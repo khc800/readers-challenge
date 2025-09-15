@@ -87,25 +87,29 @@
 /* Center the row of icons */
 .timerBtns{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
 
-/* Round, equal-size icon buttons */
 .timerBtns .icon{
   --size: 44px;
   width: var(--size);
   height: var(--size);
-  aspect-ratio: 1 / 1;               /* stays perfectly round */
+  aspect-ratio: 1 / 1;
   border-radius: 999px;
-  display: grid; place-items: center;/* centers glyph exactly */
+  display: grid; place-items: center;
   padding: 0;
   border: 1px solid var(--ring);
   background: linear-gradient(180deg,var(--brand-accent),var(--brand-accent-2));
   box-shadow: 0 2px 8px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06);
-  font-size: 20px; font-weight: 900; line-height: 1;
-  color: #111; cursor: pointer;
+  cursor: pointer;
+}
+
+.timerBtns .icon svg{
+  width: 22px; height: 22px;
+  fill: #111;                 /* icon color */
 }
 
 .timerBtns .icon:hover:not(:disabled){ transform: translateY(-1px); }
 .timerBtns .icon:active:not(:disabled){ transform: translateY(0); }
 .timerBtns .icon:disabled{ opacity:.55; cursor: default; }
+
 
 /* Optional tiny visual tweaks per action */
 .timerBtns .play  { }
@@ -165,9 +169,26 @@
           <div class="timer">
             <div id="timerDisplay">00:00:00</div>
 <div class="timerBtns">
-  <button id="btnStart" class="icon play"  type="button" aria-label="بدء"         title="بدء">⏵</button>
-  <button id="btnPause" class="icon pause" type="button" aria-label="إيقاف مؤقت"  title="إيقاف مؤقت" disabled>⏸</button>
-  <button id="btnReset" class="icon reset" type="button" aria-label="إعادة ضبط"      title="إعادة ضبط" disabled>⟲</button>
+  <!-- Play -->
+  <button id="btnStart" class="icon play" type="button" aria-label="بدء" title="بدء">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8 5v14l11-7z"></path>
+    </svg>
+  </button>
+
+  <!-- Pause -->
+  <button id="btnPause" class="icon pause" type="button" aria-label="إيقاف مؤقت" title="إيقاف مؤقت" disabled>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 5h4v14H6zM14 5h4v14h-4z"></path>
+    </svg>
+  </button>
+
+  <!-- Reset -->
+  <button id="btnReset" class="icon reset" type="button" aria-label="إعادة ضبط" title="إعادة ضبط" disabled>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 5V2L7.5 6.5 12 11V8a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"></path>
+    </svg>
+  </button>
 </div>
 
 
