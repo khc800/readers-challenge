@@ -10,50 +10,32 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root{
-      --brand-dark:#212e3e;   /* from your logo */
-      --brand-accent:#ff8f00; /* orange */
-      --brand-accent-2:#feaf00; /* amber */
-      --ink:#ffffff;
-      --ink-dim:#d1d1d1;
-      --ink-muted:#b7b7b7;
-      --card:#263347;
-      --card-2:#2f3e56;
-      --ring:#3e4f6a;
-      --ok:#1db954;
-      --bg1:#1a2433;
-      --bg2:#212e3e;
+      --brand-dark:#212e3e; --brand-accent:#ff8f00; --brand-accent-2:#feaf00;
+      --ink:#ffffff; --ink-dim:#d1d1d1; --ink-muted:#b7b7b7;
+      --card:#263347; --card-2:#2f3e56; --ring:#3e4f6a; --ok:#1db954;
+      --bg1:#1a2433; --bg2:#212e3e;
     }
     *{ box-sizing:border-box; }
-    body{
-      margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,var(--bg1),var(--bg2) 60%,var(--bg1));
-      color:var(--ink);
-    }
-    header{
-      max-width:1100px; margin:24px auto 0; padding:0 16px;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
+    body{ margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2) 60%,var(--bg1)); color:var(--ink); }
+    header{ max-width:1100px; margin:24px auto 0; padding:0 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px; }
     header .brand{ display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.2px; }
     header img.logo{ height:36px; width:auto; display:block; }
     .controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    select,input,button{
-      border-radius:12px; border:1px solid var(--ring); background:var(--card);
-      color:var(--ink); padding:10px 12px; outline:none;
-    }
-    button{
-      border-color:transparent;
-      background:linear-gradient(180deg,var(--brand-accent),var(--brand-accent-2));
-      color:#111; font-weight:800; cursor:pointer;
-    }
+    select,input,button{ border-radius:12px; border:1px solid var(--ring); background:var(--card);
+      color:var(--ink); padding:10px 12px; outline:none; }
+    button{ border-color:transparent; background:linear-gradient(180deg,var(--brand-accent),var(--brand-accent-2));
+      color:#111; font-weight:800; cursor:pointer; }
     .wrap{ max-width:1100px; margin:16px auto 40px; padding:0 16px; }
     .tabs{ display:flex; gap:8px; margin-bottom:16px; }
     .tab{ padding:10px 16px; background:var(--card); border:1px solid var(--ring); border-radius:12px; cursor:pointer; user-select:none; }
     .tab.active{ background:var(--card-2); border-color:var(--brand-accent-2); box-shadow:0 0 0 2px rgba(255,143,0,.25) inset; }
     .card{ background:rgba(33,46,62,.65); backdrop-filter:blur(6px); border:1px solid var(--ring); border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
-    .row{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:16px; }
-    .row-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
-    @media (max-width: 980px){ .row{ grid-template-columns:1fr 1fr; } }
-    @media (max-width: 640px){ .row, .row-3{ grid-template-columns:1fr; } header{ flex-direction:column; align-items:flex-start; gap:8px; } }
+    .row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .row-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    @media (max-width:980px){ .row{ grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:640px){ .row, .row-3{ grid-template-columns:1fr; } header{ flex-direction:column; align-items:flex-start; gap:8px; } }
     label{ display:block; font-size:14px; color:var(--ink-dim); margin-bottom:6px; }
     .muted{ color:var(--ink-muted); font-size:13px; }
     .spacer{ height:16px; }
@@ -65,6 +47,30 @@
     table{ width:100%; border-collapse:collapse; }
     th,td{ border-bottom:1px solid var(--ring); padding:8px 6px; text-align:right; }
     th{ color:var(--ink-dim); font-weight:600; }
+    /* tiny grid for HH:MM:SS */
+    /* .timegrid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .timegrid input{ text-align:center; } */
+
+
+    /* Equal widths for HH:MM:SS */
+.timegrid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* not just 1fr */
+  gap: 8px;
+}
+.timegrid input{
+  width: 100%;
+  min-width: 0;                 /* key for equal sizing in grids */
+  text-align: center;
+  direction: ltr;               /* easier to type numbers */
+}
+
+/* Optional: hide the number spinners for a cleaner look */
+.timegrid input::-webkit-outer-spin-button,
+.timegrid input::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+.timegrid input[type="number"]{ -moz-appearance: textfield; }
+
+
     /* RTL helpers */
     body.rtl{ direction: rtl; } body.rtl .row, body.rtl .row-3{ direction: rtl; }
   </style>
@@ -82,7 +88,7 @@
       </select>
       <select id="weekTypeSel" title="نمط الأسبوع">
         <option value="rolling">٧ أيام متحركة</option>
-        <option value="calendar">أسبوع تقويمي</option>
+        <option value="calendar">أسبوع تقويمي (السبت–الجمعة)</option>
       </select>
     </div>
   </header>
@@ -92,6 +98,7 @@
       <div class="tab active" data-tab="log" role="tab" aria-selected="true" tabindex="0" id="tab-log">تسجيل القراءة</div>
       <div class="tab" data-tab="stats" role="tab" aria-selected="false" tabindex="0" id="tab-stats">لوحة الإحصائيات</div>
       <div class="tab" data-tab="reader" role="tab" aria-selected="false" tabindex="0" id="tab-reader">سجل القارئ</div>
+      <div class="tab" data-tab="discipline" role="tab" aria-selected="false" tabindex="0" id="tab-discipline">المطرودون/الإنذارات</div>
     </div>
 
     <!-- Log Form -->
@@ -103,10 +110,18 @@
           <select id="name" aria-label="اسم القارئ"></select>
           <div class="muted" id="nameHint">لم تجد اسمك؟ تواصل مع المجلس الأعلى</div>
         </div>
+
+        <!-- New HH:MM:SS duration -->
         <div>
-          <label for="minutes" id="lblMinutes">الدقائق المقروءة</label>
-          <input id="minutes" type="number" min="1" step="1" placeholder="مثال: 30" inputmode="numeric" />
+          <label id="lblDuration">المدة (س:د:ث)</label>
+          <div class="timegrid">
+            <input id="durH" type="number" min="0" step="1" placeholder="س" inputmode="numeric" />
+            <input id="durM" type="number" min="0" max="59" step="1" placeholder="د" inputmode="numeric" />
+            <input id="durS" type="number" min="0" max="59" step="1" placeholder="ث" inputmode="numeric" />
+          </div>
+          <div class="muted" id="durationHint">أدخل الساعات والدقائق والثواني</div>
         </div>
+
         <div>
           <label for="date" id="lblDate">التاريخ</label>
           <input id="date" type="date" />
@@ -143,35 +158,23 @@
         </div>
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="refreshBtn">تحديث</button>
-          <span class="muted" id="rangeHint">اليوم = نفس التاريخ · الأسبوع = ٧ أيام متحركة أو أسبوع تقويمي · الشهر = شهر تقويمي</span>
+          <span class="muted" id="rangeHint">اليوم = نفس التاريخ · الأسبوع = ٧ أيام متحركة أو أسبوع تقويمي (السبت–الجمعة) · الشهر = شهر تقويمي</span>
         </div>
       </div>
 
       <div class="spacer"></div>
 
       <div class="row-3" id="kpiRow">
-        <div class="kpi">
-          <div class="v" id="kpi-total">–</div>
-          <div class="muted" id="kpiTotalLabel">إجمالي الدقائق</div>
-        </div>
-        <div class="kpi">
-          <div class="v" id="kpi-avg">–</div>
-          <div class="muted" id="kpiAvgLabel">متوسط لكل قارئ</div>
-        </div>
-        <div class="kpi">
-          <div class="v" id="kpi-count">–</div>
-          <div class="muted" id="kpiCountLabel">عدد القرّاء النشطين</div>
-        </div>
+        <div class="kpi"><div class="v" id="kpi-total">–</div><div class="muted" id="kpiTotalLabel">إجمالي الدقائق</div></div>
+        <div class="kpi"><div class="v" id="kpi-avg">–</div><div class="muted" id="kpiAvgLabel">متوسط لكل قارئ</div></div>
+        <div class="kpi"><div class="v" id="kpi-count">–</div><div class="muted" id="kpiCountLabel">عدد القرّاء النشطين</div></div>
       </div>
 
       <div class="spacer"></div>
 
       <div class="card" style="background:transparent; border:0; padding:0;">
         <div style="display:grid; grid-template-columns:1fr; gap:24px;">
-          <div>
-            <div class="pill" id="pillByReader">حسب القارئ</div>
-            <canvas id="chartMain" height="140"></canvas>
-          </div>
+          <div><div class="pill" id="pillByReader">حسب القارئ</div><canvas id="chartMain" height="140"></canvas></div>
           <div>
             <div class="pill" id="pillStreaks">سلاسل الأيام المتتالية (≥ دقيقة يومياً)</div>
             <table id="tblStreaks">
@@ -192,12 +195,13 @@
           <select id="readerSel"></select>
         </div>
         <div>
-          <label for="daysSel" id="lblDays">الأيام</label>
+          <label for="daysSel" id="lblDays">المدى</label>
           <select id="daysSel">
             <option value="14">14</option>
             <option value="30" selected>30</option>
             <option value="60">60</option>
             <option value="90">90</option>
+            <option value="all">الكل</option>
           </select>
         </div>
         <div>
@@ -214,154 +218,90 @@
       <canvas id="chartHistory" height="160"></canvas>
     </div>
 
-    <footer>
-      <span id="footNote">صٌنع بحب لتحدي القراء</span>
-    </footer>
+    <!-- Discipline (Removed/Warning) -->
+    <div id="panel-discipline" class="card hidden" role="tabpanel" aria-labelledby="tab-discipline">
+      <h2 style="margin-top:0" id="discTitle">المطرودون والإنذارات</h2>
+      <div class="row">
+        <div>
+          <label id="lblDiscDate" for="discDate">تاريخ المرجع</label>
+          <input id="discDate" type="date" />
+        </div>
+        <div style="display:flex; align-items:flex-end; gap:12px;">
+          <button id="discBtn">تحديث القائمة</button>
+          <span class="muted" id="discHint">الأسبوع يبدأ السبت وينتهي الجمعة</span>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="pill" id="pillWarn">قائمة الإنذار (أقل من 30 دقيقة في الأسبوع السابق)</div>
+      <table id="tblWarn"><thead><tr><th>القارئ</th><th>دقائق الأسبوع السابق</th></tr></thead><tbody></tbody></table>
+
+      <div class="spacer"></div>
+
+      <div class="pill" id="pillRemoved">قائمة المطرودين (أقل من 60 دقيقة في آخر أسبوعين مكتملين)</div>
+      <table id="tblRemoved"><thead><tr><th>القارئ</th><th>مجموع آخر أسبوعين</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <footer><span id="footNote">صُنع بحب لتحدي القراء</span></footer>
   </div>
 
   <script>
     // ======== CONFIG ========
-    const API_BASE = 'https://script.google.com/macros/s/AKfycbwLaR6hKIWT6DqA3QFJHOp810PVKPyltZC3XW1sgyWdzNE3GE7rrbZsCKE67-1MUKFs/exec'; // https://script.google.com/macros/s/AKfycbx.../exec
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbwDCq-oJhIoFl5H2mXX_rBU_8r69nlNjuWErjySN-5fgVwfxiWgbQR0ephdfNn4s1LG/exec';  // e.g. https://script.google.com/macros/s/AKfycb.../exec
     const FALLBACK_NAMES = ['Reader 1','Reader 2','Reader 3'];
-    // const LOGO_SRC = 'C:/Users/khali/OneDrive/Documents/تحدي القراء/شعار.svg'; // put your logo path here
-    const LOGO_SRC = 'logo.svg'; // put your logo path here
+    const LOGO_SRC = 'logo.svg';
+
     // ======== DOM ========
     const tabs = document.querySelectorAll('.tab');
-    const panels = {
-      log: document.getElementById('panel-log'),
-      stats: document.getElementById('panel-stats'),
-      reader: document.getElementById('panel-reader')
-    };
-    const logo = document.getElementById('logo');
+    const panels = { log: q('#panel-log'), stats: q('#panel-stats'), reader: q('#panel-reader'), discipline: q('#panel-discipline') };
+    const logo = q('#logo');
 
     // Log form
-    const elName = document.getElementById('name');
-    const elMinutes = document.getElementById('minutes');
-    const elDate = document.getElementById('date');
-    const elStatus = document.getElementById('status');
-    const btnSubmit = document.getElementById('submitBtn');
+    const elName = q('#name');
+    const elDate = q('#date');
+    const elStatus = q('#status');
+    const btnSubmit = q('#submitBtn');
+    const durH = q('#durH'), durM = q('#durM'), durS = q('#durS');
 
     // Dashboard controls
-    const elStatsDate = document.getElementById('statsDate');
-    const elRangeSel = document.getElementById('rangeSel');
-    const elTopN = document.getElementById('topNSel');
-    const elRefresh = document.getElementById('refreshBtn');
-    const elWeekTypeSel = document.getElementById('weekTypeSel');
+    const elStatsDate = q('#statsDate');
+    const elRangeSel = q('#rangeSel');
+    const elTopN = q('#topNSel');
+    const elRefresh = q('#refreshBtn');
+    const elWeekTypeSel = q('#weekTypeSel');
 
     // KPIs
-    const kpiTotal = document.getElementById('kpi-total');
-    const kpiAvg   = document.getElementById('kpi-avg');
-    const kpiCount = document.getElementById('kpi-count');
+    const kpiTotal = q('#kpi-total'), kpiAvg = q('#kpi-avg'), kpiCount = q('#kpi-count');
 
-    // Dashboard chart/table (declare ONCE)
-    const chartMainCanvas = document.getElementById('chartMain');
-    const tblStreaksBody = document.querySelector('#tblStreaks tbody');
+    // Dashboard chart/table
+    const chartMainCanvas = q('#chartMain');
+    const tblStreaksBody = q('#tblStreaks tbody');
 
     // Reader history
-    const elReaderSel = document.getElementById('readerSel');
-    const elDaysSel = document.getElementById('daysSel');
-    const elReaderDate = document.getElementById('readerDate');
-    const elReaderBtn = document.getElementById('readerBtn');
-    const chartHistoryCanvas = document.getElementById('chartHistory');
+    const elReaderSel = q('#readerSel');
+    const elDaysSel = q('#daysSel');
+    const elReaderDate = q('#readerDate');
+    const elReaderBtn = q('#readerBtn');
+    const chartHistoryCanvas = q('#chartHistory');
 
-    // Lang
-    const langSel = document.getElementById('langSel');
+    // Discipline
+    const discDate = q('#discDate');
+    const discBtn = q('#discBtn');
+    const tblWarnBody = q('#tblWarn tbody');
+    const tblRemovedBody = q('#tblRemoved tbody');
 
-    // Labels to translate
+    // Language
+    const langSel = q('#langSel');
+
+    // Labels to translate (kept minimal since Arabic is default)
     const labels = {
-      appTitle: document.getElementById('appTitle'),
-      tabLog: document.getElementById('tab-log'),
-      tabStats: document.getElementById('tab-stats'),
-      tabReader: document.getElementById('tab-reader'),
-      logTitle: document.getElementById('logTitle'),
-      lblReader: document.getElementById('lblReader'),
-      lblMinutes: document.getElementById('lblMinutes'),
-      lblDate: document.getElementById('lblDate'),
-      submitBtn: document.getElementById('submitBtn'),
-      dashTitle: document.getElementById('dashTitle'),
-      lblRefDate: document.getElementById('lblRefDate'),
-      lblRange: document.getElementById('lblRange'),
-      lblTopN: document.getElementById('lblTopN'),
-      rangeHint: document.getElementById('rangeHint'),
-      kpiTotalLabel: document.getElementById('kpiTotalLabel'),
-      kpiAvgLabel: document.getElementById('kpiAvgLabel'),
-      kpiCountLabel: document.getElementById('kpiCountLabel'),
-      pillByReader: document.getElementById('pillByReader'),
-      pillStreaks: document.getElementById('pillStreaks'),
-      thReader: document.getElementById('thReader'),
-      thCurrent: document.getElementById('thCurrent'),
-      thLongest: document.getElementById('thLongest'),
-      readerTitle: document.getElementById('readerTitle'),
-      lblReaderSel: document.getElementById('lblReaderSel'),
-      lblDays: document.getElementById('lblDays'),
-      lblReaderDate: document.getElementById('lblReaderDate'),
-      readerBtn: document.getElementById('readerBtn'),
-      readerHint: document.getElementById('readerHint'),
-      pillHistory: document.getElementById('pillHistory'),
-      footNote: document.getElementById('footNote')
+      appTitle: q('#appTitle'),
+      lblDuration: q('#lblDuration')
     };
-
-    const i18n = {
-      en: {
-        app: 'Readers Challenge',
-        tabLog: 'Log Reading',
-        tabStats: 'Dashboard',
-        tabReader: 'Reader History',
-        logTitle: 'Add Reading Entry',
-        reader: 'Reader',
-        minutes: 'Minutes read',
-        date: 'Date',
-        submit: 'Submit Entry',
-        dashTitle: 'Reading Dashboard',
-        refDate: 'Reference date',
-        range: 'Range',
-        topN: 'Top N',
-        rangeHint: 'Day = exact date · Week = 7-day rolling or calendar week · Month = calendar month',
-        kpiTotal: 'Total minutes',
-        kpiAvg: 'Avg per reader',
-        kpiCount: 'Active readers',
-        byReader: 'By Reader',
-        streaks: 'Current Streaks (≥ 1 min/day)',
-        thReader: 'Reader', thCurrent: 'Current', thLongest:'Longest',
-        readerTitle: 'Per-reader History',
-        readerSel: 'Reader', days: 'Days', readerDate: 'Reference date', readerShow:'Show',
-        history: 'Daily Minutes',
-        footer: 'Built for Reading Group • Stores to Google Sheets',
-        weekRolling: '7-day rolling', weekCalendar: 'Calendar week',
-        rangeDay:'Day', rangeWeek:'Week', rangeMonth:'Month', rangeAll:'All time'
-      },
-      ar: {
-        app: 'تحدي القراء',
-        tabLog: 'تسجيل القراءة',
-        tabStats: 'لوحة الإحصائيات',
-        tabReader: 'سجل القارئ',
-        logTitle: 'إضافة جلسة قراءة',
-        reader: 'القارئ',
-        minutes: 'الدقائق المقروءة',
-        date: 'التاريخ',
-        submit: 'حفظ',
-        dashTitle: 'لوحة الإحصائيات',
-        refDate: 'تاريخ المرجع',
-        range: 'المدى',
-        topN: 'أفضل N',
-        rangeHint: 'اليوم = نفس التاريخ · الأسبوع = ٧ أيام متحركة أو أسبوع تقويمي · الشهر = شهر تقويمي',
-        kpiTotal: 'إجمالي الدقائق',
-        kpiAvg: 'متوسط لكل قارئ',
-        kpiCount: 'عدد القرّاء النشطين',
-        byReader: 'حسب القارئ',
-        streaks: 'سلاسل الأيام المتتالية (≥ دقيقة يومياً)',
-        thReader: 'القارئ', thCurrent: 'الحالية', thLongest:'الأطول',
-        readerTitle: 'سجل القارئ (يومياً)',
-        readerSel: 'القارئ', days: 'الأيام', readerDate: 'تاريخ المرجع', readerShow:'عرض',
-        history: 'الدقائق اليومية',
-        footer: 'صُنع بحب لتحدي القراء',
-        weekRolling: '٧ أيام متحركة', weekCalendar: 'أسبوع تقويمي',
-        rangeDay:'اليوم', rangeWeek:'الأسبوع', rangeMonth:'الشهر', rangeAll:'كل الوقت'
-      }
-    };
-    function t(key){ return i18n[state.lang][key]; }
 
     // ======== Helpers ========
+    function q(s){ return document.querySelector(s); }
     function todayISO(){ const d = new Date(); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
     function showStatus(msg, ok=true){ elStatus.textContent = msg; elStatus.style.color = ok ? '#8ef5b2' : '#ffb4b4'; }
     function fetchJSON(url, opts){ return fetch(url, opts).then(r=>r.json()); }
@@ -369,8 +309,7 @@
 
     function makeBar(ctx, labels, data, title){
       if (ctx.__chart) ctx.__chart.destroy();
-      const c = new Chart(ctx, {
-        type:'bar',
+      const c = new Chart(ctx, { type:'bar',
         data:{ labels, datasets:[{ label:title, data, backgroundColor:'rgba(255,143,0,0.6)'}]},
         options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
       });
@@ -378,8 +317,7 @@
     }
     function makeLine(ctx, labels, data, title){
       if (ctx.__chart) ctx.__chart.destroy();
-      const c = new Chart(ctx, {
-        type:'line',
+      const c = new Chart(ctx, { type:'line',
         data:{ labels, datasets:[{ label:title, data, tension:.3, fill:false, borderWidth:2, borderColor:'#ff8f00', pointRadius:2 }]},
         options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
       });
@@ -387,94 +325,35 @@
     }
     function setDirRTL(isRTL){ document.body.classList.toggle('rtl', isRTL); document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr'); }
 
-    function applyLang(lang){
-      state.lang = lang;
-      const L = i18n[lang];
-      labels.appTitle.textContent = L.app;
-      labels.tabLog.textContent = L.tabLog;
-      labels.tabStats.textContent = L.tabStats;
-      labels.tabReader.textContent = L.tabReader;
-      labels.logTitle.textContent = L.logTitle;
-      labels.lblReader.textContent = L.reader;
-      labels.lblMinutes.textContent = L.minutes;
-      labels.lblDate.textContent = L.date;
-      labels.submitBtn.textContent = L.submit;
-      labels.dashTitle.textContent = L.dashTitle;
-      labels.lblRefDate.textContent = L.refDate;
-      labels.lblRange.textContent = L.range;
-      labels.lblTopN.textContent = L.topN;
-      labels.rangeHint.textContent = L.rangeHint;
-      labels.kpiTotalLabel.textContent = L.kpiTotal;
-      labels.kpiAvgLabel.textContent = L.kpiAvg;
-      labels.kpiCountLabel.textContent = L.kpiCount;
-      labels.pillByReader.textContent = L.byReader;
-      labels.pillStreaks.textContent = L.streaks;
-      labels.thReader.textContent = L.thReader;
-      labels.thCurrent.textContent = L.thCurrent;
-      labels.thLongest.textContent = L.thLongest;
-      labels.readerTitle.textContent = L.readerTitle;
-      labels.lblReaderSel.textContent = L.readerSel;
-      labels.lblDays.textContent = L.days;
-      labels.lblReaderDate.textContent = L.readerDate;
-      labels.readerBtn.textContent = L.readerShow;
-      labels.readerHint.textContent = L.history;
-      labels.pillHistory.textContent = L.history;
-      labels.footNote.textContent = L.footer;
-
-      // Range options
-      elRangeSel.options[0].text = L.rangeDay;
-      elRangeSel.options[1].text = L.rangeWeek;
-      elRangeSel.options[2].text = L.rangeMonth;
-      elRangeSel.options[3].text = L.rangeAll;
-
-      // Week type options
-      document.getElementById('weekTypeSel').options[0].text = L.weekRolling;
-      document.getElementById('weekTypeSel').options[1].text = L.weekCalendar;
-
-      // Placeholder localization
-      elMinutes.placeholder = (lang === 'ar' ? 'مثال: 30' : 'e.g. 30');
-
-      setDirRTL(lang === 'ar');
-    }
-
-    // ======== State & Init ========
-    const state = { lang: 'ar' }; // Arabic default
+    // ======== Init ========
+    const state = { lang: 'ar' };
     logo.src = LOGO_SRC;
-
-    function todaySetInputs(){
-      const t = todayISO();
-      elDate.value = t;
-      elStatsDate.value = t;
-      elReaderDate.value = t;
-    }
-    todaySetInputs();
-    applyLang('ar'); // Arabic by default
-    langSel.value = 'ar';
+    const t = todayISO();
+    elDate.value = t; elStatsDate.value = t; elReaderDate.value = t; discDate.value = t;
 
     // Tabs
-    tabs.forEach(t => {
+    tabs.forEach(tab => {
       const activate = () => {
         tabs.forEach(x => { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
-        t.classList.add('active'); t.setAttribute('aria-selected', 'true');
-        const tab = t.dataset.tab;
-        Object.keys(panels).forEach(k => panels[k].classList.toggle('hidden', k !== tab));
-        if (tab === 'stats') loadDashboard();
-        if (tab === 'reader') loadReaderNames();
+        tab.classList.add('active'); tab.setAttribute('aria-selected', 'true');
+        const k = tab.dataset.tab;
+        Object.keys(panels).forEach(p => panels[p].classList.toggle('hidden', p !== k));
+        if (k === 'stats') loadDashboard();
+        if (k === 'reader') loadReaderNames();
+        if (k === 'discipline') loadDiscipline();
       };
-      t.addEventListener('click', activate);
-      t.addEventListener('keydown', (e)=>{ if (e.key==='Enter' || e.key===' ') activate(); });
+      tab.addEventListener('click', activate);
+      tab.addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' ') activate(); });
     });
 
-    // Language change
-    langSel.addEventListener('change', (e)=> applyLang(e.target.value));
+    // Language selector (kept for completeness)
+    langSel.addEventListener('change', (e)=> { setDirRTL(e.target.value === 'ar'); });
 
-    // Populate names
-    function populateNames(list, targetSelect){
-      targetSelect.innerHTML = '';
+    // Names
+    function populateNames(list, target){
+      target.innerHTML = '';
       if (!Array.isArray(list) || list.length === 0) list = FALLBACK_NAMES;
-      for (const n of list) {
-        const opt = document.createElement('option'); opt.value = n; opt.textContent = n; targetSelect.appendChild(opt);
-      }
+      list.forEach(n => { const opt = document.createElement('option'); opt.value=n; opt.textContent=n; target.appendChild(opt); });
     }
     function loadNames(){
       fetchJSON(`${API_BASE}?action=names`).then(j => {
@@ -485,33 +364,32 @@
     function loadReaderNames(){ if (elReaderSel.options.length === 0) loadNames(); }
     loadNames();
 
-    // Submit entry (avoid CORS preflight)
+    // Submit entry with HH:MM:SS → minutes (decimal)
     btnSubmit.addEventListener('click', async () => {
       const name = (elName.value || '').trim();
-      const minutes = Number(elMinutes.value);
+      const h = Number(durH.value)||0, m = Number(durM.value)||0, s = Number(durS.value)||0;
       const date = elDate.value;
-      if (!name || !isFinite(minutes) || minutes <= 0 || !date) {
-        showStatus(state.lang==='ar' ? 'تحقَّق من المدخلات' : 'Please fill all fields correctly.', false);
-        return;
+      const minutes = +(h*60 + m + s/60).toFixed(2);
+      if (!name || minutes <= 0 || !isFinite(minutes) || !date || m<0 || m>59 || s<0 || s>59 || h<0) {
+        showStatus('تحقَّق من المدخلات', false); return;
       }
-      btnSubmit.disabled = true; showStatus(state.lang==='ar' ? 'جاري الحفظ…' : 'Submitting…');
+      btnSubmit.disabled = true; showStatus('جاري الحفظ…');
       try {
         const res = await fetch(API_BASE, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // simple header => no preflight
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ name, minutes, date })
         });
         const ct = res.headers.get('content-type') || '';
-        let j = ct.includes('application/json') ? await res.json() : JSON.parse(await res.text());
-        if (j.ok) { showStatus(state.lang==='ar' ? 'تم الحفظ' : 'Saved!'); elMinutes.value = ''; }
-        else { showStatus(j.error || (state.lang==='ar' ? 'حدث خطأ' : 'Error saving.'), false); }
+        const j = ct.includes('application/json') ? await res.json() : JSON.parse(await res.text());
+        if (j.ok) { showStatus('تم الحفظ'); durH.value=''; durM.value=''; durS.value=''; }
+        else { showStatus(j.error || 'حدث خطأ', false); }
       } catch (e) { showStatus(String(e.message || e), false); }
       finally { btnSubmit.disabled = false; }
     });
 
     // ======== Dashboard ========
     let chartMain, chartHistory;
-
     async function loadDashboard(){
       const d = elStatsDate.value || todayISO();
       const range = elRangeSel.value;
@@ -523,33 +401,39 @@
       ]);
 
       const allRows = (agg && agg.data) ? agg.data : [];
-      // KPIs on full dataset
       kpiTotal.textContent = sumMinutes(allRows);
       kpiCount.textContent = allRows.length;
       kpiAvg.textContent   = allRows.length ? Math.round(sumMinutes(allRows)/allRows.length) : 0;
 
-      // Top N for chart
       const topNVal = elTopN.value;
-      let rows = allRows.slice(0); // already sorted by backend desc
+      let rows = allRows.slice(0);
       if (topNVal !== 'All') rows = rows.slice(0, Number(topNVal));
-
       chartMain = makeBar(chartMainCanvas, rows.map(x=>x.name), rows.map(x=>x.minutes), 'Total');
 
-      // Streaks table
-      tblStreaksBody.innerHTML = '';
-      const streakRows = (streaks && streaks.streaks) ? streaks.streaks : [];
-      for (const s of streakRows) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${s.name}</td><td>${s.current}</td><td>${s.longest}</td>`;
-        tblStreaksBody.appendChild(tr);
-      }
+// Streaks table (show only users with a streak)
+tblStreaksBody.innerHTML = '';
+const streakRows = (streaks && streaks.streaks) ? streaks.streaks : [];
+const filtered = streakRows.filter(s => (s.current || 0) > 0 || (s.longest || 0) > 0);
+
+if (filtered.length === 0) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td class="muted" colspan="3">لا يوجد سلاسل</td>`;
+  tblStreaksBody.appendChild(tr);
+} else {
+  for (const s of filtered) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.name}</td><td>${s.current}</td><td>${s.longest}</td>`;
+    tblStreaksBody.appendChild(tr);
+  }
+}
+
     }
     elRefresh.addEventListener('click', loadDashboard);
     elTopN.addEventListener('change', loadDashboard);
     elRangeSel.addEventListener('change', loadDashboard);
     elWeekTypeSel.addEventListener('change', loadDashboard);
 
-    document.getElementById('tab-stats').addEventListener('click', () => { if (!chartMainCanvas.__chart) loadDashboard(); });
+    q('#tab-stats').addEventListener('click', () => { if (!chartMainCanvas.__chart) loadDashboard(); });
 
     // ======== Reader history ========
     async function loadReaderHistory(){
@@ -561,7 +445,22 @@
       chartHistory = makeLine(chartHistoryCanvas, pts.map(p=>p.date), pts.map(p=>p.minutes), 'Minutes');
     }
     elReaderBtn.addEventListener('click', loadReaderHistory);
-    document.getElementById('tab-reader').addEventListener('click', () => { if (!chartHistoryCanvas.__chart) loadReaderHistory(); });
+    q('#tab-reader').addEventListener('click', () => { if (!chartHistoryCanvas.__chart) loadReaderHistory(); });
+
+    // ======== Discipline ========
+    async function loadDiscipline(){
+      const d = discDate.value || todayISO();
+      const res = await fetchJSON(`${API_BASE}?action=discipline&date=${d}`);
+      tblWarnBody.innerHTML = ''; tblRemovedBody.innerHTML = '';
+      (res.warning || []).forEach(r => {
+        const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.name}</td><td>${r.minutes}</td>`; tblWarnBody.appendChild(tr);
+      });
+      (res.removed || []).forEach(r => {
+        const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.name}</td><td>${r.minutes}</td>`; tblRemovedBody.appendChild(tr);
+      });
+    }
+    discBtn.addEventListener('click', loadDiscipline);
+    q('#tab-discipline').addEventListener('click', () => { if (!tblWarnBody.childElementCount) loadDiscipline(); });
   </script>
 </body>
 </html>
