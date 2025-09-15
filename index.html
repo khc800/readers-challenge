@@ -9,6 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
+    /* Make datalist inputs expand nicely */
+    input[list]{
+      width: 100%;
+    }
     :root{
       --brand-dark:#212e3e; --brand-accent:#ff8f00; --brand-accent-2:#feaf00;
       --ink:#ffffff; --ink-dim:#d1d1d1; --ink-muted:#b7b7b7;
@@ -107,7 +111,8 @@
       <div class="row">
         <div>
           <label for="name" id="lblReader">القارئ</label>
-          <select id="name" aria-label="اسم القارئ"></select>
+          <input id="name" list="namesList" autocomplete="off" placeholder="اسمك…" />
+          <datalist id="namesList"></datalist>
           <div class="muted" id="nameHint">لم تجد اسمك؟ تواصل مع المجلس الأعلى</div>
         </div>
 
@@ -192,7 +197,8 @@
       <div class="row">
         <div>
           <label for="readerSel" id="lblReaderSel">القارئ</label>
-          <select id="readerSel"></select>
+          <input id="readerSel" list="readerList" autocomplete="off" placeholder="ابحث عن قارئ…" />
+          <datalist id="readerList"></datalist>
         </div>
         <div>
           <label for="daysSel" id="lblDays">المدى</label>
@@ -256,6 +262,14 @@
     const tabs = document.querySelectorAll('.tab');
     const panels = { log: q('#panel-log'), stats: q('#panel-stats'), reader: q('#panel-reader'), discipline: q('#panel-discipline') };
     const logo = q('#logo');
+
+    // Datalists for autocomplete
+    const dlNames   = document.getElementById('namesList');
+    const dlReaders = document.getElementById('readerList');
+
+    // Keep names in memory to validate input
+    // state.names = [];
+    // state.nameSet = new Set();
 
     // Log form
     const elName = q('#name');
@@ -326,7 +340,8 @@
     function setDirRTL(isRTL){ document.body.classList.toggle('rtl', isRTL); document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr'); }
 
     // ======== Init ========
-    const state = { lang: 'ar' };
+    // const state = { lang: 'ar' };
+    const state = { lang: 'ar', names: [], nameSet: new Set() };
     logo.src = LOGO_SRC;
     const t = todayISO();
     elDate.value = t; elStatsDate.value = t; elReaderDate.value = t; discDate.value = t;
@@ -350,43 +365,73 @@
     langSel.addEventListener('change', (e)=> { setDirRTL(e.target.value === 'ar'); });
 
     // Names
-    function populateNames(list, target){
-      target.innerHTML = '';
-      if (!Array.isArray(list) || list.length === 0) list = FALLBACK_NAMES;
-      list.forEach(n => { const opt = document.createElement('option'); opt.value=n; opt.textContent=n; target.appendChild(opt); });
-    }
-    function loadNames(){
-      fetchJSON(`${API_BASE}?action=names`).then(j => {
-        if (j && j.ok) { populateNames(j.names, elName); populateNames(j.names, elReaderSel); }
-        else { populateNames(null, elName); populateNames(null, elReaderSel); }
-      }).catch(()=> { populateNames(null, elName); populateNames(null, elReaderSel); });
-    }
-    function loadReaderNames(){ if (elReaderSel.options.length === 0) loadNames(); }
-    loadNames();
+function setNames(list){
+  // fallback if API fails
+  const names = (Array.isArray(list) && list.length) ? list : FALLBACK_NAMES;
+
+  // fill datalists
+  dlNames.innerHTML = '';
+  dlReaders.innerHTML = '';
+  for (const n of names) {
+    const o1 = document.createElement('option'); o1.value = n; dlNames.appendChild(o1);
+    const o2 = document.createElement('option'); o2.value = n; dlReaders.appendChild(o2);
+  }
+
+  // save to state for validation
+  state.names = names.slice();
+  state.nameSet = new Set(names.map(x => x.trim()));
+}
+
+function loadNames(){
+  fetchJSON(`${API_BASE}?action=names`)
+    .then(j => setNames(j && j.ok ? j.names : null))
+    .catch(() => setNames(null));
+}
+
+// Only fetch once when reader page is opened first time
+function loadReaderNames(){
+  if (dlReaders.childElementCount === 0) loadNames();
+}
+
+// initial load
+loadNames();
 
     // Submit entry with HH:MM:SS → minutes (decimal)
-    btnSubmit.addEventListener('click', async () => {
-      const name = (elName.value || '').trim();
-      const h = Number(durH.value)||0, m = Number(durM.value)||0, s = Number(durS.value)||0;
-      const date = elDate.value;
-      const minutes = +(h*60 + m + s/60).toFixed(2);
-      if (!name || minutes <= 0 || !isFinite(minutes) || !date || m<0 || m>59 || s<0 || s>59 || h<0) {
-        showStatus('تحقَّق من المدخلات', false); return;
-      }
-      btnSubmit.disabled = true; showStatus('جاري الحفظ…');
-      try {
-        const res = await fetch(API_BASE, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ name, minutes, date })
-        });
-        const ct = res.headers.get('content-type') || '';
-        const j = ct.includes('application/json') ? await res.json() : JSON.parse(await res.text());
-        if (j.ok) { showStatus('تم الحفظ'); durH.value=''; durM.value=''; durS.value=''; }
-        else { showStatus(j.error || 'حدث خطأ', false); }
-      } catch (e) { showStatus(String(e.message || e), false); }
-      finally { btnSubmit.disabled = false; }
+btnSubmit.addEventListener('click', async () => {
+  const raw = (elName.value || '').trim();
+
+  // try to accept exact or unique case-insensitive match
+  let name = raw;
+  if (!state.nameSet.has(name)) {
+    const cand = state.names.filter(n => n.toLowerCase() === raw.toLowerCase());
+    if (cand.length === 1) name = cand[0];
+  }
+  if (!state.nameSet.has(name)) {
+    showStatus('الاسم غير موجود في القائمة. اختر من الاقتراحات.', false);
+    return;
+  }
+
+  const h = Number(durH.value)||0, m = Number(durM.value)||0, s = Number(durS.value)||0;
+  const date = elDate.value;
+  const minutes = +(h*60 + m + s/60).toFixed(2);
+  if (minutes <= 0 || !isFinite(minutes) || !date || m<0 || m>59 || s<0 || s>59 || h<0) {
+    showStatus('تحقَّق من المدخلات', false); return;
+  }
+
+  btnSubmit.disabled = true; showStatus('جاري الحفظ…');
+  try {
+    const res = await fetch(API_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ name, minutes, date })
     });
+    const ct = res.headers.get('content-type') || '';
+    const j = ct.includes('application/json') ? await res.json() : JSON.parse(await res.text());
+    if (j.ok) { showStatus('تم الحفظ'); durH.value=''; durM.value=''; durS.value=''; }
+    else { showStatus(j.error || 'حدث خطأ', false); }
+  } catch (e) { showStatus(String(e.message || e), false); }
+  finally { btnSubmit.disabled = false; }
+});
 
     // ======== Dashboard ========
     let chartMain, chartHistory;
@@ -436,14 +481,23 @@ if (filtered.length === 0) {
     q('#tab-stats').addEventListener('click', () => { if (!chartMainCanvas.__chart) loadDashboard(); });
 
     // ======== Reader history ========
-    async function loadReaderHistory(){
-      const name = elReaderSel.value;
-      const days = elDaysSel.value;
-      const d = elReaderDate.value || todayISO();
-      const res = await fetchJSON(`${API_BASE}?action=history&name=${encodeURIComponent(name)}&days=${days}&date=${d}`);
-      const pts = (res && res.points) ? res.points : [];
-      chartHistory = makeLine(chartHistoryCanvas, pts.map(p=>p.date), pts.map(p=>p.minutes), 'Minutes');
-    }
+function normalizeName(raw){
+  const r = (raw || '').trim();
+  if (state.nameSet.has(r)) return r;
+  const cand = state.names.filter(n => n.toLowerCase() === r.toLowerCase());
+  return cand.length === 1 ? cand[0] : null;
+}
+
+async function loadReaderHistory(){
+  const nameRaw = elReaderSel.value;
+  const name = normalizeName(nameRaw);
+  if (!name) { alert('الاسم غير موجود في القائمة. اختر من الاقتراحات.'); return; }
+  const days = elDaysSel.value;
+  const d = elReaderDate.value || todayISO();
+  const res = await fetchJSON(`${API_BASE}?action=history&name=${encodeURIComponent(name)}&days=${days}&date=${d}`);
+  const pts = (res && res.points) ? res.points : [];
+  chartHistory = makeLine(chartHistoryCanvas, pts.map(p=>p.date), pts.map(p=>p.minutes), 'Minutes');
+}
     elReaderBtn.addEventListener('click', loadReaderHistory);
     q('#tab-reader').addEventListener('click', () => { if (!chartHistoryCanvas.__chart) loadReaderHistory(); });
 
