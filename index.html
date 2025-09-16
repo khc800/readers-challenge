@@ -160,6 +160,17 @@
 .timerBtns .pause { filter: saturate(.9) brightness(1.02); }
 .timerBtns .reset { filter: saturate(.85); }
 
+    /* Two columns for the discipline lists */
+.row-2{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 980px){
+  .row-2{ grid-template-columns: 1fr; }   /* stack on phones */
+}
+
 
     /* RTL helpers */
     body.rtl{ direction: rtl; } body.rtl .row, body.rtl .row-3{ direction: rtl; }
@@ -377,10 +388,26 @@
       <div class="pill" id="pillWarn">قائمة الإنذار (أقل من 30 دقيقة في الأسبوع السابق)</div>
       <table id="tblWarn"><thead><tr><th>القارئ</th><th>دقائق الأسبوع السابق</th></tr></thead><tbody></tbody></table>
 
-      <div class="spacer"></div>
+<div class="spacer"></div>
 
-      <div class="pill" id="pillRemoved">قائمة المطرودين (أقل من 60 دقيقة في آخر أسبوعين مكتملين)</div>
-      <table id="tblRemoved"><thead><tr><th>القارئ</th><th>مجموع آخر أسبوعين</th></tr></thead><tbody></tbody></table>
+<div class="row-2">
+  <div>
+    <div class="pill" id="pillWarn">قائمة الإنذار (أقل من 30 دقيقة في الأسبوع السابق)</div>
+    <table id="tblWarn">
+      <thead><tr><th>القارئ</th><th>دقائق الأسبوع السابق</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div>
+    <div class="pill" id="pillRemoved">قائمة المطرودين (أقل من 60 دقيقة في آخر أسبوعين مكتملين)</div>
+    <table id="tblRemoved">
+      <thead><tr><th>القارئ</th><th>مجموع آخر أسبوعين</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
     </div>
 
     <footer><span id="footNote">صُنع بحب لتحدي القراء</span></footer>
@@ -714,6 +741,7 @@
   </script>
 </body>
 </html>
+
 
 
 
