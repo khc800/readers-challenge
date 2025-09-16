@@ -15,7 +15,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<!--   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"> -->
+  <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     /* Make datalist inputs expand nicely */
@@ -62,8 +64,16 @@
       --bg1:#1a2433; --bg2:#212e3e;
     }
     *{ box-sizing:border-box; }
-    body{ margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    body{ margin:0; font-family:'Almarai', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
       background:linear-gradient(180deg,var(--bg1),var(--bg2) 60%,var(--bg1)); color:var(--ink); }
+    select, input, button{
+  font-family: inherit;   /* ensure controls also use Almarai */
+}
+
+    /* (nice for the timer/KPIs: monospaced digits) */
+#timerDisplay, .kpi .v, table td{
+  font-variant-numeric: tabular-nums;
+}
     header{ max-width:1100px; margin:24px auto 0; padding:0 16px;
       display:flex; align-items:center; justify-content:space-between; gap:12px; }
     header .brand{ display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.2px; }
@@ -684,6 +694,7 @@
   </script>
 </body>
 </html>
+
 
 
 
