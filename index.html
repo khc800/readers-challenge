@@ -243,7 +243,13 @@
 
         <div>
           <label for="date" id="lblDate">التاريخ</label>
-          <input id="date" type="date" />
+<!--           <input id="date" type="date" /> -->
+
+          <div class="date-wrap">
+            <input id="date" type="date" />
+            <span class="cal-ic" aria-hidden="true"></span>
+          </div>
+
         </div>
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="submitBtn">حفظ</button>
@@ -694,6 +700,7 @@
   </script>
 </body>
 </html>
+
 
 
 
