@@ -21,6 +21,16 @@
     /* Make datalist inputs expand nicely */
     input[list]{ width: 100%; }
 
+    /* Make the native calendar icon white */
+    input[type="date"] {
+      color-scheme: dark;                /* turns control icons light on dark UIs */
+    }
+    
+    input[type="date"]::-webkit-calendar-picker-indicator{
+      filter: invert(1) brightness(1.8); /* force white if color-scheme isn't enough */
+      opacity: 1;
+    }
+
     :root{
       --brand-dark:#212e3e; --brand-accent:#ff8f00; --brand-accent-2:#feaf00;
       --ink:#ffffff; --ink-dim:#d1d1d1; --ink-muted:#b7b7b7;
@@ -650,4 +660,5 @@
   </script>
 </body>
 </html>
+
 
