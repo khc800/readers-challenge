@@ -555,9 +555,14 @@
         `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` };
     }
     function fillInputsFromElapsed(){
-      const {h,m,s} = msToHMS(timer.elapsed);
-      durH.value = h; durM.value = m; durS.value = s;
-    }
+          // لا تكتب شيئًا في الحقول إذا المؤقّت متوقف والوقت صفر
+          if (!timer.running && timer.elapsed === 0) return;
+        
+          const {h,m,s} = msToHMS(timer.elapsed);
+          durH.value = h;
+          durM.value = m;
+          durS.value = s;
+        }
     function updateTimerUI(){
       const t = msToHMS(timer.elapsed);
       timerDisplay.textContent = t.label;
@@ -588,11 +593,16 @@
       saveTimer(); updateTimerUI();
     }
     function resetTimer(){
-      timer.running = false;
-      cancelAnimationFrame(timer.rafId);
-      timer.elapsed = 0;
-      saveTimer(); updateTimerUI();
-    }
+        timer.running = false;
+        cancelAnimationFrame(timer.rafId);
+        timer.elapsed = 0;
+        // اجعل حقول س/د/ث فارغة
+        durH.value = '';
+        durM.value = '';
+        durS.value = '';
+        saveTimer();
+        updateTimerUI();
+      }
     // function stopFillAndSubmit(){ pauseTimer(); btnSubmit.click(); }
     function loadTimer(){
       try{
@@ -737,6 +747,7 @@
   </script>
 </body>
 </html>
+
 
 
 
