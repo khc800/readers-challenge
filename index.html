@@ -215,11 +215,11 @@
 
         <!-- HH:MM:SS duration + Timer -->
         <div>
-          <label id="lblDuration">المدة (س:د:ث)</label>
+          <label id="lblDuration">المدة (ث:د:س)</label>
           <div class="timegrid">
-            <input id="durH" type="number" min="0" step="1" placeholder="س" inputmode="numeric" />
-            <input id="durM" type="number" min="0" max="59" step="1" placeholder="د" inputmode="numeric" />
             <input id="durS" type="number" min="0" max="59" step="1" placeholder="ث" inputmode="numeric" />
+            <input id="durM" type="number" min="0" max="59" step="1" placeholder="د" inputmode="numeric" />
+            <input id="durH" type="number" min="0" step="1" placeholder="س" inputmode="numeric" />
           </div>
           <div class="timer">
             <div id="timerDisplay">00:00:00</div>
@@ -737,6 +737,7 @@
   </script>
 </body>
 </html>
+
 
 
 
