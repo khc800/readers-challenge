@@ -218,7 +218,7 @@
           <div class="timegrid">
             <input id="durS" type="number" min="0" max="59" step="1" placeholder="ث" inputmode="numeric" />
             <input id="durM" type="number" min="0" max="59" step="1" placeholder="د" inputmode="numeric" />
-            <input id="durH" type="number" min="0" step="1" placeholder="س" inputmode="numeric" />
+            <input id="durH" type="number" min="0" max="23" step="1" placeholder="س" inputmode="numeric" />
           </div>
           <div class="timer">
             <div id="timerDisplay">00:00:00</div>
@@ -654,7 +654,7 @@
       const h = Number(durH.value)||0, m = Number(durM.value)||0, s = Number(durS.value)||0;
       const date = elDate.value;
       const minutes = +(h*60 + m + s/60).toFixed(2);
-      if (minutes <= 0 || !isFinite(minutes) || !date || m<0 || m>59 || s<0 || s>59 || h<0) {
+      if (minutes <= 0 || !isFinite(minutes) || !date || m<0 || m>59 || s<0 || s>59 || h<0 || h>23) {
         showStatus('تحقَّق من المدخلات', false); return;
       }
 
@@ -860,3 +860,4 @@
   </script>
 </body>
 </html>
+
