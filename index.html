@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>تحدي القراء</title>
 
-  <!-- Favicon -->
+  <!-- Favicon / tab icon -->
   <link rel="icon" type="image/svg+xml" href="logo2.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
@@ -19,9 +19,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    input[list]{ width:100%; }
+    input[list]{ width: 100%; }
 
-    /* Date icons in white */
+    /* white date icon */
     input[type="date"]{ color-scheme: dark; }
     input[type="date"]::-webkit-calendar-picker-indicator{ filter: invert(1) brightness(1.8); opacity:1; }
     .date-wrap{ position:relative; display:inline-block; }
@@ -42,13 +42,14 @@
       --bg1:#1a2433; --bg2:#212e3e;
     }
     *{ box-sizing:border-box; }
-    body{ margin:0; font-family:'Almarai',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+    body{ margin:0; font-family:'Almarai', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
       background:linear-gradient(180deg,var(--bg1),var(--bg2) 60%,var(--bg1)); color:var(--ink); }
-    select,input,button{ border-radius:12px; border:1px solid var(--ring); background:var(--card);
+    select, input, button{ border-radius:12px; border:1px solid var(--ring); background:var(--card);
       color:var(--ink); padding:10px 12px; outline:none; font-family:inherit; }
     button{ border-color:transparent; background:linear-gradient(180deg,var(--brand-accent),var(--brand-accent-2));
       color:#111; font-weight:800; cursor:pointer; }
-    #timerDisplay,.kpi .v,table td{ font-variant-numeric:tabular-nums; }
+    #timerDisplay, .kpi .v, table td{ font-variant-numeric: tabular-nums; }
+
     header{ max-width:1100px; margin:24px auto 0; padding:0 16px;
       display:flex; align-items:center; justify-content:space-between; gap:12px; }
     header .brand{ display:flex; align-items:center; gap:12px; font-weight:800; }
@@ -63,7 +64,7 @@
     .row-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
     .row-2{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; align-items:start; }
     @media (max-width:980px){ .row{ grid-template-columns:repeat(2,1fr); } .row-2{ grid-template-columns:1fr; } }
-    @media (max-width:640px){ .row,.row-3{ grid-template-columns:1fr; } header{ flex-direction:column; align-items:flex-start; gap:8px; } }
+    @media (max-width:640px){ .row, .row-3{ grid-template-columns:1fr; } header{ flex-direction:column; align-items:flex-start; gap:8px; } }
     label{ display:block; font-size:14px; color:var(--ink-dim); margin-bottom:6px; }
     .muted{ color:var(--ink-muted); font-size:13px; }
     .spacer{ height:16px; }
@@ -73,13 +74,14 @@
     .kpi .v{ font-size:28px; font-weight:800; color:var(--brand-accent-2); }
     footer{ text-align:center; margin-top:20px; color:var(--ink-muted); font-size:12px; }
 
-    /* HH:MM:SS inputs */
+    /* HH:MM:SS */
     .timegrid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; }
     .timegrid input{ width:100%; min-width:0; text-align:center; direction:ltr; }
-    .timegrid input::-webkit-outer-spin-button,.timegrid input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+    .timegrid input::-webkit-outer-spin-button,
+    .timegrid input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
     .timegrid input[type="number"]{ -moz-appearance:textfield; }
 
-    /* Timer buttons */
+    /* Timer UI */
     .timer{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
     #timerDisplay{ text-align:center; direction:ltr; font-size:28px; font-weight:800; letter-spacing:1.5px;
       padding:10px 12px; border:1px solid var(--ring); background:var(--card); border-radius:12px; }
@@ -91,7 +93,7 @@
     .timerBtns .icon svg{ width:22px; height:22px; fill:#111; }
     .timerBtns .icon:disabled{ opacity:.55; cursor:default; }
 
-    body.rtl{ direction:rtl; } body.rtl .row, body.rtl .row-3{ direction:rtl; }
+    body.rtl{ direction: rtl; } body.rtl .row, body.rtl .row-3{ direction: rtl; }
   </style>
 </head>
 <body class="rtl">
@@ -120,7 +122,7 @@
       <div class="tab" data-tab="discipline" role="tab" aria-selected="false" tabindex="0" id="tab-discipline">المطرودون/الإنذارات</div>
     </div>
 
-    <!-- Log Form -->
+    <!-- Log Form (unchanged except date icon) -->
     <div id="panel-log" class="card" role="tabpanel" aria-labelledby="tab-log">
       <h2 id="logTitle" style="margin-top:0">إضافة جلسة قراءة</h2>
       <div class="row">
@@ -131,7 +133,6 @@
           <div class="muted" id="nameHint">لم تجد اسمك؟ تواصل مع المجلس الأعلى</div>
         </div>
 
-        <!-- Duration + Timer -->
         <div>
           <label id="lblDuration">المدة (ث:د:س)</label>
           <div class="timegrid">
@@ -198,7 +199,7 @@
           </select>
         </div>
 
-        <!-- NEW: Segment filter -->
+        <!-- Segment filter -->
         <div>
           <label for="segSel" id="lblSeg" class="muted" style="display:block;">التصنيف</label>
           <select id="segSel">
@@ -234,13 +235,11 @@
             <canvas id="chartMain" height="140"></canvas>
           </div>
 
-          <!-- NEW: Segmentation summary -->
           <div>
             <div class="pill" id="pillSegments">تصنيفات القرّاء (آخر ١٢ أسبوع)</div>
-            <div id="segCounts" class="muted"></div>
+            <div id="segCounts" class="muted">—</div>
           </div>
 
-          <!-- NEW: Day-of-week strength -->
           <div>
             <div class="pill" id="pillDOW">قوة أيام الأسبوع (متوسط آخر ١٢ أسبوع)</div>
             <canvas id="chartDOW" height="100"></canvas>
@@ -257,7 +256,7 @@
       </div>
     </div>
 
-    <!-- Per-Reader History -->
+    <!-- Reader History -->
     <div id="panel-reader" class="card hidden" role="tabpanel" aria-labelledby="tab-reader">
       <h2 id="readerTitle" style="margin-top:0">سجل القارئ (يومياً)</h2>
       <div class="row">
@@ -329,7 +328,7 @@
 
   <script>
     // ======== CONFIG ========
-    const API_BASE = 'https://script.google.com/macros/s/AKfycbyRDLTnTd5R_GnmGO0-7kn0jIZXYnzYK1X1TNxTcg9ol07nG67j7vcM1QBDoNTu-bH3/exec';
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbysD1jDgRsXDdVVWXRJ0tvWlXq788cBhT2vQtJkVkT0WrPf2u7VAgbQFL4YhLTh1ZI/exec';
     const FALLBACK_NAMES = ['Reader 1','Reader 2','Reader 3'];
     const LOGO_SRC = 'logo.svg';
 
@@ -338,24 +337,20 @@
     const panels = { log: q('#panel-log'), stats: q('#panel-stats'), reader: q('#panel-reader'), discipline: q('#panel-discipline') };
     const logo = q('#logo');
 
-    // Datalists
-    const dlNames = document.getElementById('namesList');
+    const dlNames   = document.getElementById('namesList');
     const dlReaders = document.getElementById('readerList');
 
-    // Log form
     const elName = q('#name');
     const elDate = q('#date');
     const elStatus = q('#status');
     const btnSubmit = q('#submitBtn');
     const durH = q('#durH'), durM = q('#durM'), durS = q('#durS');
 
-    // Timer
     const timerDisplay = q('#timerDisplay');
-    const btnStart = q('#btnStart');
-    const btnPause = q('#btnPause');
-    const btnReset = q('#btnReset');
+    const btnStart     = q('#btnStart');
+    const btnPause     = q('#btnPause');
+    const btnReset     = q('#btnReset');
 
-    // Dashboard controls
     const elStatsDate = q('#statsDate');
     const elRangeSel = q('#rangeSel');
     const elTopN = q('#topNSel');
@@ -363,27 +358,21 @@
     const elWeekTypeSel = q('#weekTypeSel');
     const elSegSel = q('#segSel');
 
-    // KPIs
     const kpiTotal = q('#kpi-total'), kpiAvg = q('#kpi-avg'), kpiCount = q('#kpi-count');
 
-    // Charts
     const chartMainCanvas = q('#chartMain');
     const chartHistoryCanvas = q('#chartHistory');
     const chartDOWCanvas = q('#chartDOW');
 
-    // Tables
     const tblStreaksBody = q('#tblStreaks tbody');
     const tblWarnBody = q('#tblWarn tbody');
     const tblRemovedBody = q('#tblRemoved tbody');
 
-    // Discipline controls
     const discDate = q('#discDate');
     const discBtn = q('#discBtn');
 
-    // Language
     const langSel = q('#langSel');
 
-    // NEW: segmentation counts container
     const segCountsDiv = q('#segCounts');
 
     // ======== Helpers ========
@@ -418,7 +407,6 @@
     elDate.value = t0; elStatsDate.value = t0; q('#readerDate').value = t0; discDate.value = t0;
     langSel.addEventListener('change', (e)=> setDirRTL(e.target.value === 'ar'));
 
-    // Tabs
     tabs.forEach(tab => {
       const activate = () => {
         tabs.forEach(x => { x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
@@ -503,7 +491,6 @@
 
     // ======== Dashboard ========
     let chartMain, chartHistory, chartDOW;
-    const segLabelAr = { steady:'مستقرون', sprinter:'اندفاعيون', weekend:'تركيز نهاية الأسبوع', mixed:'متنوع', inactive:'غير نشط' };
 
     async function loadDashboard(){
       const d = elStatsDate.value || todayISO();
@@ -515,7 +502,7 @@
         fetchJSON(`${API_BASE}?action=streaks&date=${d}&threshold=1`),
         fetchJSON(`${API_BASE}?action=segments&date=${d}&weeks=12`),
         fetchJSON(`${API_BASE}?action=dow&date=${d}&weeks=12`)
-      ]);
+      ]).catch(() => [null, null, null, null]);
 
       // KPIs
       const allRows = (agg && agg.data) ? agg.data : [];
@@ -523,31 +510,30 @@
       kpiCount.textContent = allRows.length;
       kpiAvg.textContent   = allRows.length ? Math.round(sumMinutes(allRows)/allRows.length) : 0;
 
-      // Segments map & counts
+      // Segments summary + map
       state.segMap = new Map();
-      let segCounts = { steady:0, sprinter:0, weekend:0, mixed:0, inactive:0 };
       if (segRes && segRes.ok){
-        for (const s of segRes.segments){
-          state.segMap.set(s.name, s.segment);
-          if (segCounts[s.segment] != null) segCounts[s.segment]++;
-        }
+        // populate mapping for filtering
+        (segRes.segments || []).forEach(s => state.segMap.set(s.name, s.segment));
+        const s = segRes.summary || {steady:0,sprinter:0,weekend:0,mixed:0,inactive:0};
+        segCountsDiv.textContent =
+          `مستقرون: ${s.steady} · اندفاعيون: ${s.sprinter} · نهاية الأسبوع: ${s.weekend} · متنوع: ${s.mixed} · غير نشط: ${s.inactive}`;
+      } else {
+        segCountsDiv.textContent = 'لا توجد بيانات للتصنيف (segments).';
       }
-      segCountsDiv.textContent =
-        `مستقرون: ${segCounts.steady} · اندفاعيون: ${segCounts.sprinter} · نهاية الأسبوع: ${segCounts.weekend} · متنوع: ${segCounts.mixed} · غير نشط: ${segCounts.inactive}`;
 
-      // Filter by segment if selected
+      // Filter Top-N by selected segment
       const selectedSeg = elSegSel.value;
-      let rows = allRows.slice(0); // already sorted desc by backend
+      let rows = allRows.slice(0);
       if (selectedSeg !== 'all'){
         rows = rows.filter(x => (state.segMap.get(x.name) || 'mixed') === selectedSeg);
       }
 
-      // Top N for chart
       const topNVal = elTopN.value;
       if (topNVal !== 'All') rows = rows.slice(0, Number(topNVal));
       chartMain = makeBar(chartMainCanvas, rows.map(x=>x.name), rows.map(x=>x.minutes), 'Total');
 
-      // DOW mini chart
+      // Day-of-week chart
       if (dowRes && dowRes.ok){
         const items = dowRes.items || [];
         const labels = items.map(i => i.label);
@@ -587,7 +573,7 @@
       return cand.length === 1 ? cand[0] : null;
     }
     async function loadReaderHistory(){
-      const nameRaw = elReaderSel.value;
+      const nameRaw = q('#readerSel').value;
       const name = normalizeName(nameRaw);
       const days = q('#daysSel').value;
       const d = q('#readerDate').value || todayISO();
