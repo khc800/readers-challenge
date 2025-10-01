@@ -93,6 +93,17 @@
     .timerBtns .icon svg{ width:22px; height:22px; fill:#111; }
     .timerBtns .icon:disabled{ opacity:.55; cursor:default; }
 
+    /* Segmentation visualization */
+    .seg-grid{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; margin-top:8px; }
+    @media (max-width:1100px){ .seg-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width:700px){ .seg-grid{ grid-template-columns:repeat(1,minmax(0,1fr)); } }
+    .seg-card{ background:var(--card); border:1px solid var(--ring); border-radius:12px; padding:12px; }
+    .seg-head{ font-weight:700; color:var(--ink-dim); margin-bottom:8px; display:flex; gap:8px; align-items:baseline; }
+    .seg-head small{ color:var(--ink-muted); font-weight:400; }
+    .seg-names{ display:flex; flex-wrap:wrap; gap:6px; }
+    .chip{ display:inline-block; padding:4px 8px; border:1px solid var(--ring); border-radius:999px; background:rgba(255,255,255,.04); font-size:12px; cursor:pointer; }
+    .chip:hover{ border-color:var(--brand-accent-2); }
+
     body.rtl{ direction: rtl; } body.rtl .row, body.rtl .row-3{ direction: rtl; }
   </style>
 </head>
@@ -122,7 +133,7 @@
       <div class="tab" data-tab="discipline" role="tab" aria-selected="false" tabindex="0" id="tab-discipline">المطرودون/الإنذارات</div>
     </div>
 
-    <!-- Log Form (unchanged except date icon) -->
+    <!-- Log Form -->
     <div id="panel-log" class="card" role="tabpanel" aria-labelledby="tab-log">
       <h2 id="logTitle" style="margin-top:0">إضافة جلسة قراءة</h2>
       <div class="row">
@@ -238,6 +249,8 @@
           <div>
             <div class="pill" id="pillSegments">تصنيفات القرّاء (آخر ١٢ أسبوع)</div>
             <div id="segCounts" class="muted">—</div>
+            <!-- NEW: visualization grid -->
+            <div id="segGrid" class="seg-grid"></div>
           </div>
 
           <div>
@@ -374,6 +387,7 @@
     const langSel = q('#langSel');
 
     const segCountsDiv = q('#segCounts');
+    const segGrid = q('#segGrid');
 
     // ======== Helpers ========
     function q(s){ return document.querySelector(s); }
@@ -382,6 +396,7 @@
     function fetchJSON(url, opts){ return fetch(url, opts).then(r=>r.json()); }
     function sumMinutes(arr){ return arr.reduce((a,b)=>a+(b.minutes||0),0); }
     function setDirRTL(isRTL){ document.body.classList.toggle('rtl', isRTL); document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr'); }
+    function esc(s){ return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
     function makeBar(ctx, labels, data, title){
       if (ctx.__chart) ctx.__chart.destroy();
@@ -438,7 +453,7 @@
     function loadReaderNames(){ if (dlReaders.childElementCount === 0) loadNames(); }
     loadNames();
 
-    // Timer
+    // ======== Timer ========
     const TIMER_KEY = 'readingTimer:v1';
     const timer = { running:false, startAt:0, elapsed:0, rafId:null };
     function saveTimer(){ try{ localStorage.setItem(TIMER_KEY, JSON.stringify({running:timer.running,startAt:timer.startAt,elapsed:timer.elapsed})); }catch(_){ } }
@@ -457,7 +472,7 @@
     document.addEventListener('keydown', (e)=>{ if (e.code==='Space' && document.activeElement.tagName!=='INPUT'){ e.preventDefault(); timer.running ? pauseTimer() : startTimer(); }});
     loadTimer();
 
-    // Submit
+    // ======== Submit ========
     btnSubmit.addEventListener('click', async () => {
       const raw = (elName.value || '').trim();
       let name = raw;
@@ -510,16 +525,36 @@
       kpiCount.textContent = allRows.length;
       kpiAvg.textContent   = allRows.length ? Math.round(sumMinutes(allRows)/allRows.length) : 0;
 
-      // Segments summary + map
+      // Segments: summary + names grid + filter map
       state.segMap = new Map();
+      segGrid.innerHTML = '';
       if (segRes && segRes.ok){
-        // populate mapping for filtering
         (segRes.segments || []).forEach(s => state.segMap.set(s.name, s.segment));
         const s = segRes.summary || {steady:0,sprinter:0,weekend:0,mixed:0,inactive:0};
         segCountsDiv.textContent =
           `مستقرون: ${s.steady} · اندفاعيون: ${s.sprinter} · نهاية الأسبوع: ${s.weekend} · متنوع: ${s.mixed} · غير نشط: ${s.inactive}`;
+
+        const labels = {
+          steady:'مستقرون',
+          sprinter:'اندفاعيون',
+          weekend:'نهاية الأسبوع',
+          mixed:'متنوع',
+          inactive:'غير نشط'
+        };
+        const groups = { steady:[], sprinter:[], weekend:[], mixed:[], inactive:[] };
+        (segRes.segments || []).forEach(r => { if (groups[r.segment]) groups[r.segment].push(r.name); });
+
+        const sections = Object.keys(groups).map(key => {
+          const names = groups[key].sort((a,b)=>a.localeCompare(b,'ar'));
+          const chips = names.map(n=>`<span class="chip" data-name="${esc(n)}" data-seg="${key}">${esc(n)}</span>`).join('') || `<span class="muted">—</span>`;
+          return `<div class="seg-card">
+                    <div class="seg-head">${labels[key]} <small>(${names.length})</small></div>
+                    <div class="seg-names">${chips}</div>
+                  </div>`;
+        }).join('');
+        segGrid.innerHTML = sections;
       } else {
-        segCountsDiv.textContent = 'لا توجد بيانات للتصنيف (segments).';
+        segCountsDiv.textContent = 'لا توجد بيانات للتصنيف.';
       }
 
       // Filter Top-N by selected segment
@@ -528,7 +563,6 @@
       if (selectedSeg !== 'all'){
         rows = rows.filter(x => (state.segMap.get(x.name) || 'mixed') === selectedSeg);
       }
-
       const topNVal = elTopN.value;
       if (topNVal !== 'All') rows = rows.slice(0, Number(topNVal));
       chartMain = makeBar(chartMainCanvas, rows.map(x=>x.name), rows.map(x=>x.minutes), 'Total');
@@ -564,6 +598,16 @@
     elWeekTypeSel.addEventListener('change', loadDashboard);
     elSegSel.addEventListener('change', loadDashboard);
     q('#tab-stats').addEventListener('click', () => { if (!chartMainCanvas.__chart) loadDashboard(); });
+
+    // Click a name chip → open Reader tab with that user
+    segGrid.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      const name = chip.dataset.name;
+      q('#tab-reader').click();
+      q('#readerSel').value = name;
+      setTimeout(() => q('#readerBtn').click(), 50);
+    });
 
     // ======== Reader history ========
     function normalizeName(raw){
