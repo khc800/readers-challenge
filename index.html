@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>تحدي القراء</title>
 
-  <!-- Favicon -->
+  <!-- Favicon / tab icon -->
   <link rel="icon" type="image/svg+xml" href="logo2.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
@@ -13,153 +13,114 @@
   <link rel="mask-icon" href="logo.svg" color="#ff8f00">
   <meta name="theme-color" content="#212e3e">
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
   <style>
+    /* Inputs expand nicely */
+    input[list]{ width: 100%; }
+
+    /* White date icon */
+    input[type="date"]{ color-scheme: dark; }
+    input[type="date"]::-webkit-calendar-picker-indicator{ filter: invert(1) brightness(1.8); opacity:1; }
+    .date-wrap{ position:relative; display:inline-block; width:100%; }
+    .date-wrap input[type="date"]{ padding-inline-end:2.2rem; width:100%; }
+    .date-wrap input[type="date"]::-webkit-calendar-picker-indicator{ opacity:0; }
+    .date-wrap .cal-ic{
+      position:absolute; inset-inline-end:.6rem; inset-block-start:50%; transform:translateY(-50%);
+      width:18px; height:18px; pointer-events:none;
+      background:no-repeat center/contain url('data:image/svg+xml;utf8,\
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">\
+      <path d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm12 6H5v12h14V8zM7 10h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 14h2v2H7v-2zm4 0h2v2h-2v-2z"/></svg>');
+    }
+
     :root{
       --brand-dark:#212e3e; --brand-accent:#ff8f00; --brand-accent-2:#feaf00;
       --ink:#ffffff; --ink-dim:#d1d1d1; --ink-muted:#b7b7b7;
       --card:#263347; --card-2:#2f3e56; --ring:#3e4f6a; --ok:#1db954;
-      --bg1:#1a2433; --bg2:#212e3e; --danger:#ff6b6b;
+      --bg1:#1a2433; --bg2:#212e3e;
     }
     *{ box-sizing:border-box; }
-    body{
-      margin:0; font-family:'Almarai',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
-      background:linear-gradient(180deg,var(--bg1),var(--bg2) 60%,var(--bg1)); color:var(--ink);
-    }
-    select,input,button{ font-family:inherit; }
-
-    /* Inputs */
-    input[list]{ width:100%; }
-    input[type="date"]{ color-scheme:dark; }
-    .date-wrap{ position:relative; display:inline-block; width:100%; }
-    .date-wrap input[type="date"]{ padding-inline-end:2.2rem; }
-    .date-wrap input[type="date"]::-webkit-calendar-picker-indicator{ opacity:0; }
-    .date-wrap .cal-ic{
-      position:absolute; inset-inline-end:.6rem; inset-block-start:50%; transform:translateY(-50%);
-      width:18px; height:18px; pointer-events:none; background:no-repeat center/contain
-      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm12 6H5v12h14V8zM7 10h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 14h2v2H7v-2zm4 0h2v2h-2v-2z"/></svg>');
-    }
+    body{ margin:0; font-family:'Almarai', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2) 60%,var(--bg1)); color:var(--ink); }
+    select, input, button{ border-radius:12px; border:1px solid var(--ring); background:var(--card);
+      color:var(--ink); padding:10px 12px; outline:none; font-family:inherit; }
+    button{ border-color:transparent; background:linear-gradient(180deg,var(--brand-accent),var(--brand-accent-2));
+      color:#111; font-weight:800; cursor:pointer; }
+    #timerDisplay, .kpi .v, table td{ font-variant-numeric: tabular-nums; }
 
     header{ max-width:1100px; margin:24px auto 0; padding:0 16px;
       display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    header .brand{ display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.2px; }
+    header .brand{ display:flex; align-items:center; gap:12px; font-weight:800; }
     header img.logo{ height:36px; width:auto; display:block; }
     .controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-
-    select,input,button{
-      border-radius:12px; border:1px solid var(--ring); background:var(--card);
-      color:var(--ink); padding:10px 12px; outline:none;
-    }
-    button{
-      border-color:transparent; background:linear-gradient(180deg,var(--brand-accent),var(--brand-accent-2));
-      color:#111; font-weight:800; cursor:pointer;
-    }
-
     .wrap{ max-width:1100px; margin:16px auto 40px; padding:0 16px; }
-
-    /* Sticky tabs */
-    .tabs{
-      position:sticky; top:0; z-index:5; backdrop-filter:blur(8px);
-      background:rgba(26,36,51,.75); border:1px solid var(--ring);
-      display:flex; gap:8px; margin-bottom:16px; padding:8px; border-radius:14px;
-    }
-    .tab{
-      padding:10px 16px; background:var(--card); border:1px solid var(--ring);
-      border-radius:12px; cursor:pointer; user-select:none;
-    }
-    .tab.active{ background:var(--card-2); border-color:var(--brand-accent-2);
-      box-shadow:0 0 0 2px rgba(255,143,0,.25) inset; }
-
-    .card{ background:rgba(33,46,62,.65); backdrop-filter:blur(6px);
-      border:1px solid var(--ring); border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
-
-    .row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; align-items:start; }
+    .tabs{ display:flex; gap:8px; margin-bottom:16px; overflow:auto; }
+    .tab{ padding:10px 16px; background:var(--card); border:1px solid var(--ring); border-radius:12px; cursor:pointer; user-select:none; }
+    .tab.active{ background:var(--card-2); border-color:var(--brand-accent-2); box-shadow:0 0 0 2px rgba(255,143,0,.25) inset; }
+    .card{ background:rgba(33,46,62,.65); backdrop-filter:blur(6px); border:1px solid var(--ring); border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+    .row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
     .row-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
     .row-2{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; align-items:start; }
-    @media (max-width:980px){ .row{ grid-template-columns:repeat(2,1fr); } .row-3{ grid-template-columns:1fr; } .row-2{ grid-template-columns:1fr; } }
-    @media (max-width:640px){ header{ flex-direction:column; align-items:flex-start; gap:8px; } }
-
+    @media (max-width:980px){ .row{ grid-template-columns:repeat(2,1fr); } .row-2{ grid-template-columns:1fr; } }
+    @media (max-width:640px){
+      .row, .row-3{ grid-template-columns:1fr; }
+      header{ flex-direction:column; align-items:flex-start; gap:8px; }
+      .timerBtns .icon{ --size:60px; } #timerDisplay{ font-size:36px; }
+      label{ font-size:16px; }
+    }
     label{ display:block; font-size:14px; color:var(--ink-dim); margin-bottom:6px; }
     .muted{ color:var(--ink-muted); font-size:13px; }
     .spacer{ height:16px; }
     .hidden{ display:none; }
     .pill{ display:inline-block; padding:6px 10px; border-radius:999px; background:var(--card); border:1px solid var(--ring); font-size:12px; }
-    .kpi{ text-align:center; background:var(--card); border:1px solid var(--ring); border-radius:16px; padding:16px; min-height:84px; }
-    .kpi .v{ font-size:28px; font-weight:800; color:var(--brand-accent-2); font-variant-numeric:tabular-nums; }
-
+    .kpi{ text-align:center; background:var(--card); border:1px solid var(--ring); border-radius:16px; padding:16px; }
+    .kpi .v{ font-size:28px; font-weight:800; color:var(--brand-accent-2); }
     footer{ text-align:center; margin-top:20px; color:var(--ink-muted); font-size:12px; }
-    table{ width:100%; border-collapse:collapse; }
-    th,td{ border-bottom:1px solid var(--ring); padding:8px 6px; text-align:right; font-variant-numeric:tabular-nums; }
-    th{ color:var(--ink-dim); font-weight:600; }
-    .table-wrap{ max-height:360px; overflow:auto; border-radius:12px; }
 
-    /* Time grid */
-    .timegrid{
-      display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;
-    }
+    /* HH:MM:SS inputs */
+    .timegrid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; }
     .timegrid input{ width:100%; min-width:0; text-align:center; direction:ltr; }
-    .timegrid input::-webkit-outer-spin-button,.timegrid input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+    .timegrid input::-webkit-outer-spin-button,
+    .timegrid input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
     .timegrid input[type="number"]{ -moz-appearance:textfield; }
 
     /* Timer UI */
     .timer{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
-    #timerDisplay{
-      text-align:center; direction:ltr; font-size:28px; font-weight:800; letter-spacing:1.5px;
-      padding:10px 12px; border:1px solid var(--ring); background:var(--card); border-radius:12px;
-    }
-    .timer.pulse #timerDisplay{ animation:pulse 1.6s ease-in-out infinite; }
-    @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(255,143,0,.35)} 70%{box-shadow:0 0 0 10px rgba(255,143,0,0)} 100%{box-shadow:0 0 0 0 rgba(255,143,0,0)} }
-
+    #timerDisplay{ text-align:center; direction:ltr; font-size:28px; font-weight:800; letter-spacing:1.5px;
+      padding:10px 12px; border:1px solid var(--ring); background:var(--card); border-radius:12px; }
     .timerBtns{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-    .icon{
-      --size:48px; width:var(--size); height:var(--size); aspect-ratio:1/1;
-      border-radius:999px; display:grid; place-items:center; padding:0;
-      border:1px solid var(--ring);
+    .timerBtns .icon{ --size:44px; width:var(--size); height:var(--size); aspect-ratio:1/1; border-radius:999px;
+      display:grid; place-items:center; padding:0; border:1px solid var(--ring);
       background:linear-gradient(180deg,var(--brand-accent),var(--brand-accent-2));
-      box-shadow:0 2px 8px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06);
-      cursor:pointer;
-    }
-    .icon svg{ width:22px; height:22px; fill:#111; }
-    .icon:disabled{ opacity:.55; cursor:default; }
+      box-shadow:0 2px 8px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06); cursor:pointer; }
+    .timerBtns .icon svg{ width:22px; height:22px; fill:#111; }
+    .timerBtns .icon:disabled{ opacity:.55; cursor:default; }
 
-    /* Toast */
-    .toast{
-      position:fixed; inset-inline:0; bottom:24px; display:flex; justify-content:center; pointer-events:none; z-index:10;
-    }
-    .toast .msg{
-      pointer-events:auto; min-width:200px; max-width:90vw;
-      background:rgba(33,46,62,.96); border:1px solid var(--ring); color:var(--ink);
-      padding:10px 14px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.35);
-      display:flex; gap:10px; align-items:center;
-    }
-    .toast .msg.success{ border-color:#1faa6b; }
-    .toast .msg.error{ border-color:var(--danger); }
-    .toast .msg button{
-      margin-inline-start:auto; background:transparent; border:1px solid var(--ring); color:var(--ink);
-      border-radius:8px; padding:6px 10px; cursor:pointer;
-    }
+    /* Segmentation grid */
+    .seg-grid{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; margin-top:8px; }
+    @media (max-width:1100px){ .seg-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width:700px){ .seg-grid{ grid-template-columns:repeat(1,minmax(0,1fr)); } }
+    .seg-card{ background:var(--card); border:1px solid var(--ring); border-radius:12px; padding:12px; }
+    .seg-head{ font-weight:700; color:var(--ink-dim); margin-bottom:8px; display:flex; gap:8px; align-items:baseline; }
+    .seg-head small{ color:var(--ink-muted); font-weight:400; }
+    .seg-names{ display:flex; flex-wrap:wrap; gap:6px; }
+    .chip{ display:inline-block; padding:4px 8px; border:1px solid var(--ring); border-radius:999px; background:rgba(255,255,255,.04); font-size:12px; cursor:pointer; }
+    .chip:hover{ border-color:var(--brand-accent-2); }
 
-    /* Skeletons */
-    .skeleton{ background:linear-gradient(90deg,#2a3850 25%, #33455f 37%, #2a3850 63%); background-size:400% 100%; animation:shimmer 1.2s ease-in-out infinite; border-radius:10px; }
-    @keyframes shimmer{ 0%{background-position:100% 0} 100%{background-position:-100% 0} }
-    .skeleton.kpi{ height:84px; }
+    /* Reader progress list under chart */
+    .mini-list{ margin-top:8px; display:grid; gap:10px; }
+    .progress{ background:#2f3e56; border-radius:999px; height:8px; overflow:hidden; }
+    .bar{ background:linear-gradient(90deg,var(--brand-accent),var(--brand-accent-2)); height:100%; }
 
-    /* Highlights strip */
-    .highlights{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-    .highlight{ display:flex; gap:10px; align-items:center; background:var(--card); border:1px solid var(--ring); border-radius:12px; padding:10px 12px; }
-    .highlight .ico{ width:28px; height:28px; display:grid; place-items:center; border-radius:8px; background:#3a4b69; }
-    .highlight .v{ font-weight:800; color:var(--brand-accent-2); }
-    @media (max-width:980px){ .highlights{ grid-template-columns:1fr; } }
+    /* Export buttons row */
+    .export-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .export-btn{ padding:8px 12px; border-radius:10px; border:1px solid var(--ring); background:linear-gradient(180deg,var(--brand-accent),var(--brand-accent-2)); color:#111; font-weight:700; cursor:pointer; }
+    .export-btn:disabled{ opacity:.6; cursor:default; }
 
-    /* RTL helpers */
-    body.rtl{ direction:rtl; } body.rtl .row, body.rtl .row-3, body.rtl .row-2{ direction:rtl; }
+    body.rtl{ direction: rtl; } body.rtl .row, body.rtl .row-3{ direction: rtl; }
   </style>
 </head>
 <body class="rtl">
@@ -170,7 +131,7 @@
     </div>
     <div class="controls">
       <select id="langSel" title="اللغة">
-        <option value="ar">العربية</option>
+        <option value="ar" selected>العربية</option>
         <option value="en">English</option>
       </select>
       <select id="weekTypeSel" title="نمط الأسبوع">
@@ -199,7 +160,6 @@
           <div class="muted" id="nameHint">لم تجد اسمك؟ تواصل مع المجلس الأعلى</div>
         </div>
 
-        <!-- HH:MM:SS duration + Timer -->
         <div>
           <label id="lblDuration">المدة (ث:د:س)</label>
           <div class="timegrid">
@@ -207,20 +167,20 @@
             <input id="durM" type="number" min="0" max="59" step="1" placeholder="د" inputmode="numeric" />
             <input id="durH" type="number" min="0" step="1" placeholder="س" inputmode="numeric" />
           </div>
-          <div class="timer" id="timerBox">
+          <div class="timer">
             <div id="timerDisplay">00:00:00</div>
             <div class="timerBtns">
-              <!-- Toggle Play/Pause -->
-              <button id="btnToggle" class="icon" type="button" aria-label="بدء/إيقاف">
-                <svg id="icoPlay"  viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                <svg id="icoPause" viewBox="0 0 24 24" class="hidden"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+              <button id="btnStart" class="icon play"  type="button" aria-label="بدء" title="بدء">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
               </button>
-              <!-- Reset -->
-              <button id="btnReset" class="icon" type="button" aria-label="إعادة ضبط" title="R">
-                <svg viewBox="0 0 24 24"><path d="M12 5V2L7.5 6.5 12 11V8a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></svg>
+              <button id="btnPause" class="icon pause" type="button" aria-label="إيقاف مؤقت" title="إيقاف مؤقت" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+              </button>
+              <button id="btnReset" class="icon reset" type="button" aria-label="إعادة ضبط" title="إعادة ضبط" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7.5 6.5 12 11V8a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></svg>
               </button>
             </div>
-            <div class="muted">يمكنك تعديل الوقت يدويًا في الحقول أعلاه</div>
+            <div class="muted">اختصار: مفتاح المسافة يبدأ/يوقف المؤقّت. يمكنك تعديل الوقت يدويًا أعلاه.</div>
           </div>
           <div class="muted" id="durationHint">أدخل الساعات والدقائق والثواني</div>
         </div>
@@ -232,7 +192,6 @@
             <span class="cal-ic" aria-hidden="true"></span>
           </div>
         </div>
-
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="submitBtn">حفظ</button>
           <span class="muted" id="status" role="status" aria-live="polite"></span>
@@ -243,16 +202,6 @@
     <!-- Stats Dashboard -->
     <div id="panel-stats" class="card hidden" role="tabpanel" aria-labelledby="tab-stats">
       <h2 id="dashTitle" style="margin-top:0">لوحة الإحصائيات</h2>
-
-      <!-- Highlights strip -->
-      <div id="highlights" class="highlights">
-        <div class="highlight skeleton" id="hl1"></div>
-        <div class="highlight skeleton" id="hl2"></div>
-        <div class="highlight skeleton" id="hl3"></div>
-      </div>
-
-      <div class="spacer"></div>
-
       <div class="row">
         <div>
           <label for="statsDate" id="lblRefDate">تاريخ المرجع</label>
@@ -276,10 +225,22 @@
             <option>10</option><option selected>20</option><option>50</option><option>100</option><option>All</option>
           </select>
         </div>
+
+        <div>
+          <label for="segSel" id="lblSeg" class="muted" style="display:block;">التصنيف</label>
+          <select id="segSel">
+            <option value="all" selected>الكل</option>
+            <option value="steady">مستقرون</option>
+            <option value="sprinter">اندفاعيون</option>
+            <option value="weekend">تركيز نهاية الأسبوع</option>
+            <option value="mixed">متنوع</option>
+            <option value="inactive">غير نشط</option>
+          </select>
+        </div>
+
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="refreshBtn">تحديث</button>
-          <button id="btnPng" title="تحميل الرسم PNG">PNG</button>
-          <span class="muted" id="rangeHint">اليوم = نفس التاريخ · الأسبوع = ٧ أيام متحركة أو تقويمي · الشهر = تقويمي</span>
+          <span class="muted" id="rangeHint">اليوم = نفس التاريخ · الأسبوع = ٧ أيام متحركة أو أسبوع تقويمي (السبت–الجمعة) · الشهر = شهر تقويمي</span>
         </div>
       </div>
 
@@ -298,21 +259,39 @@
           <div>
             <div class="pill" id="pillByReader">حسب القارئ</div>
             <canvas id="chartMain" height="140"></canvas>
+            <div class="export-row">
+              <button id="btnExportMain" class="export-btn">📷 تصدير الرسم</button>
+            </div>
+            <!-- Reader list with progress & badges -->
+            <div id="readerMiniList" class="mini-list"></div>
           </div>
+
+          <div>
+            <div class="pill" id="pillSegments">تصنيفات القرّاء (آخر ١٢ أسبوع)</div>
+            <div id="segCounts" class="muted">—</div>
+            <div id="segGrid" class="seg-grid"></div>
+          </div>
+
+          <div>
+            <div class="pill" id="pillDOW">قوة أيام الأسبوع (متوسط آخر ١٢ أسبوع)</div>
+            <canvas id="chartDOW" height="100"></canvas>
+            <div class="export-row">
+              <button id="btnExportDOW" class="export-btn">📷 تصدير الرسم</button>
+            </div>
+          </div>
+
           <div>
             <div class="pill" id="pillStreaks">سلاسل الأيام المتتالية (≥ دقيقة يومياً)</div>
-            <div class="table-wrap">
-              <table id="tblStreaks">
-                <thead><tr><th id="thReader">القارئ</th><th id="thCurrent">الحالية</th><th id="thLongest">الأطول</th></tr></thead>
-                <tbody></tbody>
-              </table>
-            </div>
+            <table id="tblStreaks">
+              <thead><tr><th id="thReader">القارئ</th><th id="thCurrent">الحالية</th><th id="thLongest">الأطول</th></tr></thead>
+              <tbody></tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Per-Reader History -->
+    <!-- Reader History -->
     <div id="panel-reader" class="card hidden" role="tabpanel" aria-labelledby="tab-reader">
       <h2 id="readerTitle" style="margin-top:0">سجل القارئ (يومياً)</h2>
       <div class="row">
@@ -346,6 +325,9 @@
       <div class="spacer"></div>
       <div class="pill" id="pillHistory">الدقائق اليومية</div>
       <canvas id="chartHistory" height="160"></canvas>
+      <div class="export-row">
+        <button id="btnExportHistory" class="export-btn">📷 تصدير الرسم</button>
+      </div>
     </div>
 
     <!-- Discipline -->
@@ -366,14 +348,15 @@
       </div>
 
       <div class="spacer"></div>
+
       <div class="row-2">
         <div>
           <div class="pill" id="pillWarn">قائمة الإنذار (أقل من 30 دقيقة في الأسبوع السابق)</div>
-          <div class="table-wrap"><table id="tblWarn"><thead><tr><th>القارئ</th><th>دقائق الأسبوع السابق</th></tr></thead><tbody></tbody></table></div>
+          <table id="tblWarn"><thead><tr><th>القارئ</th><th>دقائق الأسبوع السابق</th></tr></thead><tbody></tbody></table>
         </div>
         <div>
           <div class="pill" id="pillRemoved">قائمة المطرودين (أقل من 60 دقيقة في آخر أسبوعين مكتملين)</div>
-          <div class="table-wrap"><table id="tblRemoved"><thead><tr><th>القارئ</th><th>مجموع آخر أسبوعين</th></tr></thead><tbody></tbody></table></div>
+          <table id="tblRemoved"><thead><tr><th>القارئ</th><th>مجموع آخر أسبوعين</th></tr></thead><tbody></tbody></table>
         </div>
       </div>
     </div>
@@ -381,26 +364,21 @@
     <footer><span id="footNote">صُنع بحب لتحدي القراء</span></footer>
   </div>
 
-  <!-- Toast container -->
-  <div class="toast" id="toast" aria-live="polite"></div>
-
   <script>
-    // ===== CONFIG =====
+    // ======== CONFIG ========
     const API_BASE = 'https://script.google.com/macros/s/AKfycbwu4LmHJU16fyl7jo-ksKO2e-H70H00em6WmhkXMcREKxDcYOrhlJdU8B-YbuF4IvIt/exec';
     const FALLBACK_NAMES = ['Reader 1','Reader 2','Reader 3'];
     const LOGO_SRC = 'logo.svg';
+    const WEEKLY_GOAL_MIN = 210; // 30 دقيقة × 7
 
-    // ===== DOM =====
-    const q = s => document.querySelector(s);
+    // ======== DOM ========
     const tabs = document.querySelectorAll('.tab');
-    const panels = { log:q('#panel-log'), stats:q('#panel-stats'), reader:q('#panel-reader'), discipline:q('#panel-discipline') };
+    const panels = { log: q('#panel-log'), stats: q('#panel-stats'), reader: q('#panel-reader'), discipline: q('#panel-discipline') };
     const logo = q('#logo');
 
-    // Lists
-    const dlNames = document.getElementById('namesList');
+    const dlNames   = document.getElementById('namesList');
     const dlReaders = document.getElementById('readerList');
 
-    // Log form
     const elName = q('#name');
     const elDate = q('#date');
     const elStatus = q('#status');
@@ -408,317 +386,235 @@
     const durH = q('#durH'), durM = q('#durM'), durS = q('#durS');
 
     // Timer
-    const timerBox = q('#timerBox');
     const timerDisplay = q('#timerDisplay');
-    const btnToggle = q('#btnToggle');
-    const icoPlay = q('#icoPlay');
-    const icoPause = q('#icoPause');
-    const btnReset = q('#btnReset');
+    const btnStart     = q('#btnStart');
+    const btnPause     = q('#btnPause');
+    const btnReset     = q('#btnReset');
 
-    // Dashboard
+    // Dashboard controls
     const elStatsDate = q('#statsDate');
     const elRangeSel = q('#rangeSel');
     const elTopN = q('#topNSel');
     const elRefresh = q('#refreshBtn');
     const elWeekTypeSel = q('#weekTypeSel');
-    const btnPng = q('#btnPng');
+    const elSegSel = q('#segSel');
 
-    // KPI
+    // KPIs
     const kpiTotal = q('#kpi-total'), kpiAvg = q('#kpi-avg'), kpiCount = q('#kpi-count');
 
-    // Chart/Table
+    // Canvases
     const chartMainCanvas = q('#chartMain');
-    const tblStreaksBody = q('#tblStreaks tbody');
-
-    // Reader history
-    const elReaderSel = q('#readerSel');
-    const elDaysSel = q('#daysSel');
-    const elReaderDate = q('#readerDate');
-    const elReaderBtn = q('#readerBtn');
     const chartHistoryCanvas = q('#chartHistory');
+    const chartDOWCanvas = q('#chartDOW');
 
-    // Discipline
-    const discDate = q('#discDate');
-    const discBtn = q('#discBtn');
+    // Export buttons
+    const btnExportMain = q('#btnExportMain');
+    const btnExportHistory = q('#btnExportHistory');
+    const btnExportDOW = q('#btnExportDOW');
+
+    const tblStreaksBody = q('#tblStreaks tbody');
     const tblWarnBody = q('#tblWarn tbody');
     const tblRemovedBody = q('#tblRemoved tbody');
 
-    // Lang
+    const discDate = q('#discDate');
+    const discBtn = q('#discBtn');
+
     const langSel = q('#langSel');
 
-    // Highlights placeholders
-    const hl1 = q('#hl1'), hl2 = q('#hl2'), hl3 = q('#hl3');
+    const segCountsDiv = q('#segCounts');
+    const segGrid = q('#segGrid');
+    const readerMiniList = q('#readerMiniList');
 
-    // ===== Helpers =====
-    const todayISO = () => {
-      const d=new Date(), y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
-      return `${y}-${m}-${day}`;
-    };
-    const showStatus = (msg, ok=true) => { elStatus.textContent = msg; elStatus.style.color = ok ? '#8ef5b2' : '#ffb4b4'; };
-    const fetchJSON = (url,opts) => fetch(url,opts).then(r=>r.json());
-    const sumMinutes = arr => arr.reduce((a,b)=>a+(b.minutes||0),0);
+    // ======== Helpers ========
+    function q(s){ return document.querySelector(s); }
+    function todayISO(){ const d = new Date(); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+    function showStatus(msg, ok=true){ elStatus.textContent = msg; elStatus.style.color = ok ? '#8ef5b2' : '#ffb4b4'; }
+    async function fetchJSON(url, opts){ const r=await fetch(url, opts); return r.json(); }
+    function sumMinutes(arr){ return arr.reduce((a,b)=>a+(b.minutes||0),0); }
+    function setDirRTL(isRTL){ document.body.classList.toggle('rtl', isRTL); document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr'); }
+    function esc(s){ return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    function downloadCanvas(canvas, filename){ const url = canvas.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); }
 
-    function toast(msg, type='success', withUndo=null){
-      const holder = q('#toast');
-      holder.innerHTML = '';
-      const div = document.createElement('div');
-      div.className = `msg ${type}`;
-      div.innerHTML = `<span>${msg}</span>` + (withUndo ? `<button id="btnUndo">تراجع</button>` : `<button id="btnClose">إغلاق</button>`);
-      holder.appendChild(div);
-      const close = () => holder.innerHTML = '';
-      if (withUndo) {
-        const t = setTimeout(close, 5000);
-        div.querySelector('#btnUndo').onclick = () => { clearTimeout(t); withUndo(); close(); };
-      } else {
-        div.querySelector('#btnClose').onclick = close;
-        setTimeout(close, 2500);
+    // Tiny cache (localStorage TTL)
+    async function cachedJSON(key, url, ttlSec){
+      try{
+        const now=Date.now();
+        const raw=localStorage.getItem(key);
+        if(raw){
+          const {t, data} = JSON.parse(raw);
+          if(now - t < ttlSec*1000) return data;
+        }
+        const data = await fetchJSON(url);
+        localStorage.setItem(key, JSON.stringify({t:now, data}));
+        return data;
+      }catch(_){
+        return fetchJSON(url);
       }
     }
 
-    function makeBar(ctx, labels, data){
+    function makeBar(ctx, labels, data, title){
       if (ctx.__chart) ctx.__chart.destroy();
-      const c = new Chart(ctx, {
-        type:'bar',
-        data:{ labels, datasets:[{ data, backgroundColor:'rgba(255,143,0,0.6)' }]},
-        options:{
-          responsive:true,
-          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(it)=>`${it.raw} د` } } },
-          scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } }
-        }
-      });
-      ctx.__chart = c; return c;
-    }
-    function makeLine(ctx, labels, data){
-      if (ctx.__chart) ctx.__chart.destroy();
-      const c = new Chart(ctx, {
-        type:'line',
-        data:{ labels, datasets:[{ data, tension:.3, fill:false, borderWidth:2, borderColor:'#ff8f00', pointRadius:2 }]},
+      const c = new Chart(ctx, { type:'bar',
+        data:{ labels, datasets:[{ label:title, data, backgroundColor:'rgba(255,143,0,0.6)'}]},
         options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
       });
       ctx.__chart = c; return c;
     }
-    function setDirRTL(isRTL){ document.body.classList.toggle('rtl', isRTL); document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr'); }
-
-    // ===== State & Prefs =====
-    const state = {
-      lang:'ar', names:[], nameSet:new Set(),
-      cache:{ agg:null, streaks:null },   // dashboard cached payloads
-      lastSaved:null                      // for undo
-    };
-    const PREFS_KEY='rg:prefs:v1';
-    function loadPrefs(){
-      try{
-        const p=JSON.parse(localStorage.getItem(PREFS_KEY)||'{}');
-        if (p.lang) langSel.value=p.lang, setDirRTL(p.lang==='ar');
-        if (p.weekType) elWeekTypeSel.value=p.weekType;
-        if (p.topN) elTopN.value=p.topN;
-        if (p.lastName) elName.value=p.lastName;
-      }catch(_){}
-    }
-    function savePrefs(){
-      const p={
-        lang: langSel.value,
-        weekType: elWeekTypeSel.value,
-        topN: elTopN.value,
-        lastName: elName.value
-      };
-      try{ localStorage.setItem(PREFS_KEY, JSON.stringify(p)); }catch(_){}
+    function makeLine(ctx, labels, data, title){
+      if (ctx.__chart) ctx.__chart.destroy();
+      const c = new Chart(ctx, { type:'line',
+        data:{ labels, datasets:[{ label:title, data, tension:.3, fill:false, borderWidth:2, borderColor:'#ff8f00', pointRadius:2 }]},
+        options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+      });
+      ctx.__chart = c; return c;
     }
 
+    // ======== Init & state ========
+    const state = { lang:'ar', names:[], nameSet:new Set(), segMap:new Map() };
     logo.src = LOGO_SRC;
-    const t0=todayISO();
-    elDate.value=t0; elStatsDate.value=t0; elReaderDate.value=t0; discDate.value=t0;
-    langSel.value='ar'; setDirRTL(true); loadPrefs();
+    const t0 = todayISO();
+    elDate.value = t0; elStatsDate.value = t0; q('#readerDate').value = t0; discDate.value = t0;
+    langSel.addEventListener('change', (e)=> setDirRTL(e.target.value === 'ar'));
 
-    // ===== Tabs =====
-    tabs.forEach(tab=>{
-      const activate=()=>{
-        tabs.forEach(x=>{ x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
+    tabs.forEach(tab => {
+      const activate = () => {
+        tabs.forEach(x => { x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
         tab.classList.add('active'); tab.setAttribute('aria-selected','true');
-        const k=tab.dataset.tab;
-        Object.keys(panels).forEach(p=>panels[p].classList.toggle('hidden', p!==k));
-        if (k==='stats') loadDashboard();
-        if (k==='reader') loadReaderNames();
-        if (k==='discipline') loadDiscipline();
+        const k = tab.dataset.tab;
+        Object.keys(panels).forEach(p => panels[p].classList.toggle('hidden', p !== k));
+        if (k === 'stats') loadDashboard();
+        if (k === 'reader') loadReaderNames();
+        if (k === 'discipline') loadDiscipline();
       };
       tab.addEventListener('click', activate);
-      tab.addEventListener('keydown', e=>{ if (e.key==='Enter'||e.key===' ') activate(); });
+      tab.addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' ') activate(); });
     });
 
-    // ===== Language / Prefs changes =====
-    langSel.addEventListener('change', ()=>{ setDirRTL(langSel.value==='ar'); savePrefs(); });
-    elWeekTypeSel.addEventListener('change', ()=>{ savePrefs(); loadDashboard(); });
-    elTopN.addEventListener('change', ()=>{ savePrefs(); renderTopNOnly(); });
-
-    // ===== Names (datalist) =====
+    // ======== Names ========
     function setNames(list){
-      const names=(Array.isArray(list)&&list.length)?list:FALLBACK_NAMES;
-      dlNames.innerHTML=''; dlReaders.innerHTML='';
-      for(const n of names){
-        const o1=document.createElement('option'); o1.value=n; dlNames.appendChild(o1);
-        const o2=document.createElement('option'); o2.value=n; dlReaders.appendChild(o2);
+      const names = (Array.isArray(list) && list.length) ? list : FALLBACK_NAMES;
+      dlNames.innerHTML = ''; dlReaders.innerHTML = '';
+      for (const n of names) {
+        const o1 = document.createElement('option'); o1.value = n; dlNames.appendChild(o1);
+        const o2 = document.createElement('option'); o2.value = n; dlReaders.appendChild(o2);
       }
-      state.names=names.slice(); state.nameSet=new Set(names.map(x=>x.trim()));
+      state.names = names.slice();
+      state.nameSet = new Set(names.map(x => x.trim()));
     }
     function loadNames(){
-      fetchJSON(`${API_BASE}?action=names`).then(j=>setNames(j&&j.ok?j.names:null)).catch(()=>setNames(null));
+      cachedJSON('names:v1', `${API_BASE}?action=names`, 86400)
+        .then(j => setNames(j && j.ok ? j.names : null))
+        .catch(() => setNames(null));
     }
-    function loadReaderNames(){ if (dlReaders.childElementCount===0) loadNames(); }
+    function loadReaderNames(){ if (dlReaders.childElementCount === 0) loadNames(); }
     loadNames();
 
-    // ===== Timer logic (toggle) =====
-    const TIMER_KEY='readingTimer:v1';
-    const timer={ running:false, startAt:0, elapsed:0, rafId:null };
-    function saveTimer(){ try{ localStorage.setItem(TIMER_KEY, JSON.stringify({running:timer.running,startAt:timer.startAt,elapsed:timer.elapsed})); }catch(_){ } }
-    function msToHMS(ms){ ms=Math.max(0,Math.floor(ms)); const s=Math.floor(ms/1000), h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
-      return {h,m:ss?m:m, s:ss, label:`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`}; }
-    function fillInputsFromElapsed(){
-      if(!timer.running && timer.elapsed===0) return; // keep empty initially
-      const {h,m,s}=msToHMS(timer.elapsed);
-      durH.value=h; durM.value=m; durS.value=s;
-    }
-    function updateTimerUI(){
-      const t=msToHMS(timer.elapsed);
-      timerDisplay.textContent=t.label;
-      fillInputsFromElapsed();
-      // toggle icons
-      icoPlay.classList.toggle('hidden', timer.running);
-      icoPause.classList.toggle('hidden', !timer.running);
-      timerBox.classList.toggle('pulse', timer.running);
-      // lock name while running
-      elName.disabled = timer.running;
-    }
-    function tick(){ if(!timer.running) return; timer.elapsed=Date.now()-timer.startAt; updateTimerUI(); timer.rafId=requestAnimationFrame(tick); }
-    function startTick(){ cancelAnimationFrame(timer.rafId); timer.rafId=requestAnimationFrame(tick); }
-    function toggleTimer(){
-      if (timer.running){ // pause
-        timer.running=false; cancelAnimationFrame(timer.rafId);
-        timer.elapsed=Date.now()-timer.startAt; saveTimer(); updateTimerUI();
-      } else { // start
-        timer.running=true; timer.startAt=Date.now()-timer.elapsed;
-        saveTimer(); updateTimerUI(); startTick();
-        if (!elName.value) elName.focus();
-      }
-    }
-    function resetTimer(){
-      timer.running=false; cancelAnimationFrame(timer.rafId); timer.elapsed=0;
-      durH.value=''; durM.value=''; durS.value='';
-      saveTimer(); updateTimerUI();
-    }
-    function loadTimer(){
+    // ======== Timer ========
+    const TIMER_KEY = 'readingTimer:v1';
+    const timer = { running:false, startAt:0, elapsed:0, rafId:null };
+
+    function playBeep(){
       try{
-        const t=JSON.parse(localStorage.getItem(TIMER_KEY)||'{}');
-        if (typeof t.elapsed==='number') timer.elapsed=t.elapsed;
-        if (t.running && t.startAt){ timer.running=true; timer.startAt=t.startAt; startTick(); }
-        else updateTimerUI();
-      }catch(_){ updateTimerUI(); }
+        const ctx = new (window.AudioContext||window.webkitAudioContext)();
+        const o = ctx.createOscillator(); o.type="sine"; o.frequency.value=880;
+        o.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+0.25);
+      }catch(_){}
+      if (navigator.vibrate) navigator.vibrate(120);
     }
-    btnToggle.addEventListener('click', toggleTimer);
+    function saveTimer(){ try{ localStorage.setItem(TIMER_KEY, JSON.stringify({running:timer.running,startAt:timer.startAt,elapsed:timer.elapsed})); }catch(_){ } }
+    function msToHMS(ms){ ms=Math.max(0,Math.floor(ms)); const totalSec=Math.floor(ms/1000); const h=Math.floor(totalSec/3600); const m=Math.floor((totalSec%3600)/60); const s=totalSec%60; return {h,m,s,label:`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}; }
+    function fillInputsFromElapsed(){ if (!timer.running && timer.elapsed===0) return; const {h,m,s}=msToHMS(timer.elapsed); durH.value=h; durM.value=m; durS.value=s; }
+    function updateTimerUI(){ const t=msToHMS(timer.elapsed); timerDisplay.textContent=t.label; fillInputsFromElapsed(); btnStart.disabled=timer.running; btnPause.disabled=!timer.running; btnReset.disabled=!timer.running && timer.elapsed===0; }
+    function tick(){ if (!timer.running) return; timer.elapsed = Date.now()-timer.startAt; updateTimerUI(); timer.rafId = requestAnimationFrame(tick); }
+    function startTick(){ cancelAnimationFrame(timer.rafId); timer.rafId=requestAnimationFrame(tick); }
+    function startTimer(){ if (timer.running) return; timer.running=true; timer.startAt=Date.now()-timer.elapsed; saveTimer(); updateTimerUI(); startTick(); }
+    function pauseTimer(){ if (!timer.running) return; timer.running=false; cancelAnimationFrame(timer.rafId); timer.elapsed=Date.now()-timer.startAt; saveTimer(); updateTimerUI(); }
+    function resetTimer(){ timer.running=false; cancelAnimationFrame(timer.rafId); timer.elapsed=0; durH.value=''; durM.value=''; durS.value=''; saveTimer(); updateTimerUI(); }
+    function loadTimer(){ try{ const t=JSON.parse(localStorage.getItem(TIMER_KEY)||'{}'); if (typeof t.elapsed==='number') timer.elapsed=t.elapsed; if (t.running && t.startAt){ timer.running=true; timer.startAt=t.startAt; startTick(); } else updateTimerUI(); }catch(_){ updateTimerUI(); } }
+    btnStart.addEventListener('click', startTimer);
+    btnPause.addEventListener('click', pauseTimer);
     btnReset.addEventListener('click', resetTimer);
-    document.addEventListener('keydown', (e)=>{
-      if (e.code==='Space' && document.activeElement.tagName!=='INPUT'){ e.preventDefault(); toggleTimer(); }
-      if (e.key==='r' || e.key==='R'){ if(document.activeElement.tagName!=='INPUT'){ e.preventDefault(); resetTimer(); } }
-      if (e.key==='Enter' && panels.log && !panels.log.classList.contains('hidden')){ btnSubmit.click(); }
-    });
+    document.addEventListener('keydown', (e)=>{ if (e.code==='Space' && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='SELECT'){ e.preventDefault(); timer.running ? pauseTimer() : startTimer(); }});
     loadTimer();
 
-    // ===== Submit entry (HH:MM:SS → minutes) + Undo =====
-    btnSubmit.addEventListener('click', async ()=>{
-      const raw=(elName.value||'').trim();
-      savePrefs(); // store lastName
-      // accept exact or unique case-insensitive match
-      let name=raw;
-      if(!state.nameSet.has(name)){
-        const cand=state.names.filter(n=>n.toLowerCase()===raw.toLowerCase());
-        if(cand.length===1) name=cand[0];
-      }
-      if(!state.nameSet.has(name)){ showStatus('الاسم غير موجود في القائمة. اختر من الاقتراحات.', false); return; }
+    // ======== Submit ========
+    function normalizeName(raw){
+      const r = (raw || '').trim();
+      if (state.nameSet.has(r)) return r;
+      const cand = state.names.filter(n => n.toLowerCase() === r.toLowerCase());
+      return cand.length === 1 ? cand[0] : null;
+    }
 
-      const h=Number(durH.value)||0, m=Number(durM.value)||0, s=Number(durS.value)||0;
-      const date=elDate.value;
-      const minutes=+(h*60 + m + s/60).toFixed(2);
-      if(minutes<=0 || !isFinite(minutes) || !date || m<0 || m>59 || s<0 || s>59 || h<0){
+    btnSubmit.addEventListener('click', async () => {
+      const name = normalizeName(elName.value);
+      if (!name) { showStatus('الاسم غير موجود في القائمة. اختر من الاقتراحات.', false); return; }
+      const h = Number(durH.value)||0, m = Number(durM.value)||0, s = Number(durS.value)||0;
+      const date = elDate.value;
+      const minutes = +(h*60 + m + s/60).toFixed(2);
+      if (minutes <= 0 || !isFinite(minutes) || !date || m<0 || m>59 || s<0 || s>59 || h<0) {
         showStatus('تحقَّق من المدخلات', false); return;
       }
 
-      btnSubmit.disabled=true; showStatus('جاري الحفظ…');
-      try{
-        const res=await fetch(API_BASE,{ method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({name,minutes,date}) });
-        const ct=res.headers.get('content-type')||''; const j=ct.includes('application/json')?await res.json():JSON.parse(await res.text());
-        if(j.ok){
-          showStatus('تم الحفظ');
-          state.lastSaved={ name, minutes, date };
-          toast('تم الحفظ ✅', 'success', async ()=>{
-            // Undo = إضافة عكسية (دقائق سالبة)
-            try{
-              await fetch(API_BASE,{ method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({ name, minutes:-minutes, date }) });
-              showStatus('تم التراجع'); toast('تراجع عن آخر إدخال', 'success');
-              // تحديث لوحة التحكم إن كانت مفتوحة
-              if (!panels.stats.classList.contains('hidden')) await loadDashboard(true);
-            }catch(_){ toast('تعذّر التراجع', 'error'); }
-          });
-          durH.value=''; durM.value=''; durS.value=''; resetTimer();
-          // تحديث الداشبورد إن كانت على الشاشة
-          if (!panels.stats.classList.contains('hidden')) await loadDashboard(true);
-        } else {
-          showStatus(j.error || 'حدث خطأ', false); toast(j.error || 'خطأ في الحفظ', 'error');
-        }
-      } catch(e){
-        showStatus(String(e.message||e), false); toast('فشل الاتصال', 'error');
-      } finally {
-        btnSubmit.disabled=false;
-      }
+      btnSubmit.disabled = true; showStatus('جاري الحفظ…');
+      try {
+        const res = await fetch(API_BASE, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ name, minutes, date })
+        });
+        const ct = res.headers.get('content-type') || '';
+        const j = ct.includes('application/json') ? await res.json() : JSON.parse(await res.text());
+        if (j.ok) {
+          showStatus('تم الحفظ'); durH.value=''; durM.value=''; durS.value=''; resetTimer();
+          // Nudge: small beep on save
+          playBeep();
+        } else { showStatus(j.error || 'حدث خطأ', false); }
+      } catch (e) { showStatus(String(e.message || e), false); }
+      finally { btnSubmit.disabled = false; }
     });
 
-    // ===== Dashboard (cached + TopN redraw) =====
-    let chartMain, chartHistory;
-    function renderHighlights(agg, streaks){
-      // 🏆 قارئ الأسبوع: نأخذ من البيانات الحالية حسب المدى المختار إن كانت أسبوع
-      const best = (agg.data && agg.data[0]) ? agg.data[0] : null;
-      const topHtml = best ? `
-        <div class="highlight"><div class="ico">🏆</div><div><div class="muted">قارئ الفترة</div><div class="v">${best.name}</div></div></div>` :
-        `<div class="highlight"><div class="ico">🏆</div><div class="muted">لا بيانات</div></div>`;
-      // 🔥 أطول سلسلة فعّالة اليوم
-      const srow = (streaks.streaks||[]).filter(s=>s.current>0).sort((a,b)=>b.current-a.current)[0];
-      const streakHtml = srow ? `
-        <div class="highlight"><div class="ico">🔥</div><div><div class="muted">أطول سلسلة</div><div class="v">${srow.name} · ${srow.current} يوم</div></div></div>` :
-        `<div class="highlight"><div class="ico">🔥</div><div class="muted">لا سلاسل</div></div>`;
-      // 📈 الأكثر تحسّنًا (تقريب مبسط: الفرق بين هذه الفترة والسابق إن كانت أسبوع/شهر)
-      const improveHtml = `
-        <div class="highlight"><div class="ico">📈</div><div><div class="muted">الأكثر تحسّنًا</div><div class="v">سيظهر قريبًا</div></div></div>`;
-      hl1.classList.remove('skeleton'); hl2.classList.remove('skeleton'); hl3.classList.remove('skeleton');
-      hl1.innerHTML = topHtml; hl2.innerHTML = streakHtml; hl3.innerHTML = improveHtml;
+    // ======== Dashboard ========
+    let chartMain, chartHistory, chartDOW;
+
+    function addBadgesForStreak(current, longest){
+      let b = '';
+      if (current >= 7) b += ' 🔥';
+      if (longest >= 30) b += ' 🏆';
+      return b;
     }
 
-    async function loadDashboard(force=false){
+    function renderReaderMiniList(rows, streakMap){
+      readerMiniList.innerHTML = '';
+      if (!rows || !rows.length){ readerMiniList.innerHTML = '<div class="muted">لا توجد بيانات</div>'; return; }
+      // Goal is WEEKLY_GOAL_MIN; when range=week show goal %, else scale vs top
+      const top = Math.max(...rows.map(r=>r.minutes||0), 1);
+      rows.forEach(r=>{
+        const streak = streakMap.get(r.name) || {current:0,longest:0};
+        const label = `${esc(r.name)}${addBadgesForStreak(streak.current, streak.longest)}`;
+        const pct = Math.min(100, Math.round((r.minutes / WEEKLY_GOAL_MIN) * 100));
+        const pctFallback = Math.min(100, Math.round((r.minutes / top) * 100));
+        const width = (elRangeSel.value==='week') ? pct : pctFallback;
+        const goalTxt = (elRangeSel.value==='week') ? ` (${pct}%)` : '';
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <div><strong>${label}</strong> - ${Math.round(r.minutes)} دقيقة${goalTxt}</div>
+          <div class="progress"><div class="bar" style="width:${width}%"></div></div>
+        `;
+        readerMiniList.appendChild(div);
+      });
+    }
+
+    async function loadDashboard(){
       const d = elStatsDate.value || todayISO();
       const range = elRangeSel.value;
       const weekType = elWeekTypeSel.value;
 
-      // skeletons
-      kpiTotal.textContent='—'; kpiAvg.textContent='—'; kpiCount.textContent='—';
-      tblStreaksBody.innerHTML = `<tr><td class="muted" colspan="3">جاري التحميل…</td></tr>`;
-      hl1.classList.add('skeleton'); hl2.classList.add('skeleton'); hl3.classList.add('skeleton'); hl1.innerHTML=''; hl2.innerHTML=''; hl3.innerHTML='';
-
-      // reuse cache unless force or params changed
-      if (!force && state.cache.agg && state.cache.agg._key === `${range}|${d}|${weekType}`){
-        renderFromCache(); return;
-      }
-
-      const [agg, streaks] = await Promise.all([
-        fetchJSON(`${API_BASE}?action=stats&range=${range}&date=${d}&weekType=${weekType}`),
-        fetchJSON(`${API_BASE}?action=streaks&date=${d}&threshold=1`)
-      ]);
-      // cache
-      state.cache.agg = Object.assign({ _key:`${range}|${d}|${weekType}` }, agg);
-      state.cache.streaks = streaks;
-
-      renderFromCache();
-    }
-
-    function renderFromCache(){
-      const agg = state.cache.agg || { data:[] };
-      const streaks = state.cache.streaks || { streaks:[] };
+      const [agg, streaks, segRes, dowRes] = await Promise.all([
+        cachedJSON(`stats:${range}:${d}:${weekType}`, `${API_BASE}?action=stats&range=${range}&date=${d}&weekType=${weekType}`, 900),
+        cachedJSON(`streaks:${d}`, `${API_BASE}?action=streaks&date=${d}&threshold=1`, 300),
+        cachedJSON(`segments:${d}:12`, `${API_BASE}?action=segments&date=${d}&weeks=12`, 900),
+        cachedJSON(`dow:${d}:12`, `${API_BASE}?action=dow&date=${d}&weeks=12`, 900)
+      ]).catch(() => [null, null, null, null]);
 
       // KPIs
       const allRows = (agg && agg.data) ? agg.data : [];
@@ -726,79 +622,132 @@
       kpiCount.textContent = allRows.length;
       kpiAvg.textContent   = allRows.length ? Math.round(sumMinutes(allRows)/allRows.length) : 0;
 
-      // Highlights
-      renderHighlights(agg, streaks);
+      // Build streak map for badges & mini list
+      const streakMap = new Map();
+      const streakRows = (streaks && streaks.streaks) ? streaks.streaks : [];
+      streakRows.forEach(s => streakMap.set(s.name, {current:s.current, longest:s.longest}));
 
-      // Top N render
-      renderTopNOnly();
+      // Segments: summary + names grid + filter map
+      state.segMap = new Map();
+      segGrid.innerHTML = '';
+      if (segRes && segRes.ok){
+        (segRes.segments || []).forEach(s => state.segMap.set(s.name, s.segment));
+        const s = segRes.summary || {steady:0,sprinter:0,weekend:0,mixed:0,inactive:0};
+        segCountsDiv.textContent =
+          `مستقرون: ${s.steady} · اندفاعيون: ${s.sprinter} · نهاية الأسبوع: ${s.weekend} · متنوع: ${s.mixed} · غير نشط: ${s.inactive}`;
 
-      // Streaks table
-      tblStreaksBody.innerHTML='';
-      const filtered = (streaks.streaks||[]).filter(s => (s.current||0)>0 || (s.longest||0)>0);
-      if (filtered.length===0){
-        const tr=document.createElement('tr'); tr.innerHTML=`<td class="muted" colspan="3">لا يوجد سلاسل</td>`; tblStreaksBody.appendChild(tr);
+        const labels = {
+          steady:'مستقرون',
+          sprinter:'اندفاعيون',
+          weekend:'نهاية الأسبوع',
+          mixed:'متنوع',
+          inactive:'غير نشط'
+        };
+        const groups = { steady:[], sprinter:[], weekend:[], mixed:[], inactive:[] };
+        (segRes.segments || []).forEach(r => { if (groups[r.segment]) groups[r.segment].push(r.name); });
+
+        const sections = Object.keys(groups).map(key => {
+          const names = groups[key].sort((a,b)=>a.localeCompare(b,'ar'));
+          const chips = names.map(n=>`<span class="chip" data-name="${esc(n)}" data-seg="${key}">${esc(n)}</span>`).join('') || `<span class="muted">—</span>`;
+          return `<div class="seg-card">
+                    <div class="seg-head">${labels[key]} <small>(${names.length})</small></div>
+                    <div class="seg-names">${chips}</div>
+                  </div>`;
+        }).join('');
+        segGrid.innerHTML = sections;
       } else {
-        for (const s of filtered){
-          const tr=document.createElement('tr');
-          tr.innerHTML = `<td>${s.name}</td><td>${s.current}</td><td>${s.longest}</td>`;
+        segCountsDiv.textContent = 'لا توجد بيانات للتصنيف.';
+      }
+
+      // Filter Top-N by selected segment
+      let rows = allRows.slice(0);
+      const selectedSeg = elSegSel.value;
+      if (selectedSeg !== 'all'){
+        rows = rows.filter(x => (state.segMap.get(x.name) || 'mixed') === selectedSeg);
+      }
+      const topNVal = elTopN.value;
+      if (topNVal !== 'All') rows = rows.slice(0, Number(topNVal));
+
+      // Chart main
+      chartMain = makeBar(chartMainCanvas, rows.map(x=>x.name), rows.map(x=>x.minutes), 'Total');
+
+      // Mini reader list with goal progress + badges
+      renderReaderMiniList(rows, streakMap);
+
+      // Day-of-week chart
+      if (dowRes && dowRes.ok){
+        const items = dowRes.items || [];
+        const labels = items.map(i => i.label);
+        const data = items.map(i => Math.round(i.avg));
+        chartDOW = makeBar(chartDOWCanvas, labels, data, 'DOW');
+      }
+
+      // Streaks table (hide zero-streak users)
+      tblStreaksBody.innerHTML = '';
+      const filtered = streakRows.filter(s => (s.current || 0) > 0 || (s.longest || 0) > 0);
+      if (filtered.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="muted" colspan="3">لا يوجد سلاسل</td>`;
+        tblStreaksBody.appendChild(tr);
+      } else {
+        for (const s of filtered) {
+          const badge = addBadgesForStreak(s.current, s.longest);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${s.name}${badge}</td><td>${s.current}</td><td>${s.longest}</td>`;
           tblStreaksBody.appendChild(tr);
         }
       }
     }
 
-    function renderTopNOnly(){
-      const agg = state.cache.agg || { data:[] };
-      const allRows = agg.data || [];
-      const topNVal = elTopN.value;
-      let rows = allRows.slice(0); // already sorted by backend desc
-      if (topNVal!=='All') rows = rows.slice(0, Number(topNVal));
-      makeBar(chartMainCanvas, rows.map(x=>x.name), rows.map(x=>x.minutes));
-    }
+    elRefresh.addEventListener('click', loadDashboard);
+    elTopN.addEventListener('change', loadDashboard);
+    elRangeSel.addEventListener('change', loadDashboard);
+    elWeekTypeSel.addEventListener('change', loadDashboard);
+    elSegSel.addEventListener('change', loadDashboard);
+    q('#tab-stats').addEventListener('click', () => { if (!chartMainCanvas.__chart) loadDashboard(); });
 
-    elRefresh.addEventListener('click', ()=>loadDashboard(true));
-    elRangeSel.addEventListener('change', ()=>loadDashboard(true));
-    elWeekTypeSel.addEventListener('change', ()=>loadDashboard(true));
-    q('#tab-stats').addEventListener('click', ()=>{ if (!chartMainCanvas.__chart) loadDashboard(true); });
+    // Export handlers
+    btnExportMain.addEventListener('click', ()=> downloadCanvas(chartMainCanvas, 'stats.png'));
+    btnExportDOW.addEventListener('click', ()=> downloadCanvas(chartDOWCanvas, 'dow.png'));
+    btnExportHistory.addEventListener('click', ()=> downloadCanvas(chartHistoryCanvas, 'history.png'));
 
-    // Export PNG
-    btnPng.addEventListener('click', ()=>{
-      if (!chartMainCanvas.__chart){ toast('لا يوجد رسم لالتقاطه', 'error'); return; }
-      const url = chartMainCanvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      const d = elStatsDate.value || todayISO();
-      a.href = url; a.download = `reading_chart_${d}.png`; a.click();
+    // Click a name chip → open Reader tab with that user
+    segGrid.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      const name = chip.dataset.name;
+      q('#tab-reader').click();
+      q('#readerSel').value = name;
+      setTimeout(() => q('#readerBtn').click(), 50);
     });
 
-    // ===== Reader history =====
-    function normalizeName(raw){
-      const r=(raw||'').trim();
-      if (state.nameSet.has(r)) return r;
-      const cand=state.names.filter(n=>n.toLowerCase()===r.toLowerCase());
-      return cand.length===1 ? cand[0] : null;
-    }
+    // ======== Reader history ========
     async function loadReaderHistory(){
-      const nameRaw=elReaderSel.value;
-      const name=normalizeName(nameRaw);
-      const days=elDaysSel.value;
-      const d=elReaderDate.value || todayISO();
-      if (!name){ toast('الاسم غير موجود — اختر من الاقتراحات', 'error'); return; }
-      const res=await fetchJSON(`${API_BASE}?action=history&name=${encodeURIComponent(name)}&days=${days}&date=${d}`);
-      const pts=(res && res.points) ? res.points : [];
-      makeLine(chartHistoryCanvas, pts.map(p=>p.date), pts.map(p=>p.minutes));
+      const nameRaw = q('#readerSel').value;
+      const name = normalizeName(nameRaw);
+      const days = q('#daysSel').value;
+      const d = q('#readerDate').value || todayISO();
+      const res = await cachedJSON(`hist:${name}:${days}:${d}`, `${API_BASE}?action=history&name=${encodeURIComponent(name)}&days=${days}&date=${d}`, 300);
+      const pts = (res && res.points) ? res.points : [];
+      chartHistory = makeLine(chartHistoryCanvas, pts.map(p=>p.date), pts.map(p=>p.minutes), 'Minutes');
     }
-    elReaderBtn.addEventListener('click', loadReaderHistory);
-    q('#tab-reader').addEventListener('click', ()=>{ if (!chartHistoryCanvas.__chart) loadReaderHistory(); });
+    q('#readerBtn').addEventListener('click', loadReaderHistory);
+    q('#tab-reader').addEventListener('click', () => { if (!chartHistoryCanvas.__chart) loadReaderHistory(); });
 
-    // ===== Discipline =====
+    // ======== Discipline ========
     async function loadDiscipline(){
-      const d=discDate.value || todayISO();
-      const res=await fetchJSON(`${API_BASE}?action=discipline&date=${d}`);
-      tblWarnBody.innerHTML=''; tblRemovedBody.innerHTML='';
-      (res.warning||[]).forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.name}</td><td>${r.minutes}</td>`; tblWarnBody.appendChild(tr); });
-      (res.removed||[]).forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.name}</td><td>${r.minutes}</td>`; tblRemovedBody.appendChild(tr); });
+      const d = discDate.value || todayISO();
+      const res = await cachedJSON(`disc:${d}`, `${API_BASE}?action=discipline&date=${d}`, 300);
+      tblWarnBody.innerHTML = ''; tblRemovedBody.innerHTML = '';
+      (res.warning || []).forEach(r => {
+        const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.name}</td><td>${r.minutes}</td>`; tblWarnBody.appendChild(tr);
+      });
+      (res.removed || []).forEach(r => {
+        const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.name}</td><td>${r.minutes}</td>`; tblRemovedBody.appendChild(tr);
+      });
     }
     discBtn.addEventListener('click', loadDiscipline);
-    q('#tab-discipline').addEventListener('click', ()=>{ if (!tblWarnBody.childElementCount) loadDiscipline(); });
+    q('#tab-discipline').addEventListener('click', () => { if (!tblWarnBody.childElementCount) loadDiscipline(); });
   </script>
 </body>
 </html>
