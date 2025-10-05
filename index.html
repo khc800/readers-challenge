@@ -18,13 +18,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <style>
     input[list]{ width: 100%; }
 
     /* white date icon */
-    input[type="date"]{ color-scheme: dark; width:100%; }
+    input[type="date"]{ color-scheme: dark; }
     input[type="date"]::-webkit-calendar-picker-indicator{ filter: invert(1) brightness(1.8); opacity:1; }
-    .date-wrap{ position:relative; display:inline-block; width:100%; }
+    .date-wrap{ position:relative; display:inline-block; }
     .date-wrap input[type="date"]{ padding-inline-end:2.2rem; }
     .date-wrap input[type="date"]::-webkit-calendar-picker-indicator{ opacity:0; }
     .date-wrap .cal-ic{
@@ -35,11 +36,22 @@
       <path d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm12 6H5v12h14V8zM7 10h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 14h2v2H7v-2zm4 0h2v2h-2v-2z"/></svg>');
     }
 
+    /* ---------- Colors (أعلى تباينًا) ---------- */
     :root{
-      --brand-dark:#212e3e; --brand-accent:#ff8f00; --brand-accent-2:#feaf00;
-      --ink:#ffffff; --ink-dim:#d1d1d1; --ink-muted:#b7b7b7;
-      --card:#263347; --card-2:#2f3e56; --ring:#3e4f6a; --ok:#1db954;
-      --bg1:#1a2433; --bg2:#212e3e;
+      --brand-dark:#111826;
+      --brand-accent:#ffb100;
+      --brand-accent-2:#ffc54d;
+      --ink:#ffffff;
+      --ink-dim:#e9e9e9;
+      --ink-muted:#c9c9c9;
+      --card:#1a2533;
+      --card-2:#243146;
+      --ring:#40516c;
+      --ok:#22c55e;
+      --bg1:#0e1622;
+      --bg2:#111826;
+      --bad-red:#ef4444;
+      --bad-amber:#f59e0b;
     }
     *{ box-sizing:border-box; }
     body{ margin:0; font-family:'Almarai', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
@@ -51,28 +63,20 @@
     #timerDisplay, .kpi .v, table td{ font-variant-numeric: tabular-nums; }
 
     header{ max-width:1100px; margin:24px auto 0; padding:0 16px;
-      display:flex; align-items:center; justify-content:space-between; gap:12px; position:sticky; top:0; z-index:10;
-      background:linear-gradient(180deg, rgba(26,36,51,.95), rgba(33,46,62,.95)); backdrop-filter: blur(6px); border-bottom:1px solid var(--ring);
-      border-bottom-left-radius:16px; border-bottom-right-radius:16px;
-    }
+      display:flex; align-items:center; justify-content:space-between; gap:12px; }
     header .brand{ display:flex; align-items:center; gap:12px; font-weight:800; }
     header img.logo{ height:36px; width:auto; display:block; }
     .controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .wrap{ max-width:1100px; margin:16px auto 40px; padding:0 16px; }
-    .tabs{ display:flex; gap:8px; margin:12px 0 16px; overflow:auto; }
-    .tab{ padding:10px 16px; background:var(--card); border:1px solid var(--ring); border-radius:12px; cursor:pointer; user-select:none; white-space:nowrap; }
-    .tab.active{ background:var(--card-2); border-color:var(--brand-accent-2); box-shadow:0 0 0 2px rgba(255,143,0,.25) inset; }
+    .tabs{ display:flex; gap:8px; margin-bottom:16px; }
+    .tab{ padding:10px 16px; background:var(--card); border:1px solid var(--ring); border-radius:12px; cursor:pointer; user-select:none; }
+    .tab.active{ background:var(--card-2); border-color:var(--brand-accent-2); box-shadow:0 0 0 2px rgba(255,177,0,.25) inset; }
     .card{ background:rgba(33,46,62,.65); backdrop-filter:blur(6px); border:1px solid var(--ring); border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
     .row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
     .row-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
     .row-2{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; align-items:start; }
     @media (max-width:980px){ .row{ grid-template-columns:repeat(2,1fr); } .row-2{ grid-template-columns:1fr; } }
-    @media (max-width:640px){
-      .row, .row-3{ grid-template-columns:1fr; }
-      header{ flex-direction:column; align-items:flex-start; gap:8px; }
-      .timerBtns .icon{ --size:60px; } #timerDisplay{ font-size:36px; }
-      label{ font-size:16px; }
-    }
+    @media (max-width:640px){ .row, .row-3{ grid-template-columns:1fr; } header{ flex-direction:column; align-items:flex-start; gap:8px; } }
     label{ display:block; font-size:14px; color:var(--ink-dim); margin-bottom:6px; }
     .muted{ color:var(--ink-muted); font-size:13px; }
     .spacer{ height:16px; }
@@ -112,18 +116,40 @@
     .chip{ display:inline-block; padding:4px 8px; border:1px solid var(--ring); border-radius:999px; background:rgba(255,255,255,.04); font-size:12px; cursor:pointer; }
     .chip:hover{ border-color:var(--brand-accent-2); }
 
-    /* Awards */
-    .awards{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
-    @media (max-width:980px){ .awards{ grid-template-columns:repeat(2,1fr);} }
-    @media (max-width:640px){ .awards{ grid-template-columns:1fr;} }
-    .award-card{ display:flex; gap:12px; align-items:center; padding:12px; border:1px solid var(--ring); border-radius:14px; background:linear-gradient(180deg,rgba(46,60,82,.8),rgba(40,53,73,.8)); }
-    .award-ic{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-size:22px; background:linear-gradient(180deg,var(--brand-accent),var(--brand-accent-2)); color:#111; font-weight:800; }
-    .award-body .title{ font-weight:800; }
-    .award-body .meta{ font-size:12px; color:var(--ink-muted); margin-top:2px; }
-    .badge-name{ font-weight:800; color:var(--brand-accent-2); }
+    /* -------- Reader Calendar -------- */
+    .cal-wrap{ display:grid; gap:10px; }
+    .cal-row{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
+    @media (max-width:800px){ .cal-row{ grid-template-columns:1fr; } }
+    .cal{ background:var(--card); border:1px solid var(--ring); border-radius:16px; padding:14px; }
+    .cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .cal-title{ font-weight:800; }
+    .cal-week{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:4px; color:var(--ink-muted); font-size:12px; text-align:center; }
+    .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+    .cal-cell{ position:relative; height:42px; border-radius:10px; display:grid; place-items:center; border:1px solid transparent; }
+    .cal-cell.dim{ opacity:.45; }
+    .cal-cell .dot{ position:absolute; bottom:6px; width:8px; height:8px; border-radius:999px; background:#2c3a52; }
+    .cal-cell.active{ background:#0f1a2a; border-color:#334760; }
+    .cal-cell.active .dot{ background:var(--ok); }
+    .cal-cell.rest .dot{ background:var(--bad-amber); }
+    .cal-cell.miss .dot{ background:#7a2430; }
+    .cal-legend{ display:flex; gap:10px; align-items:center; font-size:12px; color:var(--ink-muted); margin-top:6px; }
+    .legend-item{ display:flex; gap:6px; align-items:center; }
+    .legend-dot{ width:10px; height:10px; border-radius:999px; background:#2c3a52; }
+    .legend-dot.ok{ background:var(--ok); }
+    .legend-dot.miss{ background:#7a2430; }
+    .legend-dot.rest{ background:var(--bad-amber); }
 
     body.rtl{ direction: rtl; } body.rtl .row, body.rtl .row-3{ direction: rtl; }
   </style>
+
+  <script>
+    /* وضوح Charts */
+    Chart.defaults.color = '#e9e9e9';
+    Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(17,24,38,0.95)';
+    Chart.defaults.plugins.tooltip.titleColor = '#fff';
+    Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+  </script>
 </head>
 <body class="rtl">
   <header>
@@ -207,10 +233,7 @@
       <div class="row">
         <div>
           <label for="statsDate" id="lblRefDate">تاريخ المرجع</label>
-          <div class="date-wrap">
-            <input id="statsDate" type="date" />
-            <span class="cal-ic" aria-hidden="true"></span>
-          </div>
+          <div class="date-wrap"><input id="statsDate" type="date" /><span class="cal-ic" aria-hidden="true"></span></div>
         </div>
         <div>
           <label for="rangeSel" id="lblRange">المدى</label>
@@ -227,8 +250,6 @@
             <option>10</option><option selected>20</option><option>50</option><option>100</option><option>All</option>
           </select>
         </div>
-
-        <!-- Segment filter -->
         <div>
           <label for="segSel" id="lblSeg" class="muted" style="display:block;">التصنيف</label>
           <select id="segSel">
@@ -240,7 +261,6 @@
             <option value="inactive">غير نشط</option>
           </select>
         </div>
-
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="refreshBtn">تحديث</button>
           <span class="muted" id="rangeHint">اليوم = نفس التاريخ · الأسبوع = ٧ أيام متحركة أو أسبوع تقويمي (السبت–الجمعة) · الشهر = شهر تقويمي</span>
@@ -257,10 +277,6 @@
 
       <div class="spacer"></div>
 
-      <!-- Awards -->
-      <div class="pill">جوائز الفترة</div>
-      <div id="awards" class="awards" style="margin:10px 0 18px;"></div>
-
       <div class="card" style="background:transparent; border:0; padding:0;">
         <div style="display:grid; grid-template-columns:1fr; gap:24px;">
           <div>
@@ -271,7 +287,6 @@
           <div>
             <div class="pill" id="pillSegments">تصنيفات القرّاء (آخر ١٢ أسبوع)</div>
             <div id="segCounts" class="muted">—</div>
-            <!-- visualization grid -->
             <div id="segGrid" class="seg-grid"></div>
           </div>
 
@@ -319,12 +334,19 @@
         </div>
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="readerBtn">عرض</button>
-          <span class="muted" id="readerHint">مجموع يومي خلال المدى المختار</span>
+          <span class="muted" id="readerHint">مجموع يومي خلال المدى المختار + تقويم تفاعلي</span>
         </div>
       </div>
+
       <div class="spacer"></div>
       <div class="pill" id="pillHistory">الدقائق اليومية</div>
       <canvas id="chartHistory" height="160"></canvas>
+
+      <div class="spacer"></div>
+      <div class="cal-wrap">
+        <div style="display:flex; justify-content:flex-end;"><span class="pill">تقويم القراءة</span></div>
+        <div id="readerCalendars" class="cal-row"></div>
+      </div>
     </div>
 
     <!-- Discipline -->
@@ -333,10 +355,7 @@
       <div class="row">
         <div>
           <label id="lblDiscDate" for="discDate">تاريخ المرجع</label>
-          <div class="date-wrap">
-            <input id="discDate" type="date" />
-            <span class="cal-ic" aria-hidden="true"></span>
-          </div>
+          <div class="date-wrap"><input id="discDate" type="date" /><span class="cal-ic" aria-hidden="true"></span></div>
         </div>
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="discBtn">تحديث القائمة</button>
@@ -410,31 +429,34 @@
 
     const segCountsDiv = q('#segCounts');
     const segGrid = q('#segGrid');
-
-    const awardsDiv = q('#awards');
+    const readerCalendars = q('#readerCalendars');
 
     // ======== Helpers ========
     function q(s){ return document.querySelector(s); }
     function todayISO(){ const d = new Date(); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
     function showStatus(msg, ok=true){ elStatus.textContent = msg; elStatus.style.color = ok ? '#8ef5b2' : '#ffb4b4'; }
-    async function fetchJSON(url, opts){ const r=await fetch(url, opts); return r.json(); }
-    function sumMinutes(arr){ return arr.reduce((a,b)=>a+(b.minutes||0),0); }
+    function fetchJSON(url, opts){ return fetch(url, opts).then(r=>r.json()); }
+    function sumMinutes(arr){ return arr.reduce((a,b)=>a+(Number(b.minutes)||0),0); }
     function setDirRTL(isRTL){ document.body.classList.toggle('rtl', isRTL); document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr'); }
     function esc(s){ return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
     function makeBar(ctx, labels, data, title){
       if (ctx.__chart) ctx.__chart.destroy();
       const c = new Chart(ctx, { type:'bar',
-        data:{ labels, datasets:[{ label:title, data, backgroundColor:'rgba(255,143,0,0.6)'}]},
-        options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+        data:{ labels, datasets:[{ label:title, data,
+          backgroundColor:'rgba(255,177,0,0.85)', hoverBackgroundColor:'rgba(255,197,77,0.95)'}]},
+        options:{ responsive:true, plugins:{ legend:{ display:false } },
+          scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true, ticks:{ precision:0 } } } }
       });
       ctx.__chart = c; return c;
     }
     function makeLine(ctx, labels, data, title){
       if (ctx.__chart) ctx.__chart.destroy();
       const c = new Chart(ctx, { type:'line',
-        data:{ labels, datasets:[{ label:title, data, tension:.3, fill:false, borderWidth:2, borderColor:'#ff8f00', pointRadius:2 }]},
-        options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+        data:{ labels, datasets:[{ label:title, data, tension:.35, fill:false, borderWidth:2.5,
+          borderColor:'#ffb100', pointRadius:2.5, pointHoverRadius:4 }]},
+        options:{ responsive:true, plugins:{ legend:{ display:false } },
+          scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true, ticks:{ precision:0 } } } }
       });
       ctx.__chart = c; return c;
     }
@@ -460,7 +482,7 @@
       tab.addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' ') activate(); });
     });
 
-    // ======== Names ========
+    // Names
     function setNames(list){
       const names = (Array.isArray(list) && list.length) ? list : FALLBACK_NAMES;
       dlNames.innerHTML = ''; dlReaders.innerHTML = '';
@@ -531,41 +553,18 @@
     // ======== Dashboard ========
     let chartMain, chartHistory, chartDOW;
 
-    function isoToDate(s){ return new Date(`${s}T00:00:00`); }
-    function toISO(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
-    function prevPeriodDate(range, dateStr){
-      const d = isoToDate(dateStr);
-      if(range==='day'){ d.setDate(d.getDate()-1); return toISO(d); }
-      if(range==='week'){ d.setDate(d.getDate()-7); return toISO(d); }
-      if(range==='month'){ d.setMonth(d.getMonth()-1); return toISO(d); }
-      return null; // 'all' not comparable
+    function getPrevDate(range, dateStr){
+      const d = new Date((dateStr||todayISO())+'T00:00:00');
+      if (range==='day'){ d.setDate(d.getDate()-1); }
+      else if (range==='week'){ d.setDate(d.getDate()-7); }
+      else if (range==='month'){ d.setMonth(d.getMonth()-1); }
+      return d.toISOString().slice(0,10);
     }
-    function mapByName(rows){ const m=new Map(); (rows||[]).forEach(r=>m.set(r.name, Number(r.minutes)||0)); return m; }
-
-    function renderAwards({topReader, mostImproved, longestStreak, weekendHero}){
-      const parts = [];
-      function card(icon, title, nameHTML, meta){
-        parts.push(`
-          <div class="award-card">
-            <div class="award-ic">${icon}</div>
-            <div class="award-body">
-              <div class="title">${title}</div>
-              <div class="badge-name">${nameHTML || '—'}</div>
-              <div class="meta">${meta || ''}</div>
-            </div>
-          </div>
-        `);
-      }
-      if(topReader) card('🏅','قارئ الفترة', esc(topReader.name), `${Math.round(topReader.value)} دقيقة`);
-      else card('🏅','قارئ الفترة','—','لا بيانات');
-      if(mostImproved) card('📈','الأفضل تحسّنًا', esc(mostImproved.name), `${mostImproved.delta>0?'+':''}${Math.round(mostImproved.delta)} دقيقة`);
-      else card('📈','الأفضل تحسّنًا','—','لا بيانات مقارنة');
-      if(longestStreak) card('🔥','أطول سلسلة نشطة', esc(longestStreak.name), `${longestStreak.current} يوم (الأطول: ${longestStreak.longest})`);
-      else card('🔥','أطول سلسلة نشطة','—','—');
-      if(weekendHero) card('🎉','بطل نهاية الأسبوع', esc(weekendHero.name), `${Math.round(weekendHero.share*100)}% من الدقائق خلال الجمعة/السبت`);
-      else card('🎉','بطل نهاية الأسبوع','—','—');
-
-      awardsDiv.innerHTML = parts.join('');
+    function mapTotalsByName(statsObj){
+      const map = new Map();
+      const rows = (statsObj && statsObj.data) ? statsObj.data : [];
+      rows.forEach(r => map.set(r.name, Number(r.minutes)||0));
+      return map;
     }
 
     async function loadDashboard(){
@@ -573,66 +572,30 @@
       const range = elRangeSel.value;
       const weekType = elWeekTypeSel.value;
 
-      const prevDate = prevPeriodDate(range, d);
+      const prevDate = getPrevDate(range, d);
 
-      const [agg, streaks, segRes, dowRes, aggPrev] = await Promise.all([
+      const [agg, aggPrev, streaks, segRes, dowRes] = await Promise.all([
         fetchJSON(`${API_BASE}?action=stats&range=${range}&date=${d}&weekType=${weekType}`),
+        fetchJSON(`${API_BASE}?action=stats&range=${range}&date=${prevDate}&weekType=${weekType}`),
         fetchJSON(`${API_BASE}?action=streaks&date=${d}&threshold=1`),
         fetchJSON(`${API_BASE}?action=segments&date=${d}&weeks=12`),
-        fetchJSON(`${API_BASE}?action=dow&date=${d}&weeks=12`),
-        prevDate ? fetchJSON(`${API_BASE}?action=stats&range=${range}&date=${prevDate}&weekType=${weekType}`) : Promise.resolve(null)
+        fetchJSON(`${API_BASE}?action=dow&date=${d}&weeks=12`)
       ]).catch(() => [null, null, null, null, null]);
 
       // KPIs
       const allRows = (agg && agg.data) ? agg.data : [];
-      kpiTotal.textContent = sumMinutes(allRows);
+      const total = allRows.reduce((a,b)=>a + (Number(b.minutes)||0), 0);
+      kpiTotal.textContent = total;
       kpiCount.textContent = allRows.length;
-      kpiAvg.textContent   = allRows.length ? Math.round(sumMinutes(allRows)/allRows.length) : 0;
+      kpiAvg.textContent   = allRows.length ? Math.round(total/allRows.length) : 0;
 
-      // ===== Awards logic =====
-      // 1) قارئ الفترة
-      const topReader = allRows.length ? allRows.slice().sort((a,b)=>b.minutes-a.minutes)[0] : null;
-
-      // 2) الأفضل تحسّناً: أكبر زيادة مطلقة = (الحالي - السابق)
-      let mostImproved = null;
-      if (aggPrev && aggPrev.data && aggPrev.data.length){
-        const cur = mapByName(agg.data||[]);
-        const prev = mapByName(aggPrev.data||[]);
-        let best = {name:null, delta:-Infinity};
-        cur.forEach((v,name) => {
-          const delta = v - (prev.get(name)||0);
-          if (delta > best.delta) best = {name, delta};
-        });
-        if (best.name && best.delta>0) mostImproved = best;
-      }
-
-      // 3) أطول سلسلة نشطة
-      let longestStreak = null;
-      const srows = (streaks && streaks.streaks) ? streaks.streaks : [];
-      if (srows.length){
-        longestStreak = srows.slice().sort((a,b)=> b.current - a.current || b.longest - a.longest)[0];
-      }
-
-      // 4) بطل نهاية الأسبوع (من segments weekendShare الأعلى بين النشطين)
-      let weekendHero = null;
-      if (segRes && segRes.segments && segRes.segments.length){
-        const actives = segRes.segments.filter(s => (s.total||0) > 0);
-        if (actives.length){
-          weekendHero = actives.slice().sort((a,b)=> (b.weekendShare||0)-(a.weekendShare||0))[0];
-          weekendHero = { name: weekendHero.name, share: Number(weekendHero.weekendShare||0) };
-        }
-      }
-
-      renderAwards({ topReader, mostImproved, longestStreak, weekendHero });
-
-      // ===== Segments UI =====
+      // Segments
       state.segMap = new Map();
       segGrid.innerHTML = '';
       if (segRes && segRes.ok){
         (segRes.segments || []).forEach(s => state.segMap.set(s.name, s.segment));
         const s = segRes.summary || {steady:0,sprinter:0,weekend:0,mixed:0,inactive:0};
-        segCountsDiv.textContent =
-          `مستقرون: ${s.steady} · اندفاعيون: ${s.sprinter} · نهاية الأسبوع: ${s.weekend} · متنوع: ${s.mixed} · غير نشط: ${s.inactive}`;
+        segCountsDiv.textContent = `مستقرون: ${s.steady} · اندفاعيون: ${s.sprinter} · نهاية الأسبوع: ${s.weekend} · متنوع: ${s.mixed} · غير نشط: ${s.inactive}`;
 
         const labels = { steady:'مستقرون', sprinter:'اندفاعيون', weekend:'نهاية الأسبوع', mixed:'متنوع', inactive:'غير نشط' };
         const groups = { steady:[], sprinter:[], weekend:[], mixed:[], inactive:[] };
@@ -641,17 +604,14 @@
         const sections = Object.keys(groups).map(key => {
           const names = groups[key].sort((a,b)=>a.localeCompare(b,'ar'));
           const chips = names.map(n=>`<span class="chip" data-name="${esc(n)}" data-seg="${key}">${esc(n)}</span>`).join('') || `<span class="muted">—</span>`;
-          return `<div class="seg-card">
-                    <div class="seg-head">${labels[key]} <small>(${names.length})</small></div>
-                    <div class="seg-names">${chips}</div>
-                  </div>`;
+          return `<div class="seg-card"><div class="seg-head">${labels[key]} <small>(${names.length})</small></div><div class="seg-names">${chips}</div></div>`;
         }).join('');
         segGrid.innerHTML = sections;
       } else {
         segCountsDiv.textContent = 'لا توجد بيانات للتصنيف.';
       }
 
-      // ===== Main chart (with segment filter & TopN) =====
+      // Filter Top-N
       const selectedSeg = elSegSel.value;
       let rows = allRows.slice(0);
       if (selectedSeg !== 'all'){
@@ -659,27 +619,29 @@
       }
       const topNVal = elTopN.value;
       if (topNVal !== 'All') rows = rows.slice(0, Number(topNVal));
-      chartMain = makeBar(chartMainCanvas, rows.map(x=>x.name), rows.map(x=>x.minutes), 'Total');
+      chartMain = makeBar(chartMainCanvas, rows.map(x=>x.name), rows.map(x=>Math.round(Number(x.minutes)||0)), 'Total');
 
-      // DOW chart
+      // DOW
       if (dowRes && dowRes.ok){
         const items = dowRes.items || [];
         const labels = items.map(i => i.label);
-        const data = items.map(i => Math.round(i.avg));
+        const data = items.map(i => Math.round(Number(i.avg)||0));
         chartDOW = makeBar(chartDOWCanvas, labels, data, 'DOW');
       }
 
-      // Streaks table (hide zero-streak users)
+      // Streaks table
       tblStreaksBody.innerHTML = '';
-      const filtered = srows.filter(s => (s.current || 0) > 0 || (s.longest || 0) > 0);
+      const streakRows = (streaks && streaks.streaks) ? streaks.streaks : [];
+      const filtered = streakRows
+        .map(s=>({ ...s, current:Number(s.current)||0, longest:Number(s.longest)||0 }))
+        .filter(s => s.current>0 || s.longest>0)
+        .sort((a,b)=> b.current - a.current || b.longest - a.longest);
       if (filtered.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="muted" colspan="3">لا يوجد سلاسل</td>`;
-        tblStreaksBody.appendChild(tr);
+        tblStreaksBody.innerHTML = `<tr><td class="muted" colspan="3">لا يوجد سلاسل</td></tr>`;
       } else {
         for (const s of filtered) {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${s.name}</td><td>${s.current}</td><td>${s.longest}</td>`;
+          tr.innerHTML = `<td>${esc(s.name)}</td><td>${s.current}</td><td>${s.longest}</td>`;
           tblStreaksBody.appendChild(tr);
         }
       }
@@ -702,21 +664,93 @@
       setTimeout(() => q('#readerBtn').click(), 50);
     });
 
-    // ======== Reader history ========
+    // ======== Reader history + Calendar ========
     function normalizeName(raw){
       const r = (raw || '').trim();
       if (state.nameSet.has(r)) return r;
       const cand = state.names.filter(n => n.toLowerCase() === r.toLowerCase());
       return cand.length === 1 ? cand[0] : null;
     }
+
+    // توليد مصفوفة شهر (يبدأ السبت)
+    function monthMatrix(year, month, weekStart=6){ // 0=Jan, weekStart=6 (Sat)
+      const first = new Date(year, month, 1);
+      const last  = new Date(year, month+1, 0);
+      const daysInMonth = last.getDate();
+      const matrix = [];
+      let week = new Array(7).fill(null);
+      let dayIdx = (first.getDay() - weekStart + 7) % 7;
+      for (let i=0; i<dayIdx; i++) week[i] = { d:null, dim:true };
+
+      for (let d=1; d<=daysInMonth; d++){
+        const date = new Date(year, month, d);
+        week[dayIdx] = { d, dim:false, date };
+        if (dayIdx === 6){ matrix.push(week); week = new Array(7).fill(null); dayIdx=0; }
+        else dayIdx++;
+      }
+      if (dayIdx !== 0){
+        for (let i=dayIdx; i<7; i++) week[i] = { d:null, dim:true };
+        matrix.push(week);
+      }
+      return matrix;
+    }
+
+    function renderCalendarMonth(targetISO, activeSet, restSet){
+      const d = new Date(targetISO+'T00:00:00');
+      const y = d.getFullYear(), m = d.getMonth();
+      const title = d.toLocaleDateString('ar', { month:'long', year:'numeric' });
+      const weekHdr = ['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+
+      const matrix = monthMatrix(y, m, 6);
+      const htmlCells = matrix.map(week=>{
+        return week.map(cell=>{
+          if (!cell) return `<div class="cal-cell dim"></div>`;
+          if (cell.d===null) return `<div class="cal-cell dim"></div>`;
+          const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(cell.d).padStart(2,'0')}`;
+          const read = activeSet.has(iso);
+          const rest = restSet.has(iso);
+          const cls  = read ? 'active' : (rest ? 'rest' : 'miss');
+          return `<div class="cal-cell ${cls}"><div>${cell.d}</div><span class="dot"></span></div>`;
+        }).join('');
+      }).join('');
+
+      return `
+        <div class="cal">
+          <div class="cal-head"><div class="cal-title">${title}</div></div>
+          <div class="cal-week">${weekHdr.map(d=>`<div>${d.slice(0,1)}</div>`).join('')}</div>
+          <div class="cal-grid">${htmlCells}</div>
+          <div class="cal-legend">
+            <span class="legend-item"><span class="legend-dot ok"></span> قرأ</span>
+            <span class="legend-item"><span class="legend-dot rest"></span> راحة</span>
+            <span class="legend-item"><span class="legend-dot miss"></span> لم يقرأ</span>
+          </div>
+        </div>`;
+    }
+
     async function loadReaderHistory(){
       const nameRaw = q('#readerSel').value;
       const name = normalizeName(nameRaw);
+      if (!name){ alert('اختر قارئًا من القائمة.'); return; }
       const days = q('#daysSel').value;
       const d = q('#readerDate').value || todayISO();
+
       const res = await fetchJSON(`${API_BASE}?action=history&name=${encodeURIComponent(name)}&days=${days}&date=${d}`);
       const pts = (res && res.points) ? res.points : [];
-      chartHistory = makeLine(chartHistoryCanvas, pts.map(p=>p.date), pts.map(p=>p.minutes), 'Minutes');
+      chartHistory = makeLine(chartHistoryCanvas, pts.map(p=>p.date), pts.map(p=>Number(p.minutes)||0), 'Minutes');
+
+      // تقويم: نحدد الأيام التي قرأ فيها (>0) + أيام الراحة (0)
+      const activeSet = new Set(pts.filter(p => (Number(p.minutes)||0) > 0).map(p => p.date));
+      const restSet   = new Set(pts.filter(p => (Number(p.minutes)||0) === 0).map(p => p.date));
+
+      // نبني شهرين: الشهر المرجعي والسابق
+      const ref = new Date((q('#readerDate').value || todayISO())+'T00:00:00');
+      const curISO  = ref.toISOString().slice(0,10);
+      const prev    = new Date(ref); prev.setMonth(prev.getMonth()-1);
+      const prevISO = prev.toISOString().slice(0,10);
+
+      readerCalendars.innerHTML =
+        renderCalendarMonth(prevISO, activeSet, restSet) +
+        renderCalendarMonth(curISO,  activeSet, restSet);
     }
     q('#readerBtn').addEventListener('click', loadReaderHistory);
     q('#tab-reader').addEventListener('click', () => { if (!chartHistoryCanvas.__chart) loadReaderHistory(); });
@@ -727,10 +761,10 @@
       const res = await fetchJSON(`${API_BASE}?action=discipline&date=${d}`);
       tblWarnBody.innerHTML = ''; tblRemovedBody.innerHTML = '';
       (res.warning || []).forEach(r => {
-        const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.name}</td><td>${r.minutes}</td>`; tblWarnBody.appendChild(tr);
+        const tr = document.createElement('tr'); tr.innerHTML = `<td>${esc(r.name)}</td><td>${r.minutes}</td>`; tblWarnBody.appendChild(tr);
       });
       (res.removed || []).forEach(r => {
-        const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.name}</td><td>${r.minutes}</td>`; tblRemovedBody.appendChild(tr);
+        const tr = document.createElement('tr'); tr.innerHTML = `<td>${esc(r.name)}</td><td>${r.minutes}</td>`; tblRemovedBody.appendChild(tr);
       });
     }
     discBtn.addEventListener('click', loadDiscipline);
