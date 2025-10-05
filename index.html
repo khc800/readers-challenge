@@ -119,6 +119,16 @@
     thead th{ text-align:right; color:var(--ink-dim); font-weight:700; }
     tbody tr{ background:var(--card); border:1px solid var(--ring); }
     tbody td{ padding:8px 10px; }
+
+    /* Reader Calendar */
+    .cal-wrap{ margin-top:12px; }
+    .cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:8px; padding:12px; border:1px solid var(--ring); border-radius:12px; }
+    .cal-grid .dow{ text-align:center; color:var(--ink-dim); font-weight:700; }
+    .cal-cell{ height:58px; border-radius:10px; display:flex; align-items:flex-start; justify-content:center; padding-top:6px; position:relative; background:transparent; border:1px solid transparent; }
+    .cal-cell.has{ border-color:var(--ring); background:rgba(255,255,255,.03); }
+    .cal-cell .d{ opacity:.95; }
+    .cal-cell .dot{ position:absolute; bottom:8px; width:8px; height:8px; border-radius:50%; background:var(--ok); }
     body.rtl{ direction: rtl; } body.rtl .row, body.rtl .row-3{ direction: rtl; }
   </style>
 </head>
@@ -193,6 +203,31 @@
     <!-- Stats Dashboard -->
     <div id="panel-stats" class="card hidden" role="tabpanel" aria-labelledby="tab-stats">
       <h2 id="dashTitle" style="margin-top:0">لوحة الإحصائيات</h2>
+
+      <!-- القسم الثابت الخاص بالأسبوع (أعلى الصفحة) -->
+      <div class="pill">جوائز الأسبوع</div>
+      <div id="badges" class="badges"></div>
+
+      <div class="spacer"></div>
+
+      <div class="row-2">
+        <div>
+          <div class="pill" id="pillDOW">قوة أيام الأسبوع (متوسط آخر ١٢ أسبوع)</div>
+          <canvas id="chartDOW" height="120"></canvas>
+        </div>
+        <div>
+          <div class="pill" id="pillStreaks">سلاسل الأيام المتتالية (≥ دقيقة يومياً) · <span class="muted">يُحسب لآخر 180 يومًا</span></div>
+          <table id="tblStreaks">
+            <thead><tr><th id="thReader">القارئ</th><th id="thCurrent">الحالية</th><th id="thLongest">الأطول</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <!-- القسم المتغيّر مع الفترة -->
+      <div class="pill">مؤشرات الفترة المختارة</div>
       <div class="row">
         <div>
           <label for="statsDate" id="lblRefDate">تاريخ المرجع</label>
@@ -216,8 +251,6 @@
             <option>10</option><option selected>20</option><option>50</option><option>100</option><option>All</option>
           </select>
         </div>
-
-        <!-- Segment filter -->
         <div>
           <label for="segSel" id="lblSeg" class="muted" style="display:block;">التصنيف</label>
           <select id="segSel">
@@ -229,18 +262,11 @@
             <option value="inactive">غير نشط</option>
           </select>
         </div>
-
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="refreshBtn">تحديث</button>
           <span class="muted" id="rangeHint">اليوم = نفس التاريخ · الأسبوع = ٧ أيام متحركة أو أسبوع تقويمي (السبت–الجمعة) · الشهر = شهر تقويمي</span>
         </div>
       </div>
-
-      <div class="spacer"></div>
-
-      <!-- BADGES -->
-      <div class="pill">جوائز الفترة</div>
-      <div id="badges" class="badges"></div>
 
       <div class="spacer"></div>
 
@@ -252,38 +278,21 @@
 
       <div class="spacer"></div>
 
-      <div class="card" style="background:transparent; border:0; padding:0;">
-        <div style="display:grid; grid-template-columns:1fr; gap:24px;">
-          <div>
-            <div class="pill" id="pillByReader">حسب القارئ</div>
-            <canvas id="chartMain" height="140"></canvas>
-          </div>
+      <div class="pill" id="pillByReader">حسب القارئ</div>
+      <canvas id="chartMain" height="160"></canvas>
 
-          <div>
-            <div class="pill" id="pillSegments">تصنيفات القرّاء (آخر ١٢ أسبوع)</div>
-            <div id="segCounts" class="muted">—</div>
-            <div id="segGrid" class="seg-grid"></div>
-          </div>
+      <div class="spacer"></div>
 
-          <div>
-            <div class="pill" id="pillDOW">قوة أيام الأسبوع (متوسط آخر ١٢ أسبوع)</div>
-            <canvas id="chartDOW" height="100"></canvas>
-          </div>
-
-          <div>
-            <div class="pill" id="pillStreaks">سلاسل الأيام المتتالية (≥ دقيقة يومياً)</div>
-            <table id="tblStreaks">
-              <thead><tr><th id="thReader">القارئ</th><th id="thCurrent">الحالية</th><th id="thLongest">الأطول</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
+      <div>
+        <div class="pill" id="pillSegments">تصنيفات القرّاء (آخر ١٢ أسبوع)</div>
+        <div id="segCounts" class="muted">—</div>
+        <div id="segGrid" class="seg-grid"></div>
       </div>
     </div>
 
-    <!-- Reader History (التقويم الشهري اختصارًا يبقى كما لديك) -->
+    <!-- Reader History -->
     <div id="panel-reader" class="card hidden" role="tabpanel" aria-labelledby="tab-reader">
-      <h2 id="readerTitle" style="margin-top:0">سجل القارئ (يومياً)</h2>
+      <h2 id="readerTitle" style="margin-top:0">سجل القارئ</h2>
       <div class="row">
         <div>
           <label for="readerSel" id="lblReaderSel">القارئ</label>
@@ -291,30 +300,29 @@
           <datalist id="readerList"></datalist>
         </div>
         <div>
-          <label for="daysSel" id="lblDays">المدى</label>
-          <select id="daysSel">
-            <option value="14">14</option>
-            <option value="30" selected>30</option>
-            <option value="60">60</option>
-            <option value="90">90</option>
-            <option value="all">الكل</option>
-          </select>
-        </div>
-        <div>
-          <label for="readerDate" id="lblReaderDate">تاريخ المرجع</label>
-          <div class="date-wrap">
-            <input id="readerDate" type="date" />
-            <span class="cal-ic" aria-hidden="true"></span>
-          </div>
+          <label for="readerMonth">الشهر</label>
+          <input id="readerMonth" type="month" />
         </div>
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="readerBtn">عرض</button>
-          <span class="muted" id="readerHint">مجموع يومي خلال المدى المختار</span>
+          <span class="muted" id="readerHint">يعرض أيام القراءة فقط في الشهر المختار + منحنى الدقائق</span>
         </div>
       </div>
+
       <div class="spacer"></div>
+
       <div class="pill" id="pillHistory">الدقائق اليومية</div>
       <canvas id="chartHistory" height="160"></canvas>
+
+      <div class="spacer"></div>
+
+      <div class="cal-wrap">
+        <div class="cal-head">
+          <div class="pill">تقويم الشهر المختار</div>
+          <div class="muted">النقاط الخضراء = يوم فيه قراءة</div>
+        </div>
+        <div id="readerCal" class="cal-grid"></div>
+      </div>
     </div>
 
     <!-- Discipline -->
@@ -401,6 +409,11 @@
     const segGrid = q('#segGrid');
     const badgesDiv = q('#badges');
 
+    const readerSel = q('#readerSel');
+    const readerMonth = q('#readerMonth');
+    const readerBtn = q('#readerBtn');
+    const readerCal = q('#readerCal');
+
     // ======== Helpers ========
     function q(s){ return document.querySelector(s); }
     function todayISO(){ const d = new Date(); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
@@ -428,10 +441,11 @@
     }
 
     // ======== Init & state ========
-    const state = { lang:'ar', names:[], nameSet:new Set(), segMap:new Map() };
+    const state = { lang:'ar', names:[], nameSet:new Set(), segMap:new Map(), historyCache:new Map() };
     logo.src = LOGO_SRC;
     const t0 = todayISO();
-    elDate.value = t0; elStatsDate.value = t0; q('#readerDate').value = t0; discDate.value = t0;
+    elDate.value = t0; elStatsDate.value = t0; q('#readerDate')?.value; discDate.value = t0;
+    readerMonth.value = t0.slice(0,7); // yyyy-mm
     langSel.addEventListener('change', (e)=> setDirRTL(e.target.value === 'ar'));
 
     tabs.forEach(tab => {
@@ -478,7 +492,6 @@
     function resetTimer(){ timer.running=false; cancelAnimationFrame(timer.rafId); timer.elapsed=0; durH.value=''; durM.value=''; durS.value=''; saveTimer(); updateTimerUI(); }
     function loadTimer(){ try{ const t=JSON.parse(localStorage.getItem(TIMER_KEY)||'{}'); if (typeof t.elapsed==='number') timer.elapsed=t.elapsed; if (t.running && t.startAt){ timer.running=true; timer.startAt=t.startAt; startTick(); } else updateTimerUI(); }catch(_){ updateTimerUI(); } }
     btnOne.addEventListener('click', toggleTimer);
-    // ضغط مطوّل لإعادة الضبط
     let holdT=null; btnOne.addEventListener('pointerdown', ()=>{ btnOne.classList.add('hold'); holdT=setTimeout(()=>{ resetTimer(); btnOne.classList.remove('hold'); }, 700); });
     ['pointerup','pointerleave','pointercancel'].forEach(ev=>btnOne.addEventListener(ev, ()=>{ btnOne.classList.remove('hold'); clearTimeout(holdT); }));
     document.addEventListener('keydown', (e)=>{ if (e.code==='Space' && document.activeElement.tagName!=='INPUT'){ e.preventDefault(); toggleTimer(); }});
@@ -516,7 +529,7 @@
       finally { btnSubmit.disabled = false; }
     });
 
-    // ======== STREAK HELPERS (client-side) ========
+    // ======== STREAK HELPERS ========
     const STREAK_LOOKBACK_DAYS = 180;
     const WEEKEND_WINDOW_DAYS  = 30;
 
@@ -557,36 +570,29 @@
     }
 
     // ======== Dashboard ========
-    let chartMain, chartHistory, chartDOW;
+    let chartHistory;
 
     async function loadDashboard(){
       const d = elStatsDate.value || todayISO();
       const weekType = elWeekTypeSel.value;
       const range = elRangeSel.value;
 
-      // نحتاج دائمًا لإحصاءات "الأسبوع" للشارات (قارئ الفترة)
-      const [statsCurrent, statsPrev, statsWeek, statsWeekPrev, segRes, dowRes] = await Promise.all([
+      // نحتاج دائمًا لإحصاءات "الأسبوع" للشارات
+      const [statsCurrent, statsWeek, statsWeekPrev, segRes, dowRes] = await Promise.all([
         fetchJSON(`${API_BASE}?action=stats&range=${range}&date=${d}&weekType=${weekType}`),
-        fetchJSON(`${API_BASE}?action=stats&range=${range}&date=${getPrevDate(range,d)}&weekType=${weekType}`),
         fetchJSON(`${API_BASE}?action=stats&range=week&date=${d}&weekType=${weekType}`),
         fetchJSON(`${API_BASE}?action=stats&range=week&date=${getPrevDate('week',d)}&weekType=${weekType}`),
         fetchJSON(`${API_BASE}?action=segments&date=${d}&weeks=12`),
         fetchJSON(`${API_BASE}?action=dow&date=${d}&weeks=12`)
-      ]).catch(()=>[null,null,null,null,null,null]);
+      ]).catch(()=>[null,null,null,null,null]);
 
-      // KPIs من المدى المحدد
-      const rowsNow = (statsCurrent && statsCurrent.data) ? statsCurrent.data : [];
-      const total   = sumMinutes(rowsNow);
-      const active  = rowsNow.length;
-      kpiTotal.textContent = total;
-      kpiCount.textContent = active;
-      kpiAvg.textContent   = active ? Math.round(total/active) : 0;
-
-      // جمع أسماء القُراء من إحصاءات الأسبوع (لأجل الشارات والسلاسل)
+      // شارات + سلاسل + DOW
       const weekRows = (statsWeek?.data)||[];
       const namesSet = new Set(weekRows.map(r => r.name));
+      const weekMapNow  = new Map(weekRows.map(r => [r.name, Number(r.minutes)||0]));
+      const weekMapPrev = new Map((statsWeekPrev?.data||[]).map(r => [r.name, Number(r.minutes)||0]));
 
-      // history لكل قارئ (مرّة واحدة)
+      // history لكل قارئ أسبوعي (للسلاسل والويكند)
       const byNameHistory = {};
       await Promise.all(
         [...namesSet].map(n =>
@@ -596,19 +602,16 @@
         )
       );
 
-      // خرائط الأسبوع الحالي والسابق (لتحسين)
-      const weekMapNow  = new Map((statsWeek?.data||[]).map(r => [r.name, Number(r.minutes)||0]));
-      const weekMapPrev = new Map((statsWeekPrev?.data||[]).map(r => [r.name, Number(r.minutes)||0]));
-
-      // === الشارات (قارئ الفترة = أسبوع) ===
+      // قارئ الفترة (الأسبوع)
       let bestName='—', bestVal=0;
       weekMapNow.forEach((v,k)=>{ if(v>bestVal){ bestVal=v; bestName=k; } });
 
+      // الأفضل تحسنًا (فرق أسبوع حالي - سابق)
       let impName='—', impVal=-Infinity;
       weekMapNow.forEach((v,k)=>{ const diff = v - (weekMapPrev.get(k)||0); if(diff>impVal){ impVal=diff; impName=k; } });
       if(!isFinite(impVal)) impVal = 0;
 
-      // بطل نهاية الأسبوع خلال 30 يوم
+      // بطل نهاية الأسبوع (آخر 30 يوم: جمعة/سبت)
       let wkndName='—', wkndVal=0;
       [...namesSet].forEach(n=>{
         const pts = byNameHistory[n]||[];
@@ -625,7 +628,7 @@
         if(sum > wkndVal){ wkndVal = sum; wkndName = n; }
       });
 
-      // السلاسل (حساب محلي)
+      // السلاسل (آخر 180 يوم)
       const streakMap = new Map();
       [...namesSet].forEach(n=>{
         const set = hitsSet(byNameHistory[n], 1);
@@ -662,9 +665,51 @@
         `<div class="badge"><div class="ic">🔥</div><div class="txt"><div class="title">أطول سلسلة نشطة</div>
           <div class="name">${esc(bestStreakName||'—')}</div><small>الحالية ${currentStreak||0} · الأطول ${bestStreakLen||0} يوم</small>${renderStreakStrip(30,bestStreakName)}</div></div>`;
 
-      // === التصنيفات ===
+      // DOW ثابت (آخر 12 أسبوع)
+      if(dowRes && dowRes.ok){
+        const items = dowRes.items || [];
+        makeBar(chartDOWCanvas, items.map(i=>i.label), items.map(i=>Math.round(Number(i.avg)||0)), 'DOW');
+      }
+
+      // جدول السلاسل
+      tblStreaksBody.innerHTML = '';
+      const streakRows = [...namesSet].map(n => ({ name:n, ...(streakMap.get(n)||{current:0,longest:0}) }))
+        .filter(s => s.current>0 || s.longest>0)
+        .sort((a,b)=> b.current - a.current || b.longest - a.longest);
+      if(streakRows.length === 0){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="muted" colspan="3">لا يوجد سلاسل</td>`;
+        tblStreaksBody.appendChild(tr);
+      } else {
+        for(const s of streakRows){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${esc(s.name)}</td><td>${s.current}</td><td>${s.longest}</td>`;
+          tblStreaksBody.appendChild(tr);
+        }
+      }
+
+      // ——— القسم المتغيّر حسب الفترة ———
+      const rowsNow = (statsCurrent && statsCurrent.data) ? statsCurrent.data : [];
+      const total   = sumMinutes(rowsNow);
+      const active  = rowsNow.length;
+      kpiTotal.textContent = total;
+      kpiCount.textContent = active;
+      kpiAvg.textContent   = active ? Math.round(total/active) : 0;
+
+      // فلترة التصنيف + Top-N
+      const selectedSeg = elSegSel.value;
+      let rows = rowsNow.slice(0);
+      if(selectedSeg !== 'all'){
+        rows = rows.filter(x => (state.segMap.get(x.name) || 'mixed') === selectedSeg);
+      }
+      const topNVal = elTopN.value;
+      if (topNVal !== 'All') rows = rows.slice(0, Number(topNVal));
+      makeBar(chartMainCanvas, rows.map(x=>x.name), rows.map(x=>Math.round(Number(x.minutes)||0)), 'Total');
+
+      // التصنيفات
       state.segMap = new Map();
       segGrid.innerHTML = '';
+      const segRes = await fetchJSON(`${API_BASE}?action=segments&date=${d}&weeks=12`).catch(()=>null);
       if(segRes && segRes.ok){
         (segRes.segments||[]).forEach(s=>state.segMap.set(s.name,s.segment));
         const s = segRes.summary || {steady:0,sprinter:0,weekend:0,mixed:0,inactive:0};
@@ -681,40 +726,6 @@
       } else {
         segCountsDiv.textContent = 'لا توجد بيانات للتصنيف.';
       }
-
-      // === الرسم الرئيسي Top-N مع فلتر التصنيف ===
-      const selectedSeg = elSegSel.value;
-      let rows = rowsNow.slice(0);
-      if(selectedSeg !== 'all'){
-        rows = rows.filter(x => (state.segMap.get(x.name) || 'mixed') === selectedSeg);
-      }
-      const topNVal = elTopN.value;
-      if (topNVal !== 'All') rows = rows.slice(0, Number(topNVal));
-      makeBar(chartMainCanvas, rows.map(x=>x.name), rows.map(x=>Math.round(Number(x.minutes)||0)), 'Total');
-
-      // === DOW ===
-      if(dowRes && dowRes.ok){
-        const items = dowRes.items || [];
-        makeBar(chartDOWCanvas, items.map(i=>i.label), items.map(i=>Math.round(Number(i.avg)||0)), 'DOW');
-      }
-
-      // === جدول السلاسل (من الحساب المحلي) ===
-      tblStreaksBody.innerHTML = '';
-      const streakRows = [...namesSet].map(n => ({ name:n, ...(streakMap.get(n)||{current:0,longest:0}) }))
-        .filter(s => s.current>0 || s.longest>0)
-        .sort((a,b)=> b.current - a.current || b.longest - a.longest);
-
-      if(streakRows.length === 0){
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="muted" colspan="3">لا يوجد سلاسل</td>`;
-        tblStreaksBody.appendChild(tr);
-      } else {
-        for(const s of streakRows){
-          const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${esc(s.name)}</td><td>${s.current}</td><td>${s.longest}</td>`;
-          tblStreaksBody.appendChild(tr);
-        }
-      }
     }
 
     elRefresh.addEventListener('click', loadDashboard);
@@ -724,33 +735,74 @@
     elSegSel.addEventListener('change', loadDashboard);
     q('#tab-stats').addEventListener('click', () => { if (!chartMainCanvas.__chart) loadDashboard(); });
 
-    // Click a name chip → open Reader tab with that user
+    // Click name chip → open Reader tab with that user
     segGrid.addEventListener('click', (e) => {
       const chip = e.target.closest('.chip');
       if (!chip) return;
       const name = chip.dataset.name;
       q('#tab-reader').click();
-      q('#readerSel').value = name;
-      setTimeout(() => q('#readerBtn').click(), 50);
+      readerSel.value = name;
+      setTimeout(() => readerBtn.click(), 50);
     });
 
-    // ======== Reader history ========
+    // ======== Reader history + Calendar ========
     function normalizeName(raw){
       const r = (raw || '').trim();
       if (state.nameSet.has(r)) return r;
       const cand = state.names.filter(n => n.toLowerCase() === r.toLowerCase());
       return cand.length === 1 ? cand[0] : null;
     }
-    async function loadReaderHistory(){
-      const nameRaw = q('#readerSel').value;
-      const name = normalizeName(nameRaw);
-      const days = q('#daysSel').value;
-      const d = q('#readerDate').value || todayISO();
-      const res = await fetchJSON(`${API_BASE}?action=history&name=${encodeURIComponent(name)}&days=${days}&date=${d}`);
-      const pts = (res && res.points) ? res.points : [];
-      makeLine(chartHistoryCanvas, pts.map(p=>p.date), pts.map(p=>p.minutes), 'Minutes');
+    function groupByDate(points){ const m = new Map(); (points||[]).forEach(p=>{ m.set(p.date, (m.get(p.date)||0) + (Number(p.minutes)||0)); }); return m; }
+    function renderMonthCalendar(points, ym){ // ym: 'yyyy-mm'
+      const [yy, mm] = ym.split('-').map(n=>+n);
+      const first = new Date(yy, mm-1, 1);
+      const lastDay = new Date(yy, mm, 0).getDate();
+      const dowNames = ['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة']; // بدء السبت
+      const byDate = groupByDate(points);
+      readerCal.innerHTML = '';
+      // DOW header
+      for(const d of dowNames){
+        const h = document.createElement('div'); h.textContent=d; h.className='dow'; readerCal.appendChild(h);
+      }
+      // leading blanks
+      let startIdx = (first.getDay()+1)%7; // Saturday=0
+      for(let i=0;i<startIdx;i++){ const cell=document.createElement('div'); readerCal.appendChild(cell); }
+      // days
+      for(let day=1; day<=lastDay; day++){
+        const cell = document.createElement('div'); cell.className='cal-cell';
+        const key = `${yy}-${String(mm).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const has = (byDate.get(key)||0) > 0;
+        if(has){ cell.classList.add('has'); const dot=document.createElement('div'); dot.className='dot'; cell.appendChild(dot); }
+        const dspan=document.createElement('div'); dspan.textContent=day; dspan.className='d'; cell.appendChild(dspan);
+        readerCal.appendChild(cell);
+      }
     }
-    q('#readerBtn').addEventListener('click', loadReaderHistory);
+    async function loadReaderHistory(){
+      const nameRaw = readerSel.value;
+      const name = normalizeName(nameRaw);
+      if(!name){ alert('اختر قارئًا من القائمة'); return; }
+      const ym = readerMonth.value || todayISO().slice(0,7);
+
+      // اجلب 120 يومًا لتغطية شهرين على الأقل
+      const d = todayISO();
+      const cacheKey = `${name}:${d}:120`;
+      let pts;
+      if(state.historyCache.has(cacheKey)){
+        pts = state.historyCache.get(cacheKey);
+      } else {
+        const res = await fetchJSON(`${API_BASE}?action=history&name=${encodeURIComponent(name)}&days=120&date=${d}`).catch(()=>null);
+        pts = (res && res.points) ? res.points : [];
+        state.historyCache.set(cacheKey, pts);
+      }
+
+      // رسم الخط
+      makeLine(chartHistoryCanvas, pts.map(p=>p.date), pts.map(p=>p.minutes), 'Minutes');
+
+      // تقويم الشهر (أيام القراءة فقط تُعلّم بنقطة خضراء، والباقي بدون علامات)
+      const monthPts = pts.filter(p => (p.date||'').startsWith(ym));
+      renderMonthCalendar(monthPts, ym);
+    }
+    readerBtn.addEventListener('click', loadReaderHistory);
     q('#tab-reader').addEventListener('click', () => { if (!chartHistoryCanvas.__chart) loadReaderHistory(); });
 
     // ======== Discipline ========
