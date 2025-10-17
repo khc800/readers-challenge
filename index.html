@@ -316,65 +316,77 @@
   </div>
 
   <script>
+    // ====== Chart.js theme ======
+    Chart.defaults.color = '#e9e9e9';
+    Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
+    Chart.defaults.plugins.tooltip.titleColor = '#fff';
+    Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+  
     // ====== CONFIG ======
-    const API_BASE = 'https://script.google.com/macros/s/AKfycbwu4LmHJU16fyl7jo-ksKO2e-H70H00em6WmhkXMcREKxDcYOrhlJdU8B-YbuF4IvIt/exec';
+    const API_BASE = 'https://my-backend-7o8ym3t8h-khc800s-projects.vercel.app/api';
     const FALLBACK_NAMES = ['Reader 1','Reader 2','Reader 3'];
     const LOGO_SRC = 'logo.svg';
-
+  
     // ====== DOM ======
     const tabs = document.querySelectorAll('.tab');
-    const panels = { log: q('#panel-log'), stats: q('#panel-stats'), reader: q('#panel-reader'), discipline: q('#panel-discipline') };
+    const panels = {
+      log: q('#panel-log'),
+      stats: q('#panel-stats'),
+      reader: q('#panel-reader'),
+      discipline: q('#panel-discipline')
+    };
+  
     const logo = q('#logo');
-
-    const dlNames = document.getElementById('namesList');
-    const dlReaders = document.getElementById('readerList');
-
+    const dlNames = q('#namesList');
+    const dlReaders = q('#readerList');
+  
     const elName = q('#name');
     const elDate = q('#date');
     const elStatus = q('#status');
     const btnSubmit = q('#submitBtn');
     const durH = q('#durH'), durM = q('#durM'), durS = q('#durS');
-
+  
     const timerDisplay = q('#timerDisplay');
     const btnToggle = q('#btnToggle');
     const icoToggle = q('#icoToggle');
-
+  
     const elStatsDate = q('#statsDate');
     const elRangeSel = q('#rangeSel');
     const elTopN = q('#topNSel');
     const elRefresh = q('#refreshBtn');
-    const elWeekTypeSel = q('#weekTypeSel');
-
+  
     const kpiTotal = q('#kpi-total'), kpiAvg = q('#kpi-avg'), kpiCount = q('#kpi-count');
-
     const chartMainCanvas = q('#chartMain');
     const chartHistoryCanvas = q('#chartHistory');
     const chartDOWCanvas = q('#chartDOW');
-
+  
     const tblStreaksBody = q('#tblStreaks tbody');
-    const tblWarnBody = q('#tblWarn tbody');
-    const tblRemovedBody = q('#tblRemoved tbody');
-
-    const discDate = q('#discDate');
-    const discBtn = q('#discBtn');
-
     const badgesDiv = q('#badges');
-
+  
     const readerMonth = q('#readerMonth');
     const readerSel = q('#readerSel');
     const calTitle = q('#calTitle');
     const calGrid = q('#calGrid');
-
+  
+    const discDate = q('#discDate');
+    const discBtn = q('#discBtn');
+    const tblWarnBody = q('#tblWarn tbody');
+    const tblRemovedBody = q('#tblRemoved tbody');
+  
     // ====== Helpers ======
     function q(s){ return document.querySelector(s) }
-    function todayISO(){ const d=new Date(); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}` }
-    function yesterdayISO(){ const d=new Date(); d.setDate(d.getDate()-1); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}` }
+    function todayISO(){
+      const d=new Date(); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
+    function yesterdayISO(){ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10) }
     function monthNow(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` }
     function showStatus(msg, ok=true){ elStatus.textContent=msg; elStatus.style.color= ok?'#8ef5b2':'#ffb4b4' }
     function fetchJSON(url,opts){ return fetch(url,opts).then(r=>r.json()) }
-    function sumMinutes(arr){ return arr.reduce((a,b)=>a+(Number(b.minutes)||0),0) }
     function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]) ) }
-
+    function num(v){ const n=Number(v); return Number.isFinite(n)?n:0 }
+  
     function makeBar(ctx, labels, data, title){
       if (ctx.__chart) ctx.__chart.destroy();
       const c=new Chart(ctx,{type:'bar',
@@ -389,37 +401,67 @@
         options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0}}}}
       }); ctx.__chart=c; return c;
     }
-
+    function renderStreakStrip(days=30, hitDaysSet=new Set()){
+      const frag=document.createDocumentFragment();
+      for(let i=days-1;i>=0;i--){
+        const dd=new Date(Date.now()-i*86400000);
+        const key=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`;
+        const span=document.createElement('span');
+        if(hitDaysSet.has(key)) span.className='on';
+        frag.appendChild(span);
+      }
+      const wrap=document.createElement('div'); wrap.className='streak-strip'; wrap.appendChild(frag); return wrap.outerHTML;
+    }
+  
     // ====== Init ======
     const state = { names:[], nameSet:new Set() };
     logo.src = LOGO_SRC;
     const t0 = todayISO();
     elDate.value = t0;
-    elStatsDate.value = yesterdayISO(); // الافتراضي: أمس
-    q('#discDate').value = t0;
+    elStatsDate.value = yesterdayISO();
+    discDate.value = t0;
     readerMonth.value = monthNow();
-
+  
     tabs.forEach(tab=>{
       const activate=()=>{ tabs.forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false')});
         tab.classList.add('active'); tab.setAttribute('aria-selected','true');
         const k=tab.dataset.tab; Object.keys(panels).forEach(p=>panels[p].classList.toggle('hidden',p!==k));
-        if(k==='stats') loadDashboard(); if(k==='reader'){ loadReaderNames(); renderReaderMonth(); } if(k==='discipline') loadDiscipline();
+        if(k==='stats') loadDashboard();
+        if(k==='reader'){ loadReaderNames(); renderReaderMonth(); }
+        if(k==='discipline') loadDiscipline();
       };
       tab.addEventListener('click',activate);
       tab.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' ') activate() });
     });
-
+  
+    // ====== Names ======
     function setNames(list){
-      const names=(Array.isArray(list)&&list.length)?list:FALLBACK_NAMES;
-      dlNames.innerHTML=''; dlReaders.innerHTML='';
-      for(const n of names){ const o1=document.createElement('option');o1.value=n;dlNames.appendChild(o1);
-        const o2=document.createElement('option');o2.value=n;dlReaders.appendChild(o2); }
-      state.names=names.slice(); state.nameSet=new Set(names.map(x=>x.trim()));
-    }
-    function loadNames(){ fetchJSON(`${API_BASE}?action=names`).then(j=>setNames(j&&j.ok?j.names:null)).catch(()=>setNames(null)) }
+  const names = Array.isArray(list) && list.length ? list : FALLBACK_NAMES;
+  dlNames.innerHTML=''; dlReaders.innerHTML='';
+  for(const n of names){
+    const o1=document.createElement('option'); o1.value=n; dlNames.appendChild(o1);
+    const o2=document.createElement('option'); o2.value=n; dlReaders.appendChild(o2);
+  }
+  state.names = names.slice();
+  state.nameSet = new Set(names.map(x=>x.trim()));
+}
+
+async function loadNames(){
+  try{
+    const r = await fetch(`${API_BASE}/names`);
+    if(!r.ok){ console.warn('GET /names failed', r.status); setNames(null); return; }
+    const j = await r.json();
+    if (j && Array.isArray(j.names)) setNames(j.names);
+    else { console.warn('Unexpected /names shape', j); setNames(null); }
+  }catch(e){
+    console.error('Error fetching /names', e);
+    setNames(null);
+  }
+}
+
     function loadReaderNames(){ if(dlReaders.childElementCount===0) loadNames() }
     loadNames();
-
+  
     // ====== Timer ======
     const TIMER_KEY='readingTimer:v1';
     const timer={ running:false, startAt:0, elapsed:0, rafId:null };
@@ -444,197 +486,117 @@
       if(e.code==='KeyR' && (e.metaKey||e.ctrlKey)) { e.preventDefault(); resetTimer() }
     });
     loadTimer();
-
-    // ====== Submit ======
-    btnSubmit.addEventListener('click', async ()=>{
-      const raw=(elName.value||'').trim(); let name=raw;
-      if(!state.nameSet.has(name)){ const cand=state.names.filter(n=>n.toLowerCase()===raw.toLowerCase()); if(cand.length===1) name=cand[0]; }
-      if(!state.nameSet.has(name)){ showStatus('الاسم غير موجود في القائمة. اختر من الاقتراحات.', false); return }
-
-      const h=Number(durH.value)||0, m=Number(durM.value)||0, s=Number(durS.value)||0;
-      const date=elDate.value; const minutes=+(h*60+m+s/60).toFixed(2);
-      if(minutes<=0 || !isFinite(minutes) || !date || m<0 || m>59 || s<0 || s>59 || h<0){ showStatus('تحقَّق من المدخلات', false); return }
-
-      btnSubmit.disabled=true; showStatus('جاري الحفظ…');
-      try{
-        const res=await fetch(API_BASE,{ method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({name,minutes,date}) });
-        const ct=res.headers.get('content-type')||''; const j=ct.includes('application/json')?await res.json():JSON.parse(await res.text());
-        if(j.ok){ showStatus('تم الحفظ'); durH.value=''; durM.value=''; durS.value=''; resetTimer() } else { showStatus(j.error||"حدث خطأ", false) }
-      }catch(e){ showStatus(String(e.message||e), false) } finally{ btnSubmit.disabled=false }
-    });
-
-    // ====== Dashboard ======
-    let chartMain, chartHistory, chartDOW;
-
-    function mapTotalsByName(statsObj){ const map=new Map(); const rows=(statsObj&&statsObj.data)?statsObj.data:[]; rows.forEach(r=>map.set(r.name, Number(r.minutes)||0)); return map }
-    function getPrevDate(range, dateStr){ const d=new Date((dateStr||todayISO())+'T00:00:00'); if(range==='day') d.setDate(d.getDate()-1); else if(range==='week') d.setDate(d.getDate()-7); else if(range==='month') d.setMonth(d.getMonth()-1); return d.toISOString().slice(0,10) }
-
-    function renderStreakStrip(days=30, hitDaysSet=new Set()){
-      const frag=document.createDocumentFragment();
-      for(let i=days-1;i>=0;i--){ const span=document.createElement('span'); const dd=new Date(Date.now()-i*86400000);
-        const key=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`;
-        if(hitDaysSet.has(key)) span.className='on';
-        frag.appendChild(span);
+  
+    // ====== Submit (POST /api/logs) ======
+    btnSubmit.addEventListener('click', async () => {
+      const raw = (elName.value || '').trim();
+      let name = raw;
+      if (!state.nameSet.has(name)) {
+        const cand = state.names.filter(n => n.toLowerCase() === raw.toLowerCase());
+        if (cand.length === 1) name = cand[0];
       }
-      const wrap=document.createElement('div'); wrap.className='streak-strip'; wrap.appendChild(frag); return wrap.outerHTML;
+      if (!state.nameSet.has(name)) { showStatus('الاسم غير موجود في القائمة. اختر من الاقتراحات.', false); return; }
+  
+      const h = Number(durH.value) || 0, m = Number(durM.value) || 0, s = Number(durS.value) || 0;
+      const date = elDate.value;
+      const minutes = +(h * 60 + m + s / 60).toFixed(2);
+  
+      if (minutes <= 0 || !isFinite(minutes) || !date || m < 0 || m > 59 || s < 0 || s > 59 || h < 0) {
+        showStatus('تحقَّق من المدخلات', false); return;
+      }
+  
+      btnSubmit.disabled = true; showStatus('جاري الحفظ…');
+      try {
+        const payload = { timestamp: new Date().toISOString(), name, minutes, date };
+        const res = await fetch(`${API_BASE}/logs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const j = await res.json().catch(()=>({}));
+        if (res.ok) { showStatus(j.message || 'تم الحفظ'); durH.value=''; durM.value=''; durS.value=''; resetTimer(); }
+        else { showStatus(j.error || 'حدث خطأ', false); }
+      } catch (e) { console.error(e); showStatus('حدث خطأ في الاتصال', false);
+      } finally { btnSubmit.disabled = false; }
+    });
+  
+    // ====== Dashboard ======
+    async function loadAwards(refDate){
+      try{
+        const a = await fetchJSON(`${API_BASE}/awards?date=${encodeURIComponent(refDate)}`);
+        const card=(icon,title,name,sub,extra='')=>`
+          <div class="badge">
+            <div class="ic">${icon}</div>
+            <div class="txt">
+              <div class="title">${title}</div>
+              <div class="name">${esc(name||'—')}</div>
+              <small>${sub||''}</small>
+              ${extra}
+            </div>
+          </div>`;
+        // streak strip for best current streak
+        let stripHTML='';
+        if (a?.bestCurrentStreak?.name){
+          const h = await fetchJSON(`${API_BASE}/history-window?name=${encodeURIComponent(a.bestCurrentStreak.name)}&days=30&date=${encodeURIComponent(refDate)}`);
+          const daysSet = new Set((h.points||[]).filter(p=>(Number(p.minutes)||0)>0).map(p=>p.date));
+          stripHTML = renderStreakStrip(30, daysSet);
+        }
+        badgesDiv.innerHTML =
+          card('🏅','قارئ الأسبوع', a?.bestReader?.name || '—', `${Math.max(0, a?.bestReader?.minutes||0)} دقيقة`) +
+          card('📈','الأفضل تحسّنًا', a?.mostImproved?.name || '—', `+${Math.max(0, a?.mostImproved?.diff||0)} دقيقة`) +
+          card('🔥','أطول سلسلة نشطة', a?.bestCurrentStreak?.name || '—', `${Math.max(0, a?.bestCurrentStreak?.current||0)} يوم`, stripHTML);
+      }catch(_){
+        badgesDiv.innerHTML = '';
+      }
     }
-
-    // جوائز الأسبوع: الأرقام من أسبوع تقويمي + السلاسل من streaks لنفس تاريخ المرجع
-// جوائز الأسبوع: قارئ الأسبوع + الأفضل تحسناً (فرق بين أسبوعين تقويميين) + أطول سلسلة حالية
-async function renderBadgesWeekly(refDate){
-  const range='week';
-  const weekType='calendar'; // ثابت (أسبوع تقويمي)
-
-  const [aggWeek, aggPrevWeek, streaks] = await Promise.all([
-    fetchJSON(`${API_BASE}?action=stats&range=${range}&date=${refDate}&weekType=${weekType}`),
-    fetchJSON(`${API_BASE}?action=stats&range=${range}&date=${getPrevDate(range,refDate)}&weekType=${weekType}`),
-    fetchJSON(`${API_BASE}?action=streaks&date=${refDate}&threshold=1`)
-  ]).catch(()=>[null,null,null]);
-
-  const nowMap=new Map(); (aggWeek?.data||[]).forEach(r=> nowMap.set(r.name, Math.round(Number(r.minutes)||0)));
-  const prevMap=new Map(); (aggPrevWeek?.data||[]).forEach(r=> prevMap.set(r.name, Math.round(Number(r.minutes)||0)));
-
-  // 1) قارئ الأسبوع (أعلى مجموع دقائق هذا الأسبوع التقويمي)
-  let bestReader='—', bestVal=0;
-  nowMap.forEach((v,k)=>{ if(v>bestVal){bestVal=v; bestReader=k} });
-
-  // 2) الأفضل تحسّنًا = (أسبوع refDate) − (الأسبوع السابق تقويميًا)
-  let mostImproved='—', bestDiff=0;
-  nowMap.forEach((v,k)=>{
-    const prev = prevMap.get(k) || 0;
-    const diff = v - prev;           // فرق أسبوعين تقويميّين
-    if(diff>bestDiff){ bestDiff=diff; mostImproved=k }
-  });
-
-  // 3) أطول سلسلة نشطة (حسب التعريف الجديد: أكبر current)
-  let bestStreakName='—', bestCurrent=0, stripHTML='';
-  const streakRows=(streaks&&streaks.streaks)||[];
-  streakRows.forEach(s=>{
-    const cur = parseInt(s.current||0,10);
-    if(cur>bestCurrent){ bestCurrent=cur; bestStreakName=s.name }
-  });
-  if(bestStreakName!=='—'){
-    const h=await fetchJSON(`${API_BASE}?action=history&name=${encodeURIComponent(bestStreakName)}&days=30&date=${refDate}`);
-    const daysSet=new Set((h.points||[]).filter(p=> (Number(p.minutes)||0)>0 ).map(p=>p.date));
-    stripHTML=renderStreakStrip(30, daysSet);
-  }
-
-  const fmt=v=>`${Math.max(0,Math.round(v||0))} دقيقة`;
-  const card=(icon,title,name,sub,extra='')=>`
-    <div class="badge">
-      <div class="ic">${icon}</div>
-      <div class="txt">
-        <div class="title">${title}</div>
-        <div class="name">${esc(name||'—')}</div>
-        <small>${sub||''}</small>
-        ${extra}
-      </div>
-    </div>`;
-
-  // تحديث الشبكة: 3 بطاقات فقط
-  badgesDiv.innerHTML =
-    card('🏅','قارئ الأسبوع',bestReader,fmt(bestVal)) +
-    card('📈','الأفضل تحسّنًا (مقارنة بالأسبوع السابق)',mostImproved,`+${fmt(bestDiff)}`) +
-    card('🔥','أطول سلسلة نشطة (حاليًا)',bestStreakName,`${bestCurrent||0} يوم`, stripHTML);
-}
-
-
+  
+    async function loadDOW(refDate){
+      try{
+        const d = await fetchJSON(`${API_BASE}/dow?date=${encodeURIComponent(refDate)}&weeks=12`);
+        const items = d?.items||[];
+        makeBar(chartDOWCanvas, items.map(i=>i.label), items.map(i=>Math.round(Number(i.avg)||0)), 'DOW');
+      }catch(_){
+        if (chartDOWCanvas.__chart) chartDOWCanvas.__chart.destroy();
+      }
+    }
+  
+    async function loadStreaks(refDate){
+      tblStreaksBody.innerHTML='';
+      try{
+        const s = await fetchJSON(`${API_BASE}/streaks?date=${encodeURIComponent(refDate)}&threshold=1`);
+        const rows = s?.streaks||[];
+        // Preload last-30-day strips per reader in parallel
+        const strips = await Promise.all(rows.map(async r=>{
+          const h = await fetchJSON(`${API_BASE}/history-window?name=${encodeURIComponent(r.name)}&days=30&date=${encodeURIComponent(refDate)}`);
+          const daysSet = new Set((h.points||[]).filter(p=>(Number(p.minutes)||0)>0).map(p=>p.date));
+          return renderStreakStrip(30, daysSet);
+        }));
+        tblStreaksBody.innerHTML = rows.map((r,i)=>`<tr><td>${esc(r.name)}</td><td>${r.current}</td><td>${r.longest}</td><td>${strips[i]}</td></tr>`).join('');
+      }catch(_){
+        tblStreaksBody.innerHTML = `<tr><td class="muted" colspan="4">لا يوجد بيانات</td></tr>`;
+      }
+    }
+  
+    async function loadStats(refDate, range){
+      const url = range==='all' ? `${API_BASE}/stats` : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(refDate)}`;
+      let rows=[]; try{ rows = await fetchJSON(url);}catch(_){ rows=[]; }
+      const sorted = (Array.isArray(rows)?rows:[]).slice().sort((a,b)=>num(b.total_minutes)-num(a.total_minutes));
+      const totalInt = Math.round(sorted.reduce((acc,r)=>acc+num(r.total_minutes),0));
+      const activeCount = sorted.length;
+      kpiTotal.textContent = totalInt;
+      kpiCount.textContent = activeCount;
+      kpiAvg.textContent = activeCount ? Math.round(totalInt/activeCount) : 0;
+      let view = sorted; const topNVal = elTopN.value; if (topNVal !== 'All') view = view.slice(0, Number(topNVal));
+      makeBar(chartMainCanvas, view.map(r=>r.name), view.map(r=>Math.round(num(r.total_minutes))), 'Total minutes');
+    }
+  
     async function loadDashboard(){
-      const d=elStatsDate.value||yesterdayISO(); // يبقى افتراضيًا أمس
-      const range=elRangeSel.value;
-      const weekType='calendar'; // ثابت
-
-      const [agg, dowRes] = await Promise.all([
-        fetchJSON(`${API_BASE}?action=stats&range=${range}&date=${d}&weekType=${weekType}`),
-        fetchJSON(`${API_BASE}?action=dow&date=${d}&weeks=12`)
-      ]).catch(()=>[null,null]);
-
-      // جوائز الأسبوع
-      await renderBadgesWeekly(d);
-
-      // KPIs — أعداد صحيحة
-      const allRows=(agg&&agg.data)?agg.data:[]; 
-      const totalInt=Math.round(sumMinutes(allRows));
-      const activeCount=allRows.length;
-      kpiTotal.textContent= totalInt; 
-      kpiCount.textContent= activeCount; 
-      kpiAvg.textContent= activeCount ? Math.round(totalInt/activeCount) : 0;
-
-      // الرسم الرئيسي
-      let rows=allRows.slice(0);
-      const topNVal=elTopN.value; if(topNVal!=='All') rows=rows.slice(0,Number(topNVal));
-      makeBar(chartMainCanvas, rows.map(x=>x.name), rows.map(x=>Math.round(Number(x.minutes)||0)), 'Total');
-
-      // DOW
-      if(dowRes && dowRes.ok){ const items=dowRes.items||[]; makeBar(chartDOWCanvas, items.map(i=>i.label), items.map(i=>Math.round(Number(i.avg)||0)), 'DOW') }
-
-// ===== السلاسل: الأعضاء الحاليين = دقائق > 0 ضمن المدى =====
-tblStreaksBody.innerHTML='';
-
-// أسماء نشطة ضمن المدى الحالي (من /stats على نفس المدى)
-const activeWithinRangeNames = new Set(
-  (allRows || []).filter(r => (Number(r.minutes) || 0) > 0).map(r => r.name)
-);
-
-// قراءة السلاسل من الـ API
-const streaksRes = await fetchJSON(`${API_BASE}?action=streaks&date=${d}&threshold=1`);
-const rowsRaw = (streaksRes && Array.isArray(streaksRes.streaks)) ? streaksRes.streaks : [];
-
-// إزالة التكرارات: لكل اسم نحتفظ بالسجل صاحب أكبر current (ثم أكبر longest عند التعادل)
-const byName = new Map();
-for (const s of rowsRaw) {
-  const name = s.name;
-  const cur = parseInt(s.current || 0, 10);
-  const lon = parseInt(s.longest || 0, 10);
-  const prev = byName.get(name);
-  if (!prev || cur > prev.current || (cur === prev.current && lon > prev.longest)) {
-    byName.set(name, { name, current: cur, longest: lon });
-  }
-}
-
-// نبني مجموعة الصفوف: جميع "الأعضاء الحاليين" حتى لو current=0
-const merged = [];
-for (const name of activeWithinRangeNames) {
-  const rec = byName.get(name) || { name, current: 0, longest: 0 };
-  merged.push(rec);
-}
-
-// ترتيب تنازلي حسب السلسلة الحالية فقط (وعند التعادل بالأطول، ثم بالاسم)
-const filteredSorted = merged
-  .sort((a, b) => (b.current - a.current) || (b.longest - a.longest) || a.name.localeCompare(b.name, 'ar'));
-
-// في حال لا يوجد أي عضو نشط ضمن المدى
-if (filteredSorted.length === 0) {
-  const tr = document.createElement('tr');
-  tr.innerHTML = `<td class="muted" colspan="4">لا يوجد سلاسل</td>`;
-  tblStreaksBody.appendChild(tr);
-} else {
-  // نبني الصفوف بالترتيب (ونعرض الشريط لآخر 30 يوم)
-  let html = '';
-  // لتحسين التجربة، نجهّز كل الشرائط بالتوازي ثم نعرض دفعة واحدة
-  const rowsWithStrips = await Promise.all(filteredSorted.map(async s => {
-    const h = await fetchJSON(`${API_BASE}?action=history&name=${encodeURIComponent(s.name)}&days=30&date=${d}`);
-    const daysSet = new Set((h.points || []).filter(p => (Number(p.minutes) || 0) > 0).map(p => p.date));
-    const strip = renderStreakStrip(30, daysSet);
-    return `<tr><td>${esc(s.name)}</td><td>${s.current}</td><td>${s.longest}</td><td>${strip}</td></tr>`;
-  }));
-  html = rowsWithStrips.join('');
-  tblStreaksBody.innerHTML = html;
-}
-
-
-
-
-      
+      const d = elStatsDate.value || yesterdayISO();
+      const range = elRangeSel.value; // day|week|month|all
+      await Promise.all([ loadAwards(d), loadDOW(d), loadStreaks(d), loadStats(d, range) ]);
     }
-
     elRefresh.addEventListener('click', loadDashboard);
     elTopN.addEventListener('change', loadDashboard);
     elRangeSel.addEventListener('change', loadDashboard);
-    // weekTypeSel ثابت، لا حاجة لمعالج تغيير
     q('#tab-stats').addEventListener('click', ()=>{ if(!chartMainCanvas.__chart) loadDashboard() });
-
-    // ====== Reader ======
+  
+    // ====== Reader (GET /api/history) ======
     function normalizeName(raw){
       const r=(raw||'').trim();
       if(state.nameSet.has(r)) return r;
@@ -657,48 +619,75 @@ if (filteredSorted.length === 0) {
       const blanks=(first.getDay()+1)%7;
       return { header, blanks };
     }
-    function renderCalendarGrid(monthVal, points){
-      const {first,last,days}=monthFirstLast(monthVal);
+    function renderCalendarGrid(monthVal, dayMinutesMap){
+      const {first,days}=monthFirstLast(monthVal);
       calTitle.textContent = arMonthName(first);
-      const map=new Map(points.filter(p=>(Number(p.minutes)||0)>0).map(p=>[p.date, Math.round(Number(p.minutes)||0)]));
       const {header,blanks}=buildCalendarSkeleton(first);
-      const cells=[];
       calGrid.innerHTML=''; calGrid.insertAdjacentHTML('beforeend', header);
       for(let i=0;i<blanks;i++) calGrid.insertAdjacentHTML('beforeend','<div class="cell"></div>');
+      const cells=[];
       for(let d=1; d<=days; d++){
         const key=`${first.getFullYear()}-${String(first.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const has=map.has(key);
-        const minutes=map.get(key)||0;
+        const minutes = Math.round(dayMinutesMap.get(key)||0);
+        const has = minutes>0;
         const cell = `<div class="cell ${has?'hit':''}"><div class="d">${d}</div>${has?'<span class="dot"></span>':''}${has?`<div class="muted" style="position:absolute;bottom:8px;inset-inline-end:8px;font-size:11px;">${minutes}</div>`:''}</div>`;
         cells.push(cell);
       }
       calGrid.insertAdjacentHTML('beforeend', cells.join(''));
     }
-
+  
     async function renderReaderMonth(){
       const name=normalizeName(readerSel.value);
-      if(!name){ calTitle.textContent='اختر قارئًا'; calGrid.innerHTML=''; return; }
+      if(!name){ calTitle.textContent='اختر قارئًا'; calGrid.innerHTML=''; if(chartHistoryCanvas.__chart) chartHistoryCanvas.__chart.destroy(); return; }
+  
       const monthVal = readerMonth.value || monthNow();
-      const {last,days} = monthFirstLast(monthVal);
-      const res = await fetchJSON(`${API_BASE}?action=history&name=${encodeURIComponent(name)}&days=${days}&date=${last.toISOString().slice(0,10)}`);
-      const pts=(res&&res.points)?res.points:[];
-      renderCalendarGrid(monthVal, pts);
-      makeLine(chartHistoryCanvas, pts.map(p=>p.date), pts.map(p=>Math.round(Number(p.minutes)||0)), 'Minutes');
+      const [yy,mm] = monthVal.split('-');
+  
+      let rows=[];
+      try{
+        rows = await fetchJSON(`${API_BASE}/history?name=${encodeURIComponent(name)}&month=${encodeURIComponent(mm)}&year=${encodeURIComponent(yy)}`);
+      }catch(_){ rows=[]; }
+  
+      const dayMap = new Map();
+      for(const r of rows||[]){
+        const d = (r.date || '').slice(0,10);
+        const m = Number(r.minutes)||0;
+        dayMap.set(d, (dayMap.get(d)||0)+m);
+      }
+  
+      renderCalendarGrid(monthVal, dayMap);
+  
+      const {first,days} = monthFirstLast(monthVal);
+      const labels=[], data=[];
+      for(let i=1;i<=days;i++){
+        const key=`${first.getFullYear()}-${String(first.getMonth()+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+        labels.push(key);
+        data.push(Math.round(dayMap.get(key)||0));
+      }
+      makeLine(chartHistoryCanvas, labels, data, 'Minutes');
     }
-
+  
     q('#readerBtn').addEventListener('click', renderReaderMonth);
     readerMonth.addEventListener('change', renderReaderMonth);
     q('#tab-reader').addEventListener('click', ()=>{ if(!chartHistoryCanvas.__chart) renderReaderMonth(); });
-
-    // ====== Discipline ======
+  
+    // ====== Discipline (GET /api/discipline) ======
     async function loadDiscipline(){
-      const d=todayISO(); const res=await fetchJSON(`${API_BASE}?action=discipline&date=${d}`);
-      tblWarnBody.innerHTML=''; tblRemovedBody.innerHTML='';
-      (res.warning||[]).forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.name}</td><td>${Math.round(Number(r.minutes)||0)}</td>`; tblWarnBody.appendChild(tr) });
-      (res.removed||[]).forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.name}</td><td>${Math.round(Number(r.minutes)||0)}</td>`; tblRemovedBody.appendChild(tr) });
+      const d = discDate.value || todayISO();
+      try{
+        const res = await fetchJSON(`${API_BASE}/discipline?date=${encodeURIComponent(d)}`);
+        const warn = res?.warning || [];
+        const removed = res?.removed || [];
+        tblWarnBody.innerHTML = warn.length ? warn.map(r=>`<tr><td>${esc(r.name)}</td><td>${Math.round(Number(r.minutes)||0)}</td></tr>`).join('') : `<tr><td class="muted" colspan="2">لا يوجد</td></tr>`;
+        tblRemovedBody.innerHTML = removed.length ? removed.map(r=>`<tr><td>${esc(r.name)}</td><td>${Math.round(Number(r.minutes)||0)}</td></tr>`).join('') : `<tr><td class="muted" colspan="2">لا يوجد</td></tr>`;
+      }catch(_){
+        tblWarnBody.innerHTML = `<tr><td class="muted" colspan="2">خطأ في الجلب</td></tr>`;
+        tblRemovedBody.innerHTML = `<tr><td class="muted" colspan="2">خطأ في الجلب</td></tr>`;
+      }
     }
     discBtn.addEventListener('click', loadDiscipline);
   </script>
+  
+  
 </body>
 </html>
-
