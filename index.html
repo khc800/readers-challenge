@@ -19,7 +19,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    :root{
+:root{
   --bg:#233240;
   --card:#0D0D0D;
   --ring:#2f455a;
@@ -34,10 +34,15 @@
 }
 
 *{ box-sizing:border-box }
+html,body{ max-width:100%; overflow-x:hidden; }
 body{
-  margin:0; font-family:'Almarai',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
-  background:var(--bg); color:var(--ink);
+  margin:0;
+  font-family:'Almarai',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
 }
+.wrap{ max-width:1100px; margin:16px auto 40px; padding:0 16px; }
+@media(max-width:640px){ .wrap{ padding-inline:12px; } }
 
 /* Controls */
 select,input,button{
@@ -72,8 +77,6 @@ header{ max-width:1100px; margin:24px auto 0; padding:0 16px; display:flex; alig
 header .brand{ display:flex; align-items:center; gap:12px; font-weight:800 }
 header img.logo{ height:36px; width:auto; display:block }
 
-.wrap{ max-width:1100px; margin:16px auto 40px; padding:0 16px }
-
 .tabs{
   position:sticky; top:0; z-index:5; background:var(--bg);
   display:flex; gap:8px; margin-bottom:16px; padding-block:8px; overflow:auto;
@@ -94,11 +97,12 @@ header img.logo{ height:36px; width:auto; display:block }
   box-shadow:0 6px 18px rgba(0,0,0,.35);
 }
 
-.row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px }
-.row-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px }
-.row-2{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; align-items:start }
-@media (max-width:980px){ .row{ grid-template-columns:repeat(2,1fr) } .row-2{ grid-template-columns:1fr } }
-@media (max-width:640px){ .row,.row-3{ grid-template-columns:1fr } header{ flex-direction:column; align-items:flex-start; gap:8px } }
+/* responsive grids */
+.row{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px }
+.row-3{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px }
+.row-2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px }
+@media (max-width:980px){ .row{ grid-template-columns:repeat(2,minmax(0,1fr)) } .row-2{ grid-template-columns:1fr } }
+@media (max-width:640px){ .row,.row-3{ grid-template-columns:1fr } }
 
 label{ display:block; font-size:14px; color:var(--ink-dim); margin-bottom:6px }
 .muted{ color:var(--ink-muted); font-size:13px }
@@ -132,21 +136,23 @@ footer{ text-align:center; margin-top:20px; color:var(--ink-muted); font-size:12
   border:1px solid var(--ring); background:var(--accent); color:#0D0D0D; font-weight:800; cursor:pointer;
 }
 .timer .toggle:hover{ background:var(--accent-2) }
-timer .toggle:active{ background:var(--accent-3) }
+.timer .toggle:active{ background:var(--accent-3) }
 .timer .toggle svg{ width:26px; height:26px; fill:#0D0D0D }
 
-/* Badges */
+/* ======= BADGES ======= */
 .badges{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:6px 0 18px }
 @media (max-width:980px){ .badges{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
 @media (max-width:640px){ .badges{ grid-template-columns:1fr } }
 .badge{
+  display:flex; align-items:center; gap:12px;
   padding:14px 16px; border-radius:14px;
   background:#192734; border:1px solid var(--ring);
   box-shadow:0 8px 20px rgba(0,0,0,.25);
-  display:flex; align-items:center; gap:12px;
+  overflow:hidden;
 }
 .badge .ic{
-  width:48px; height:48px; flex:0 0 48px; border-radius:12px; display:grid; place-items:center;
+  width:48px; height:48px; flex:0 0 48px; border-radius:12px;
+  display:grid; place-items:center;
   background:linear-gradient(180deg,var(--accent),var(--accent-3));
   color:#0D0D0D; font-size:22px; font-weight:800;
   border:1px solid rgba(242,159,5,.55);
@@ -155,7 +161,6 @@ timer .toggle:active{ background:var(--accent-3) }
 .badge .txt{ flex:1 1 auto; min-width:0 }
 .badge .txt .title{ font-weight:800 }
 .badge .txt .name{ font-weight:800; color:var(--accent) }
-/* wrapper to keep the strip INSIDE the badge */
 .badge .strip-wrap{ margin-top:8px; width:100%; overflow:hidden }
 
 /* Calendar */
@@ -169,18 +174,23 @@ timer .toggle:active{ background:var(--accent-3) }
 .cal .dot{ position:absolute; bottom:8px; inset-inline-start:50%; transform:translateX(-50%); width:8px; height:8px; border-radius:99px; background:#22c55e }
 
 /* Tables */
-table{ width:100%; border-collapse:separate; border-spacing:0 8px }
-th,td{ text-align:start; padding:10px 12px; background:#192734; border:1px solid var(--ring) }
+table{ width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0 8px }
+th,td{ text-align:start; padding:10px 12px; background:#192734; border:1px solid var(--ring); overflow:hidden; white-space:nowrap; text-overflow:ellipsis }
 th:first-child,td:first-child{ border-start-start-radius:10px; border-end-start-radius:10px }
 th:last-child,td:last-child{ border-start-end-radius:10px; border-end-end-radius:10px }
+#tblStreaks td{ overflow:visible }
 
-/* A11y */
-:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:10px }
+/* Charts: prevent overflow */
+#chartMain,#chartDOW,#chartHistory{
+  display:block;
+  width:100% !important;
+  max-width:100% !important;
+  height:100% !important;
+}
+#chartMain{ height:clamp(260px,56vh,680px) !important }
+#chartDOW,#chartHistory{ height:clamp(200px,38vh,520px) !important }
 
-/* RTL */
-body.rtl{ direction:rtl } body.rtl .row,body.rtl .row-3{ direction:rtl }
-
-/* Streak strip — stable on phones and inside cards */
+/* Streak strip */
 .streak-strip{
   display:grid;
   grid-auto-flow:column;
@@ -200,8 +210,12 @@ body.rtl{ direction:rtl } body.rtl .row,body.rtl .row-3{ direction:rtl }
   .streak-strip{ grid-auto-columns:4px; gap:1.5px; height:6px }
 }
 
-/* do not clip strip in table rows */
-#tblStreaks td{ overflow:visible }
+/* A11y + RTL */
+:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:10px }
+body.rtl{ direction:rtl } body.rtl .row,body.rtl .row-3{ direction:rtl }
+
+img,canvas{ max-width:100%; height:auto }
+
 
 
   </style>
