@@ -181,14 +181,15 @@ th:last-child,td:last-child{ border-start-end-radius:10px; border-end-end-radius
 #tblStreaks td{ overflow:visible }
 
 /* Charts: prevent overflow */
-#chartMain,#chartDOW,#chartHistory{
+/* Charts */
+/* #chartMain{ display:block; width:100% !important; height:clamp(260px,56vh,680px) !important }
+#chartHistory{ display:block; width:100% !important; height:clamp(200px,38vh,520px) !important } */
+
+/* DOW chart: fixed, not stretch */
+#chartDOW{
   display:block;
-  width:100% !important;
-  max-width:100% !important;
-  height:100% !important;
 }
-#chartMain{ height:clamp(260px,56vh,680px) !important }
-#chartDOW,#chartHistory{ height:clamp(200px,38vh,520px) !important }
+
 
 /* Streak strip */
 .streak-strip{
@@ -233,6 +234,14 @@ img,canvas{ max-width:100%; height:auto }
     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
     Chart.defaults.plugins.tooltip.titleColor = '#fff';
     Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+
+
+    Chart.defaults.font.family = "'Almarai', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif";
+Chart.defaults.font.size = 12;          // fixed px
+Chart.defaults.font.weight = '400';
+Chart.defaults.responsive = true;
+Chart.defaults.maintainAspectRatio = true;
+
   </script>
 </head>
 <body class="rtl">
@@ -487,9 +496,18 @@ Chart.defaults.plugins.tooltip.titleColor = '#fff';
 Chart.defaults.plugins.tooltip.bodyColor = '#fff';
 
 // ====== FONT SETTINGS ======
-Chart.defaults.font.family = "'Almarai', 'Cairo', system-ui, sans-serif"; // pick your font
+// Chart.defaults.font.family = "'Almarai', 'Cairo', system-ui, sans-serif"; // pick your font
 Chart.defaults.font.size = 13;   // optional
 Chart.defaults.font.weight = '300'; // optional
+
+
+Chart.defaults.font.family = "'Almarai'";
+// Chart.defaults.font.size = 12;
+// Chart.defaults.font.weight = '400';
+Chart.defaults.responsive = true;
+Chart.defaults.maintainAspectRatio = true;
+Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+
 
   
     // ====== Helpers ======
@@ -505,13 +523,31 @@ Chart.defaults.font.weight = '300'; // optional
     function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]) ) }
     function num(v){ const n=Number(v); return Number.isFinite(n)?n:0 }
   
-    function makeBar(ctx, labels, data, title){
-      if (ctx.__chart) ctx.__chart.destroy();
-      const c=new Chart(ctx,{type:'bar',
-        data:{labels,datasets:[{label:title,data,backgroundColor:'rgba(255,177,0,0.85)',hoverBackgroundColor:'rgba(255,197,77,0.95)'}]},
-        options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0}}}}
-      }); ctx.__chart=c; return c;
-    }
+    function makeBar(ctx, labels, data, title, opts = {}){
+  if (ctx.__chart) ctx.__chart.destroy();
+  const c = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: title, data,
+      backgroundColor: 'rgba(255,177,0,0.85)',
+      hoverBackgroundColor: 'rgba(255,197,77,0.95)' }]},
+    options: Object.assign({
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2.2,                  // controls canvas size, not font
+      animation: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display:false }, ticks: { font: { size: 12, family: Chart.defaults.font.family } } },
+        y: { beginAtZero:true, ticks: { precision:0, font: { size: 12, family: Chart.defaults.font.family } } }
+      },
+      devicePixelRatio: window.devicePixelRatio || 1
+    }, opts)
+  });
+  ctx.__chart = c; return c;
+}
+
+
+
 
     function makeBarH(canvas, labels, data, title){
   if (canvas.__chart) { canvas.__chart.destroy(); canvas.__chart = null; }
@@ -706,7 +742,11 @@ const card=(icon,title,name,sub,extra='')=>`
       try{
         const d = await fetchJSON(`${API_BASE}/dow?date=${encodeURIComponent(refDate)}&weeks=12`);
         const items = d?.items||[];
-        makeBar(chartDOWCanvas, items.map(i=>i.label), items.map(i=>Math.round(Number(i.avg)||0)), 'DOW');
+        // makeBar(chartDOWCanvas, items.map(i=>i.label), items.map(i=>Math.round(Number(i.avg)||0)), 'DOW');
+        makeBar(chartDOWCanvas, items.map(i=>i.label),
+        items.map(i=>Math.round(Number(i.avg)||0)),
+        'DOW', { aspectRatio: 2.6 });
+
       }catch(_){
         if (chartDOWCanvas.__chart) chartDOWCanvas.__chart.destroy();
       }
