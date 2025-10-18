@@ -205,6 +205,9 @@
   
 
   <script>
+
+
+
     Chart.defaults.color = '#e9e9e9';
     Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
@@ -313,6 +316,13 @@
         <div class="kpi"><div class="v" id="kpi-avg">–</div><div class="muted" id="kpiAvgLabel">متوسط لكل قارئ</div></div>
         <div class="kpi"><div class="v" id="kpi-count">–</div><div class="muted" id="kpiCountLabel">عدد القرّاء النشطين</div></div>
       </div>
+
+      <div style="text-align:end; margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+        <button id="btnDownloadCSV">تحميل CSV</button>
+        <button id="btnDownloadPNG">تحميل صورة (PNG)</button>
+      </div>
+      
+      
 
       <div class="spacer"></div>
 
@@ -444,6 +454,23 @@
     const discBtn = q('#discBtn');
     const tblWarnBody = q('#tblWarn tbody');
     const tblRemovedBody = q('#tblRemoved tbody');
+
+    // run once after you grab chartMainCanvas
+// chartMainCanvas.removeAttribute('height');      // kill fixed attr height
+// chartMainCanvas.style.height = '100%';          // let it fill its holder
+
+// ====== Chart.js theme ======
+Chart.defaults.color = '#e9e9e9';
+Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
+Chart.defaults.plugins.tooltip.titleColor = '#fff';
+Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+
+// ====== FONT SETTINGS ======
+Chart.defaults.font.family = "'Almarai', 'Cairo', system-ui, sans-serif"; // pick your font
+Chart.defaults.font.size = 13;   // optional
+Chart.defaults.font.weight = '300'; // optional
+
   
     // ====== Helpers ======
     function q(s){ return document.querySelector(s) }
@@ -465,6 +492,42 @@
         options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0}}}}
       }); ctx.__chart=c; return c;
     }
+
+    function makeBarH(canvas, labels, data, title){
+  if (canvas.__chart) { canvas.__chart.destroy(); canvas.__chart = null; }
+
+  // set HEIGHT ON THE PARENT, not the canvas
+  const rowH = 26, pad = 80;
+  const h = Math.min(800, Math.max(240, labels.length * rowH + pad));
+  const holder = canvas.parentElement;
+  if (holder) holder.style.height = h + 'px';
+
+  const c = new Chart(canvas,{
+    type:'bar',
+    data:{ labels, datasets:[{
+      label:title,
+      data,
+      backgroundColor:'rgba(242,159,5,0.9)',
+      hoverBackgroundColor:'rgba(242,116,5,0.95)'
+    }]},
+    options:{
+      indexAxis:'y',
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ beginAtZero:true, ticks:{ precision:0 }, grid:{ display:true } },
+        y:{ ticks:{ autoSkip:false, maxRotation:0, minRotation:0 }, grid:{ display:false } }
+      }
+    }
+  });
+  canvas.__chart = c;
+  return c;
+}
+
+
+
+
     function makeLine(ctx, labels, data, title){
       if (ctx.__chart) ctx.__chart.destroy();
       const c=new Chart(ctx,{type:'line',
@@ -685,18 +748,35 @@ async function loadDashboard(){
 }
 
   
-    async function loadStats(refDate, range){
-      const url = range==='all' ? `${API_BASE}/stats` : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(refDate)}`;
-      let rows=[]; try{ rows = await fetchJSON(url);}catch(_){ rows=[]; }
-      const sorted = (Array.isArray(rows)?rows:[]).slice().sort((a,b)=>num(b.total_minutes)-num(a.total_minutes));
-      const totalInt = Math.round(sorted.reduce((acc,r)=>acc+num(r.total_minutes),0));
-      const activeCount = sorted.length;
-      kpiTotal.textContent = totalInt;
-      kpiCount.textContent = activeCount;
-      kpiAvg.textContent = activeCount ? Math.round(totalInt/activeCount) : 0;
-      let view = sorted; const topNVal = elTopN.value; if (topNVal !== 'All') view = view.slice(0, Number(topNVal));
-      makeBar(chartMainCanvas, view.map(r=>r.name), view.map(r=>Math.round(num(r.total_minutes))), 'Total minutes');
-    }
+async function loadStats(refDate, range){
+  const url = range==='all'
+    ? `${API_BASE}/stats`
+    : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(refDate)}`;
+
+  let rows=[]; try{ rows = await fetchJSON(url);}catch(_){ rows=[]; }
+
+  const sorted = (Array.isArray(rows)?rows:[])
+    .slice()
+    .sort((a,b)=>num(b.total_minutes)-num(a.total_minutes));
+
+  // KPIs
+  const total = Math.round(sorted.reduce((s,r)=>s+num(r.total_minutes),0));
+  const n = sorted.length;
+  kpiTotal.textContent = total;
+  kpiCount.textContent = n;
+  kpiAvg.textContent = n ? Math.round(total/n) : 0;
+
+  // Top-N
+  const topNVal = elTopN.value;
+  const view = topNVal !== 'All' ? sorted.slice(0, Number(topNVal)) : sorted;
+
+  const labels = view.map(r=>r.name);
+  const data   = view.map(r=>Math.round(num(r.total_minutes)));
+
+  makeBarH(chartMainCanvas, labels, data, 'إجمالي الدقائق');
+}
+
+
   
 
     
@@ -795,6 +875,78 @@ async function loadDashboard(){
       }
     }
     discBtn.addEventListener('click', loadDiscipline);
+
+// ===== PNG Export with background =====
+function downloadCanvasPNG(canvas, filename, bgColor='#233240'){
+  if(!canvas) { alert('لا يوجد رسم بياني'); return; }
+  const chart = canvas.__chart;
+  if(chart?.update) chart.update(0);
+
+  const w = canvas.width, h = canvas.height;
+  const out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  const ctx = out.getContext('2d');
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(canvas, 0, 0);
+
+  out.toBlob((blob)=>{
+    if(!blob){ alert('فشل إنشاء الصورة'); return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  }, 'image/png');
+}
+
+function downloadChartPNG(){
+  const d = elStatsDate.value || yesterdayISO();
+  const range = elRangeSel.value;
+  const bg = getComputedStyle(document.body).backgroundColor || '#233240';
+  downloadCanvasPNG(chartMainCanvas, `stats_${range}_${d}.png`, bg);
+}
+
+// ===== CSV Export =====
+function toCSV(rows){
+  if(!rows?.length) return '';
+  const header = Object.keys(rows[0]).join(',');
+  const lines = rows.map(r => Object.values(r).map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+  return [header, ...lines].join('\n');
+}
+
+async function downloadStatsCSV(){
+  const d = elStatsDate.value || yesterdayISO();
+  const range = elRangeSel.value;
+  const url = range==='all'
+    ? `${API_BASE}/stats`
+    : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(d)}`;
+
+  try{
+    const rows = await fetchJSON(url);
+    if(!rows?.length){ alert('لا توجد بيانات حالياً'); return; }
+    const blob = new Blob([toCSV(rows)], { type:'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `stats_${range}_${d}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  }catch(e){
+    console.error(e); alert('حدث خطأ أثناء التحميل');
+  }
+}
+
+// ===== Correct bindings (match your HTML) =====
+q('#btnDownloadPNG')?.addEventListener('click', downloadChartPNG);
+q('#btnDownloadCSV')?.addEventListener('click', downloadStatsCSV);
+
+
+
+
   </script>
   
   
