@@ -324,7 +324,7 @@
     Chart.defaults.plugins.tooltip.bodyColor = '#fff';
   
     // ====== CONFIG ======
-    const API_BASE = 'https://my-backend-7o8ym3t8h-khc800s-projects.vercel.app/api';
+    const API_BASE = 'https://my-backend-6yx9hx1jd-khc800s-projects.vercel.app/api';
     const FALLBACK_NAMES = ['Reader 1','Reader 2','Reader 3'];
     const LOGO_SRC = 'logo.svg';
   
@@ -556,22 +556,63 @@ async function loadNames(){
       }
     }
   
-    async function loadStreaks(refDate){
-      tblStreaksBody.innerHTML='';
-      try{
-        const s = await fetchJSON(`${API_BASE}/streaks?date=${encodeURIComponent(refDate)}&threshold=1`);
-        const rows = s?.streaks||[];
-        // Preload last-30-day strips per reader in parallel
-        const strips = await Promise.all(rows.map(async r=>{
-          const h = await fetchJSON(`${API_BASE}/history-window?name=${encodeURIComponent(r.name)}&days=30&date=${encodeURIComponent(refDate)}`);
-          const daysSet = new Set((h.points||[]).filter(p=>(Number(p.minutes)||0)>0).map(p=>p.date));
-          return renderStreakStrip(30, daysSet);
-        }));
-        tblStreaksBody.innerHTML = rows.map((r,i)=>`<tr><td>${esc(r.name)}</td><td>${r.current}</td><td>${r.longest}</td><td>${strips[i]}</td></tr>`).join('');
-      }catch(_){
-        tblStreaksBody.innerHTML = `<tr><td class="muted" colspan="4">لا يوجد بيانات</td></tr>`;
-      }
+// helper: get active names for the selected range/date (minutes > 0)
+async function fetchActiveNames(refDate, range){
+  const url = range==='all'
+    ? `${API_BASE}/stats`
+    : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(refDate)}`;
+  try{
+    const rows = await fetchJSON(url);
+    return new Set((rows||[]).filter(r => Number(r.total_minutes) > 0).map(r => r.name));
+  }catch(_){
+    return new Set();
+  }
+}
+
+// replace old loadStreaks with this one
+async function loadStreaks(refDate, range){
+  tblStreaksBody.innerHTML='';
+  try{
+    // 1) who is active in the selected range?
+    const active = await fetchActiveNames(refDate, range);
+
+    // 2) fetch all streaks (anchored at refDate), then keep only active users
+    const s = await fetchJSON(`${API_BASE}/streaks?date=${encodeURIComponent(refDate)}&threshold=1`);
+    const allRows = s?.streaks || [];
+    const rows = allRows.filter(r => active.has(r.name));
+
+    if (rows.length === 0){
+      tblStreaksBody.innerHTML = `<tr><td class="muted" colspan="4">لا يوجد مستخدمون نشطون ضمن المدى الحالي</td></tr>`;
+      return;
     }
+
+    // 3) build strips only for the filtered rows
+    const strips = await Promise.all(rows.map(async r=>{
+      const h = await fetchJSON(`${API_BASE}/history-window?name=${encodeURIComponent(r.name)}&days=30&date=${encodeURIComponent(refDate)}`);
+      const daysSet = new Set((h.points||[]).filter(p => (Number(p.minutes)||0) > 0).map(p => p.date));
+      return renderStreakStrip(30, daysSet);
+    }));
+
+    tblStreaksBody.innerHTML = rows.map((r,i)=>
+      `<tr><td>${esc(r.name)}</td><td>${r.current}</td><td>${r.longest}</td><td>${strips[i]}</td></tr>`
+    ).join('');
+  }catch(_){
+    tblStreaksBody.innerHTML = `<tr><td class="muted" colspan="4">خطأ في الجلب</td></tr>`;
+  }
+}
+
+// update dashboard loader to pass the range
+async function loadDashboard(){
+  const d = elStatsDate.value || yesterdayISO();
+  const range = elRangeSel.value; // day|week|month|all
+  await Promise.all([
+    loadAwards(d),
+    loadDOW(d),
+    loadStreaks(d, range),   // <-- pass range here
+    loadStats(d, range)
+  ]);
+}
+
   
     async function loadStats(refDate, range){
       const url = range==='all' ? `${API_BASE}/stats` : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(refDate)}`;
@@ -586,11 +627,8 @@ async function loadNames(){
       makeBar(chartMainCanvas, view.map(r=>r.name), view.map(r=>Math.round(num(r.total_minutes))), 'Total minutes');
     }
   
-    async function loadDashboard(){
-      const d = elStatsDate.value || yesterdayISO();
-      const range = elRangeSel.value; // day|week|month|all
-      await Promise.all([ loadAwards(d), loadDOW(d), loadStreaks(d), loadStats(d, range) ]);
-    }
+
+    
     elRefresh.addEventListener('click', loadDashboard);
     elTopN.addEventListener('change', loadDashboard);
     elRangeSel.addEventListener('change', loadDashboard);
