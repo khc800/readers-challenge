@@ -139,6 +139,57 @@ footer{ text-align:center; margin-top:20px; color:var(--ink-muted); font-size:12
 .timer .toggle:active{ background:var(--accent-3) }
 .timer .toggle svg{ width:26px; height:26px; fill:#0D0D0D }
 
+
+/* timer as a full-width row centered */
+.timer-row{
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* compact, centered timer display that scales on phones */
+#timerDisplay{
+  width: clamp(220px, 60vw, 320px);
+  text-align: center;
+  direction: ltr;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: 10px 12px;
+  border: 1px solid var(--ring);
+  background:#192734;
+  border-radius: 12px;
+}
+
+.timer-row .toggle{
+  --size:56px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--ring);
+  background: var(--accent);
+  color:#0D0D0D;
+  font-weight: 800;
+  cursor: pointer;
+}
+.timer-row .toggle:hover{ background:var(--accent-2) }
+.timer-row .toggle:active{ background:var(--accent-3) }
+.timer-row .toggle svg{ width:26px; height:26px; fill:#0D0D0D }
+
+@media (max-width:640px){
+  .timer-row{ margin-top: 14px }
+  #timerDisplay{ width: clamp(200px, 90vw, 320px); }
+}
+
+
+
+
 /* ======= BADGES ======= */
 .badges{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:6px 0 18px }
 @media (max-width:980px){ .badges{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
@@ -229,18 +280,31 @@ img,canvas{ max-width:100%; height:auto }
 
 
 
-    Chart.defaults.color = '#e9e9e9';
-    Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
-    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
-    Chart.defaults.plugins.tooltip.titleColor = '#fff';
-    Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+//     Chart.defaults.color = '#e9e9e9';
+//     Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
+//     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
+//     Chart.defaults.plugins.tooltip.titleColor = '#fff';
+//     Chart.defaults.plugins.tooltip.bodyColor = '#fff';
 
 
-    Chart.defaults.font.family = "'Almarai', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif";
-Chart.defaults.font.size = 12;          // fixed px
-Chart.defaults.font.weight = '400';
+//     Chart.defaults.font.family = "'Almarai', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif";
+// Chart.defaults.font.size = 12;          // fixed px
+// Chart.defaults.font.weight = '400';
+// Chart.defaults.responsive = true;
+// Chart.defaults.maintainAspectRatio = true;
+
+
+// ====== Chart.js theme (single block only) ======
+Chart.defaults.color = '#e9e9e9';
+Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
+Chart.defaults.plugins.tooltip.titleColor = '#fff';
+Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+Chart.defaults.font.family = "'Almarai', system-ui, sans-serif";
+Chart.defaults.font.size = 13;
 Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = true;
+Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
 
   </script>
 </head>
@@ -261,6 +325,7 @@ Chart.defaults.maintainAspectRatio = true;
     <!-- Log Form -->
     <div id="panel-log" class="card" role="tabpanel" aria-labelledby="tab-log">
       <h2 id="logTitle" style="margin-top:0">إضافة جلسة قراءة</h2>
+    
       <div class="row">
         <div>
           <label for="name" id="lblReader">القارئ</label>
@@ -268,7 +333,14 @@ Chart.defaults.maintainAspectRatio = true;
           <datalist id="namesList"></datalist>
           <div class="muted" id="nameHint">لم تجد اسمك؟ تواصل مع المجلس الأعلى</div>
         </div>
-
+    
+        <div>
+          <label for="book">الكتاب</label>
+          <input id="book" list="bookList" placeholder="اسم الكتاب" />
+          <datalist id="bookList"></datalist>
+          <label><input type="checkbox" id="bookFinished"> تم إنهاء الكتاب</label>
+        </div>
+    
         <div>
           <label id="lblDuration">المدة (ث:د:س)</label>
           <div class="timegrid">
@@ -276,26 +348,30 @@ Chart.defaults.maintainAspectRatio = true;
             <input id="durM" type="number" min="0" max="59" step="1" placeholder="د" inputmode="numeric" />
             <input id="durH" type="number" min="0" step="1" placeholder="س" inputmode="numeric" />
           </div>
-          <div class="timer">
-            <div id="timerDisplay">00:00:00</div>
-            <button id="btnToggle" class="toggle" type="button" aria-label="تشغيل/إيقاف مؤقت" title="تشغيل/إيقاف">
-              <svg id="icoToggle" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-            <div class="hint">لمس مطوّل للتصفير</div>
-          </div>
           <div class="muted" id="durationHint">أدخل الساعات والدقائق والثواني</div>
         </div>
-
+    
         <div>
           <label for="date" id="lblDate">التاريخ</label>
           <div class="date-wrap"><input id="date" type="date" /><span class="cal-ic" aria-hidden="true"></span></div>
         </div>
+    
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="submitBtn">حفظ</button>
           <span class="muted" id="status" role="status" aria-live="polite"></span>
         </div>
+    
+        <!-- TIMER ROW -->
+        <div class="timer-row">
+          <div id="timerDisplay">00:00:00</div>
+          <button id="btnToggle" class="toggle" type="button" aria-label="تشغيل/إيقاف مؤقت" title="تشغيل/إيقاف">
+            <svg id="icoToggle" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <div class="hint">لمس مطوّل للتصفير</div>
+        </div>
       </div>
     </div>
+    
 
     <!-- Stats Dashboard -->
     <div id="panel-stats" class="card hidden" role="tabpanel" aria-labelledby="tab-stats">
@@ -421,8 +497,28 @@ Chart.defaults.maintainAspectRatio = true;
       </div>
 
       <div class="spacer"></div>
-      <div class="pill" id="pillHistory">الدقائق اليومية (اختياري)</div>
+      <div class="pill" id="pillHistory">الدقائق اليومية</div>
       <canvas id="chartHistory" height="160"></canvas>
+
+
+      <div class="spacer"></div>
+
+
+      <table id="tblReaderBooks">
+        <thead>
+          <tr>
+            <th>الكتاب</th>
+            <th>الدقائق</th>
+            <th>بداية القراءة</th>
+            <th>نهاية القراءة</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+
+
+
     </div>
 
     <!-- Discipline -->
@@ -446,14 +542,14 @@ Chart.defaults.maintainAspectRatio = true;
 
   <script>
     // ====== Chart.js theme ======
-    Chart.defaults.color = '#e9e9e9';
-    Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
-    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
-    Chart.defaults.plugins.tooltip.titleColor = '#fff';
-    Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+    // Chart.defaults.color = '#e9e9e9';
+    // Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
+    // Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
+    // Chart.defaults.plugins.tooltip.titleColor = '#fff';
+    // Chart.defaults.plugins.tooltip.bodyColor = '#fff';
   
     // ====== CONFIG ======
-    const API_BASE = 'https://my-backend-oi4wnz5ps-khc800s-projects.vercel.app/api';
+    const API_BASE = 'https://my-backend-g8p1624nv-khc800s-projects.vercel.app/api';
     const FALLBACK_NAMES = ['Reader 1','Reader 2','Reader 3'];
     const LOGO_SRC = 'logo.svg';
   
@@ -502,6 +598,11 @@ Chart.defaults.maintainAspectRatio = true;
     const discBtn = q('#discBtn');
     const tblWarnBody = q('#tblWarn tbody');
     const tblRemovedBody = q('#tblRemoved tbody');
+
+    const elBook   = q('#book');
+const dlBooks  = q('#bookList');
+    const chkFinished = q('#bookFinished'); // and a <input type="checkbox" id="bookFinished">
+
 
     // run once after you grab chartMainCanvas
 // chartMainCanvas.removeAttribute('height');      // kill fixed attr height
@@ -642,7 +743,8 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
       tab.addEventListener('click',activate);
       tab.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' ') activate() });
     });
-  
+
+
     // ====== Names ======
     function setNames(list){
   const names = Array.isArray(list) && list.length ? list : FALLBACK_NAMES;
@@ -667,6 +769,33 @@ async function loadNames(){
     setNames(null);
   }
 }
+
+async function loadBooksSuggestions(){
+  const qstr   = (elBook.value || '').trim();
+  const reader = (elName.value || '').trim();
+
+  const params = new URLSearchParams();
+  if (qstr.length >= 2) params.set('q', qstr); // prefix filter when user typed enough
+  if (reader)          params.set('name', reader);
+
+  try{
+    const res = await fetch(`${API_BASE}/books?` + params.toString());
+    const { books = [] } = await res.json();
+    dlBooks.innerHTML = books.map(b => `<option value="${b}"></option>`).join('');
+  }catch(e){
+    console.error('books fetch failed:', e);
+    dlBooks.innerHTML = '';
+  }
+}
+
+elBook?.addEventListener('input', loadBooksSuggestions);
+elBook?.addEventListener('focus', loadBooksSuggestions);
+elName?.addEventListener('change', loadBooksSuggestions);
+
+
+
+
+
 
     function loadReaderNames(){ if(dlReaders.childElementCount===0) loadNames() }
     loadNames();
@@ -695,35 +824,47 @@ async function loadNames(){
       if(e.code==='KeyR' && (e.metaKey||e.ctrlKey)) { e.preventDefault(); resetTimer() }
     });
     loadTimer();
-  
-    // ====== Submit (POST /api/logs) ======
-    btnSubmit.addEventListener('click', async () => {
-      const raw = (elName.value || '').trim();
-      let name = raw;
-      if (!state.nameSet.has(name)) {
-        const cand = state.names.filter(n => n.toLowerCase() === raw.toLowerCase());
-        if (cand.length === 1) name = cand[0];
-      }
-      if (!state.nameSet.has(name)) { showStatus('الاسم غير موجود في القائمة. اختر من الاقتراحات.', false); return; }
-  
-      const h = Number(durH.value) || 0, m = Number(durM.value) || 0, s = Number(durS.value) || 0;
-      const date = elDate.value;
-      const minutes = +(h * 60 + m + s / 60).toFixed(2);
-  
-      if (minutes <= 0 || !isFinite(minutes) || !date || m < 0 || m > 59 || s < 0 || s > 59 || h < 0) {
-        showStatus('تحقَّق من المدخلات', false); return;
-      }
-  
-      btnSubmit.disabled = true; showStatus('جاري الحفظ…');
-      try {
-        const payload = { timestamp: new Date().toISOString(), name, minutes, date };
-        const res = await fetch(`${API_BASE}/logs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        const j = await res.json().catch(()=>({}));
-        if (res.ok) { showStatus(j.message || 'تم الحفظ'); durH.value=''; durM.value=''; durS.value=''; resetTimer(); }
-        else { showStatus(j.error || 'حدث خطأ', false); }
-      } catch (e) { console.error(e); showStatus('حدث خطأ في الاتصال', false);
-      } finally { btnSubmit.disabled = false; }
+
+
+// ====== Submit (POST /api/logs) ======
+btnSubmit.addEventListener('click', async () => {
+  const raw = (elName.value || '').trim();
+  let name = raw;
+  if (!state.nameSet.has(name)) {
+    const cand = state.names.filter(n => n.toLowerCase() === raw.toLowerCase());
+    if (cand.length === 1) name = cand[0];
+  }
+  if (!state.nameSet.has(name)) { showStatus('الاسم غير موجود في القائمة. اختر من الاقتراحات.', false); return; }
+
+  const h = Number(durH.value) || 0, m = Number(durM.value) || 0, s = Number(durS.value) || 0;
+  const date = elDate.value;
+  const minutes = +(h * 60 + m + s / 60).toFixed(2);
+  if (minutes <= 0 || !isFinite(minutes) || !date || m < 0 || m > 59 || s < 0 || s > 59 || h < 0) {
+    showStatus('تحقَّق من المدخلات', false); return;
+  }
+
+  const timestamp = new Date().toISOString();        // <-- required
+  const book = (elBook?.value || '').trim() || null; // safe if field missing
+  const finished = !!chkFinished?.checked;           // boolean
+
+  btnSubmit.disabled = true; showStatus('جاري الحفظ…');
+  try {
+    const payload = { timestamp, name, minutes, date, book, finished };
+    const res = await fetch(`${API_BASE}/logs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
+    const j = await res.json().catch(()=>({}));
+    if (res.ok) { showStatus(j.message || 'تم الحفظ'); durH.value=''; durM.value=''; durS.value=''; resetTimer(); }
+    else { showStatus(j.error || 'حدث خطأ', false); }
+  } catch (e) {
+    console.error(e);
+    showStatus('حدث خطأ في الاتصال', false);
+  } finally {
+    btnSubmit.disabled = false;
+  }
+});
   
     // ====== Dashboard ======
     async function loadAwards(refDate){
@@ -911,6 +1052,29 @@ async function loadStats(refDate, range){
 }
 
 
+async function loadBooksSuggestions(){
+  const reader = (elName.value || '').trim();
+  const params = reader ? `?name=${encodeURIComponent(reader)}` : '';
+  try{
+    const j = await fetchJSON(`${API_BASE}/books${params}`);
+    const books = (j && Array.isArray(j.books)) ? j.books : [];
+    dlBooks.innerHTML = '';
+    books.forEach(b => {
+      if(!b) return;
+      const opt = document.createElement('option');
+      opt.value = b;
+      dlBooks.appendChild(opt);
+    });
+  }catch(_){
+    dlBooks.innerHTML = '';
+  }
+}
+
+
+
+
+
+
   
 
     
@@ -989,7 +1153,45 @@ async function loadStats(refDate, range){
         data.push(Math.round(dayMap.get(key)||0));
       }
       makeLine(chartHistoryCanvas, labels, data, 'Minutes');
+
+      await loadReaderBooks(name);
+
     }
+
+    const tblReaderBooksBody = document.querySelector('#tblReaderBooks tbody');
+
+async function loadReaderBooks(name){
+  if(!name){ tblReaderBooksBody.innerHTML = ''; return; }
+
+  const monthVal = readerMonth.value;
+  let url = `${API_BASE}/reader-books?name=${encodeURIComponent(name)}`;
+  if (monthVal){
+    const [yy, mm] = monthVal.split('-');
+    url += `&month=${encodeURIComponent(mm)}&year=${encodeURIComponent(yy)}`;
+  }
+
+  try{
+    const j = await fetchJSON(url);
+    const rows = j?.books || [];
+    tblReaderBooksBody.innerHTML = rows.length
+      ? rows.map(r => `
+          <tr>
+            <td>${esc(r.book || '—')}</td>
+            <td>${Math.round(Number(r.total_minutes) || 0)}</td>
+            <td>${r.start_date ? r.start_date.slice(0,10) : '—'}</td>
+            <td>${r.end_date ? r.end_date.slice(0,10) : '—'}</td>
+          </tr>
+        `).join('')
+      : `<tr><td class="muted" colspan="4">لا توجد بيانات</td></tr>`;
+  }catch(_){
+    tblReaderBooksBody.innerHTML = `<tr><td class="muted" colspan="4">خطأ</td></tr>`;
+  }
+}
+
+
+
+
+
   
     q('#readerBtn').addEventListener('click', renderReaderMonth);
     readerMonth.addEventListener('change', renderReaderMonth);
