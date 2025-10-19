@@ -357,15 +357,34 @@ Chart.defaults.maintainAspectRatio = true;
 
       <div class="card" style="background:transparent; border:0; padding:0;">
         <div style="display:grid; grid-template-columns:1fr; gap:24px;">
-          <div><div class="pill" id="pillByReader">حسب القارئ</div><canvas id="chartMain" height="140"></canvas></div>
-          <div><div class="pill" id="pillDOW">قوة أيام الأسبوع (متوسط آخر 12 أسبوع)</div><canvas id="chartDOW" height="100"></canvas></div>
+          <div><div class="pill" id="pillByReader">لوحة الشرف</div><canvas id="chartMain" height="140"></canvas></div>
+
+
+          <label>    </label>
+
           <div>
-            <div class="pill" id="pillStreaks">سلاسل الأيام المتتالية (≥ دقيقة يومياً) — مع شريط أيام القراءة</div>
+            <div class="pill" id="weekCountLabel">حصيلة الأسابيع</div>
+            <select id="weekCountSel" aria-labelledby="weekCountLabel">
+              <option value="4">4</option>
+              <option value="8" selected>8</option>
+              <option value="12">12</option>
+              <option value="16">16</option>
+            </select>
+            <canvas id="chartDOW" height="100"></canvas>
+          </div>
+          
+
+        <label>    </label>
+
+          <div>
+            <div class="pill" id="pillStreaks">سلاسل الأيام المتتالية (≥ دقيقة يومياً)</div>
             <table id="tblStreaks">
               <thead><tr><th id="thReader">القارئ</th><th id="thCurrent">الحالية</th><th id="thLongest">الأطول</th><th id="thStrip">آخر 30 يوم</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
+
+          
 
           <!-- تم حذف تصنيفات القراء -->
         </div>
@@ -738,20 +757,70 @@ const card=(icon,title,name,sub,extra='')=>`
       }
     }
   
-    async function loadDOW(refDate){
-      try{
-        const d = await fetchJSON(`${API_BASE}/dow?date=${encodeURIComponent(refDate)}&weeks=12`);
-        const items = d?.items||[];
-        // makeBar(chartDOWCanvas, items.map(i=>i.label), items.map(i=>Math.round(Number(i.avg)||0)), 'DOW');
-        makeBar(chartDOWCanvas, items.map(i=>i.label),
-        items.map(i=>Math.round(Number(i.avg)||0)),
-        'DOW', { aspectRatio: 2.6 });
+    // async function loadDOW(refDate){
+    //   try{
+    //     const d = await fetchJSON(`${API_BASE}/dow?date=${encodeURIComponent(refDate)}&weeks=12`);
+    //     const items = d?.items||[];
+    //     // makeBar(chartDOWCanvas, items.map(i=>i.label), items.map(i=>Math.round(Number(i.avg)||0)), 'DOW');
+    //     makeBar(chartDOWCanvas, items.map(i=>i.label),
+    //     items.map(i=>Math.round(Number(i.avg)||0)),
+    //     'DOW', { aspectRatio: 2.6 });
 
-      }catch(_){
-        if (chartDOWCanvas.__chart) chartDOWCanvas.__chart.destroy();
-      }
-    }
+    //   }catch(_){
+    //     if (chartDOWCanvas.__chart) chartDOWCanvas.__chart.destroy();
+    //   }
+    // }
+
+    function addDaysISO(iso, days){
+  const d = new Date(iso); d.setDate(d.getDate()+days);
+  return d.toISOString().slice(0,10);
+}
+function weekLabelShort(d){
+  const fmt = new Intl.DateTimeFormat('ar', { month:'short', day:'numeric' });
+  return 'أسبوع ' + fmt.format(d);
+}
   
+// Week starts Saturday, ends Friday
+function startOfWeekSat(d){
+  const x = new Date(d);
+  x.setHours(12,0,0,0);                 // avoid TZ/DST edge cases
+  const dow = x.getDay();               // 0=Sun..6=Sat
+  const offset = (dow + 1) % 7;         // days since Saturday
+  x.setDate(x.getDate() - offset);
+  return x;                             // local start-of-week (Sat)
+}
+
+async function loadWeeklyTrend(refDate, weeks){
+  weeks = Number(weeks) || 8;
+
+  const labels = [];
+  const data = [];
+  const fmt = new Intl.DateTimeFormat('ar', { day: 'numeric', month: 'short' });
+
+  const anchor = startOfWeekSat(new Date(refDate));  // start of current week (Sat)
+
+  for(let i = weeks - 1; i >= 0; i--){
+    const start = new Date(anchor);
+    start.setDate(anchor.getDate() - i * 7);         // walk back by whole weeks
+    const iso = start.toISOString().slice(0,10);
+
+    let rows = [];
+    try{
+      rows = await fetchJSON(`${API_BASE}/stats?range=week&date=${encodeURIComponent(iso)}`);
+    }catch(_){ rows = []; }
+
+    const total = (rows || []).reduce((s,r)=> s + num(r.total_minutes), 0);
+    labels.push(fmt.format(start));                   // first day of week (Sat)
+    data.push(Math.round(total));
+  }
+
+  makeLine(chartDOWCanvas, labels, data, `مجموع دقائق الأسبوع (آخر ${weeks} أسابيع)`);
+}
+
+
+
+
+
 // helper: get active names for the selected range/date (minutes > 0)
 async function fetchActiveNames(refDate, range){
   const url = range==='all'
@@ -800,14 +869,17 @@ async function loadStreaks(refDate, range){
 // update dashboard loader to pass the range
 async function loadDashboard(){
   const d = elStatsDate.value || yesterdayISO();
-  const range = elRangeSel.value; // day|week|month|all
+  const range = elRangeSel.value;
+  const weekCount = q('#weekCountSel')?.value || 8; // dropdown if present
+
   await Promise.all([
     loadAwards(d),
-    loadDOW(d),
-    loadStreaks(d, range),   // <-- pass range here
+    loadWeeklyTrend(d, weekCount),
+    loadStreaks(d, range),
     loadStats(d, range)
   ]);
 }
+
 
   
 async function loadStats(refDate, range){
@@ -846,6 +918,7 @@ async function loadStats(refDate, range){
     elTopN.addEventListener('change', loadDashboard);
     elRangeSel.addEventListener('change', loadDashboard);
     q('#tab-stats').addEventListener('click', ()=>{ if(!chartMainCanvas.__chart) loadDashboard() });
+     q('#weekCountSel')?.addEventListener('change', loadDashboard);
   
     // ====== Reader (GET /api/history) ======
     function normalizeName(raw){
@@ -921,6 +994,8 @@ async function loadStats(refDate, range){
     q('#readerBtn').addEventListener('click', renderReaderMonth);
     readerMonth.addEventListener('change', renderReaderMonth);
     q('#tab-reader').addEventListener('click', ()=>{ if(!chartHistoryCanvas.__chart) renderReaderMonth(); });
+
+   
   
     // ====== Discipline (GET /api/discipline) ======
     async function loadDiscipline(){
@@ -1005,6 +1080,8 @@ async function downloadStatsCSV(){
 // ===== Correct bindings (match your HTML) =====
 q('#btnDownloadPNG')?.addEventListener('click', downloadChartPNG);
 q('#btnDownloadCSV')?.addEventListener('click', downloadStatsCSV);
+
+
 
 
 
