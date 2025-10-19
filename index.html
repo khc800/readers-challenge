@@ -188,6 +188,45 @@ footer{ text-align:center; margin-top:20px; color:var(--ink-muted); font-size:12
 }
 
 
+.books-grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px }
+@media (max-width:980px){ .books-grid{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+@media (max-width:640px){ .books-grid{ grid-template-columns:1fr } }
+.book-mini{ background:#192734; border:1px solid var(--ring); border-radius:12px; padding:12px }
+.book-mini .bk{ font-weight:800; color:var(--accent) }
+.book-mini .nm{ color:var(--ink-dim); font-size:13px }
+.book-mini .mn{ font-variant-numeric:tabular-nums; color:var(--ink) }
+
+/* 
+#currentWeekBooks{
+  display:grid; gap:12px;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+} */
+.book-card{
+  background:#192734; border:1px solid var(--ring); border-radius:12px; padding:12px 14px;
+}
+.book-title{
+  font-weight:800; color:var(--ink); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.book-card .meta{ display:flex; justify-content:space-between; color:var(--ink-muted); font-size:13px }
+.book-card .minutes{ color:var(--accent); font-weight:700 }
+
+#currentWeekBooks {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+.book-only {
+  background: #192734;
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 14px;
+  text-align: center;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 
 /* ======= BADGES ======= */
@@ -384,9 +423,17 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
         <div id="badges" class="badges"></div>
       </div>
 
+      <div class="card">
+        <h3>الكتب المقروءة هذا الأسبوع</h3>
+        <div id="currentWeekBooks"></div>
+      </div>
+      
+      
+      <div class="spacer"></div>
       <!-- صندوق المدى أسفل الجوائز مباشرة (مفتوح افتراضياً) -->
-      <details class="range-box" id="rangeBox" open>
+      <details class="range-box" id="rangeBox" close>
         <summary>خيارات العرض (المدى)</summary>
+        <div class="spacer"></div>
         <div class="range-inner">
           <div class="row">
             <div>
@@ -550,7 +597,7 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
     // Chart.defaults.plugins.tooltip.bodyColor = '#fff';
   
     // ====== CONFIG ======
-    const API_BASE = 'https://my-backend-x47sc6mog-khc800s-projects.vercel.app/api';
+    const API_BASE = 'https://my-backend-ce1eke6jr-khc800s-projects.vercel.app/api';
     const FALLBACK_NAMES = ['Reader 1','Reader 2','Reader 3'];
     const LOGO_SRC = 'logo.svg';
   
@@ -1011,19 +1058,54 @@ async function loadStreaks(refDate, range){
   }
 }
 
-// update dashboard loader to pass the range
+async function renderCurrentWeekBooks(refDate){
+  const box = document.getElementById('currentWeekBooks');
+  if (!box) return;
+  const d = refDate || (elStatsDate?.value) || new Date().toISOString().slice(0,10);
+  box.innerHTML = '<div class="muted">يتم التحميل…</div>';
+  try{
+    const r = await fetch(`${API_BASE}/current-week-books?date=${encodeURIComponent(d)}`);
+    const j = await r.json();
+    const books = j.books || [];
+    box.innerHTML = books.length
+      ? books.map(b => `<div class="book-only">${esc(b)}</div>`).join('')
+      : '<div class="muted">لا توجد كتب لهذا الأسبوع</div>';
+  }catch(e){
+    console.error(e);
+    box.innerHTML = '<div class="muted">خطأ في الجلب</div>';
+  }
+}
+
+
+
+
+
+
+
+
+
 async function loadDashboard(){
   const d = elStatsDate.value || yesterdayISO();
   const range = elRangeSel.value;
-  const weekCount = q('#weekCountSel')?.value || 8; // dropdown if present
+  const weekCount = q('#weekCountSel')?.value || 8;
+  // await Promise.all([
+  //   loadAwards(d),
+  //   loadCurrentWeekBooks(d),       // <— here
+  //   loadWeeklyTrend(d, weekCount),
+  //   loadStreaks(d, range),
+  //   loadStats(d, range)
+  // ]);
 
   await Promise.all([
-    loadAwards(d),
-    loadWeeklyTrend(d, weekCount),
-    loadStreaks(d, range),
-    loadStats(d, range)
-  ]);
+  loadAwards(d),
+  loadWeeklyTrend(d, weekCount),
+  renderCurrentWeekBooks(d),   // <—
+  loadStreaks(d, range),
+  loadStats(d, range)
+]);
+
 }
+
 
 
   
