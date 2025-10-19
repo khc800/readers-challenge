@@ -340,6 +340,7 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
           <datalist id="bookList"></datalist>
           <label><input type="checkbox" id="bookFinished"> تم إنهاء الكتاب</label>
         </div>
+
     
         <div>
           <label id="lblDuration">المدة (ث:د:س)</label>
@@ -549,7 +550,7 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
     // Chart.defaults.plugins.tooltip.bodyColor = '#fff';
   
     // ====== CONFIG ======
-    const API_BASE = 'https://my-backend-g8p1624nv-khc800s-projects.vercel.app/api';
+    const API_BASE = 'https://my-backend-x47sc6mog-khc800s-projects.vercel.app/api';
     const FALLBACK_NAMES = ['Reader 1','Reader 2','Reader 3'];
     const LOGO_SRC = 'logo.svg';
   
@@ -775,11 +776,13 @@ async function loadBooksSuggestions(){
   const reader = (elName.value || '').trim();
 
   const params = new URLSearchParams();
-  if (qstr.length >= 2) params.set('q', qstr); // prefix filter when user typed enough
-  if (reader)          params.set('name', reader);
+  if (qstr.length >= 2) params.set('q', qstr);
+  if (reader)           params.set('name', reader);
+
+  const url = `${API_BASE}/books${params.toString() ? '?' + params.toString() : ''}`;
 
   try{
-    const res = await fetch(`${API_BASE}/books?` + params.toString());
+    const res = await fetch(url);
     const { books = [] } = await res.json();
     dlBooks.innerHTML = books.map(b => `<option value="${b}"></option>`).join('');
   }catch(e){
@@ -791,6 +794,7 @@ async function loadBooksSuggestions(){
 elBook?.addEventListener('input', loadBooksSuggestions);
 elBook?.addEventListener('focus', loadBooksSuggestions);
 elName?.addEventListener('change', loadBooksSuggestions);
+
 
 
 
@@ -1052,23 +1056,23 @@ async function loadStats(refDate, range){
 }
 
 
-async function loadBooksSuggestions(){
-  const reader = (elName.value || '').trim();
-  const params = reader ? `?name=${encodeURIComponent(reader)}` : '';
-  try{
-    const j = await fetchJSON(`${API_BASE}/books${params}`);
-    const books = (j && Array.isArray(j.books)) ? j.books : [];
-    dlBooks.innerHTML = '';
-    books.forEach(b => {
-      if(!b) return;
-      const opt = document.createElement('option');
-      opt.value = b;
-      dlBooks.appendChild(opt);
-    });
-  }catch(_){
-    dlBooks.innerHTML = '';
-  }
-}
+// async function loadBooksSuggestions(){
+//   const reader = (elName.value || '').trim();
+//   const params = reader ? `?name=${encodeURIComponent(reader)}` : '';
+//   try{
+//     const j = await fetchJSON(`${API_BASE}/books${params}`);
+//     const books = (j && Array.isArray(j.books)) ? j.books : [];
+//     dlBooks.innerHTML = '';
+//     books.forEach(b => {
+//       if(!b) return;
+//       const opt = document.createElement('option');
+//       opt.value = b;
+//       dlBooks.appendChild(opt);
+//     });
+//   }catch(_){
+//     dlBooks.innerHTML = '';
+//   }
+// }
 
 
 
