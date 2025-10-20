@@ -374,10 +374,10 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
         </div>
     
         <div>
-          <label for="book">الكتاب</label>
+          <label for="book">أقرأ حاليا</label>
           <input id="book" list="bookList" placeholder="اسم الكتاب" />
           <datalist id="bookList"></datalist>
-          <label><input type="checkbox" id="bookFinished"> تم إنهاء الكتاب</label>
+          <label><input type="checkbox" id="bookFinished">أنهيت الكتاب</label>
         </div>
 
     
@@ -597,7 +597,7 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
     // Chart.defaults.plugins.tooltip.bodyColor = '#fff';
   
     // ====== CONFIG ======
-    const API_BASE = 'https://my-backend-1h59oxwrl-khc800s-projects.vercel.app/api';
+    const API_BASE = 'https://rc-backend-r7qh.onrender.com/api';
     const FALLBACK_NAMES = ['Reader 1','Reader 2','Reader 3'];
     const LOGO_SRC = 'logo.svg';
   
