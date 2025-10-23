@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,352 +20,942 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-:root{
-  --bg:#233240;
-  --card:#0D0D0D;
-  --ring:#2f455a;
-  --ink:#ffffff;
-  --ink-dim:#e7edf3;
-  --ink-muted:#9fb3c7;
+    :root {
+      --bg: #233240;
+      --card: #0D0D0D;
+      --ring: #2f455a;
+      --ink: #ffffff;
+      --ink-dim: #e7edf3;
+      --ink-muted: #9fb3c7;
 
-  --accent:#F29F05;
-  --accent-2:#F28705;
-  --accent-3:#F27405;
-  --ok:#22c55e;
-}
+      --accent: #F29F05;
+      --accent-2: #F28705;
+      --accent-3: #F27405;
+      --ok: #22c55e;
+    }
 
-*{ box-sizing:border-box }
-html,body{ max-width:100%; overflow-x:hidden; }
-body{
-  margin:0;
-  font-family:'Almarai',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
-  background:var(--bg);
-  color:var(--ink);
-}
-.wrap{ max-width:1100px; margin:16px auto 40px; padding:0 16px; }
-@media(max-width:640px){ .wrap{ padding-inline:12px; } }
+    * {
+      box-sizing: border-box
+    }
 
-/* Controls */
-select,input,button{
-  border-radius:12px; border:1px solid var(--ring);
-  background:var(--card); color:var(--ink);
-  padding:12px 14px; outline:none; font-family:inherit;
-}
-input[list]{ width:100% }
-input[type="date"],input[type="month"]{ color-scheme:dark }
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="month"]::-webkit-calendar-picker-indicator{ filter:invert(1); opacity:.9 }
-.date-wrap{ position:relative; display:inline-block }
-.date-wrap input[type="date"], .date-wrap input[type="month"]{ padding-inline-end:2.2rem }
-.date-wrap input[type="date"]::-webkit-calendar-picker-indicator,
-.date-wrap input[type="month"]::-webkit-calendar-picker-indicator{ opacity:0 }
-.date-wrap .cal-ic{
-  position:absolute; inset-inline-end:.6rem; inset-block-start:50%; transform:translateY(-50%);
-  width:18px; height:18px; pointer-events:none; filter:grayscale(1) brightness(2);
-  background:no-repeat center/contain url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm12 6H5v12h14V8zM7 10h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 14h2v2H7v-2zm4 0h2v2h-2v-2z"/></svg>');
-}
+    html,
+    body {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
 
-button{
-  background:var(--accent); border-color:transparent; color:#0D0D0D;
-  font-weight:800; cursor:pointer; min-height:44px;
-  transition:background-color .12s ease, transform .04s ease;
-}
-button:hover{ background:var(--accent-2) }
-button:active{ background:var(--accent-3); transform:translateY(1px) }
+    body {
+      margin: 0;
+      font-family: 'Almarai', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
 
-/* Layout */
-header{ max-width:1100px; margin:24px auto 0; padding:0 16px; display:flex; align-items:center; justify-content:space-between; gap:12px }
-header .brand{ display:flex; align-items:center; gap:12px; font-weight:800 }
-header img.logo{ height:36px; width:auto; display:block }
+    .wrap {
+      max-width: 1100px;
+      margin: 16px auto 40px;
+      padding: 0 16px;
+    }
 
-.tabs{
-  position:sticky; top:0; z-index:5; background:var(--bg);
-  display:flex; gap:8px; margin-bottom:16px; padding-block:8px; overflow:auto;
-}
-.tab{
-  padding:10px 16px; border-radius:12px;
-  background:transparent; color:var(--ink-dim);
-  border:1px solid transparent; user-select:none; white-space:nowrap; cursor:pointer;
-}
-.tab:hover{ color:var(--ink) }
-.tab.active{
-  color:#0D0D0D; background:var(--accent);
-  border-color:var(--accent); box-shadow:0 0 0 1px rgba(0,0,0,.15) inset;
-}
+    @media(max-width:640px) {
+      .wrap {
+        padding-inline: 12px;
+      }
+    }
 
-.card{
-  background:var(--card); border:1px solid var(--ring); border-radius:16px; padding:20px;
-  box-shadow:0 6px 18px rgba(0,0,0,.35);
-}
+    /* Controls */
+    select,
+    input,
+    button {
+      border-radius: 12px;
+      border: 1px solid var(--ring);
+      background: var(--card);
+      color: var(--ink);
+      padding: 12px 14px;
+      outline: none;
+      font-family: inherit;
+    }
 
-/* responsive grids */
-.row{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px }
-.row-3{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px }
-.row-2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px }
-@media (max-width:980px){ .row{ grid-template-columns:repeat(2,minmax(0,1fr)) } .row-2{ grid-template-columns:1fr } }
-@media (max-width:640px){ .row,.row-3{ grid-template-columns:1fr } }
+    input[list] {
+      width: 100%
+    }
 
-label{ display:block; font-size:14px; color:var(--ink-dim); margin-bottom:6px }
-.muted{ color:var(--ink-muted); font-size:13px }
-.spacer{ height:16px }
-.hidden{ display:none }
-.pill{
-  display:inline-block; padding:6px 10px; border-radius:999px;
-  background:#192734; border:1px solid var(--ring); font-size:12px; color:var(--ink-dim);
-}
+    input[type="date"],
+    input[type="month"] {
+      color-scheme: dark
+    }
 
-/* KPIs */
-.kpi{ text-align:center; background:#192734; border:1px solid var(--ring); border-radius:16px; padding:16px }
-.kpi .v{ font-size:28px; font-weight:800; color:var(--accent) }
-#timerDisplay,.kpi .v,table td{ font-variant-numeric:tabular-nums }
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="month"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: .9
+    }
 
-footer{ text-align:center; margin-top:20px; color:var(--ink-muted); font-size:12px }
+    .date-wrap {
+      position: relative;
+      display: inline-block
+    }
 
-/* Timer */
-.timegrid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px }
-.timegrid input{ width:100%; min-width:0; text-align:center; direction:ltr }
-.timegrid input::-webkit-outer-spin-button,.timegrid input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
-.timegrid input[type="number"]{ -moz-appearance:textfield }
+    .date-wrap input[type="date"],
+    .date-wrap input[type="month"] {
+      padding-inline-end: 2.2rem
+    }
 
-.timer{ display:flex; flex-direction:column; gap:10px; margin-top:10px; align-items:center }
-#timerDisplay{
-  text-align:center; direction:ltr; font-size:28px; font-weight:800; letter-spacing:1.5px;
-  padding:10px 12px; border:1px solid var(--ring); background:#192734; border-radius:12px; width:240px;
-}
-.timer .toggle{
-  --size:56px; width:var(--size); height:var(--size); border-radius:999px; display:grid; place-items:center;
-  border:1px solid var(--ring); background:var(--accent); color:#0D0D0D; font-weight:800; cursor:pointer;
-}
-.timer .toggle:hover{ background:var(--accent-2) }
-.timer .toggle:active{ background:var(--accent-3) }
-.timer .toggle svg{ width:26px; height:26px; fill:#0D0D0D }
+    .date-wrap input[type="date"]::-webkit-calendar-picker-indicator,
+    .date-wrap input[type="month"]::-webkit-calendar-picker-indicator {
+      opacity: 0
+    }
+
+    .date-wrap .cal-ic {
+      position: absolute;
+      inset-inline-end: .6rem;
+      inset-block-start: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+      filter: grayscale(1) brightness(2);
+      background: no-repeat center/contain url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm12 6H5v12h14V8zM7 10h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zM7 14h2v2H7v-2zm4 0h2v2h-2v-2z"/></svg>');
+    }
+
+    button {
+      background: var(--accent);
+      border-color: transparent;
+      color: #0D0D0D;
+      font-weight: 800;
+      cursor: pointer;
+      min-height: 44px;
+      transition: background-color .12s ease, transform .04s ease;
+    }
+
+    button:hover {
+      background: var(--accent-2)
+    }
+
+    button:active {
+      background: var(--accent-3);
+      transform: translateY(1px)
+    }
 
 
-/* timer as a full-width row centered */
-.timer-row{
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 8px;
-}
 
-/* compact, centered timer display that scales on phones */
-#timerDisplay{
-  width: clamp(220px, 60vw, 320px);
-  text-align: center;
-  direction: ltr;
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  padding: 10px 12px;
-  border: 1px solid var(--ring);
-  background:#192734;
-  border-radius: 12px;
-}
+    /* Layout */
+    header {
+      max-width: 1100px;
+      margin: 24px auto 0;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px
+    }
 
-.timer-row .toggle{
-  --size:56px;
-  width: var(--size);
-  height: var(--size);
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--ring);
-  background: var(--accent);
-  color:#0D0D0D;
-  font-weight: 800;
-  cursor: pointer;
-}
-.timer-row .toggle:hover{ background:var(--accent-2) }
-.timer-row .toggle:active{ background:var(--accent-3) }
-.timer-row .toggle svg{ width:26px; height:26px; fill:#0D0D0D }
+    header .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800
+    }
 
-@media (max-width:640px){
-  .timer-row{ margin-top: 14px }
-  #timerDisplay{ width: clamp(200px, 90vw, 320px); }
-}
+    header img.logo {
+      height: 36px;
+      width: auto;
+      display: block
+    }
+
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--bg);
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-block: 8px;
+      overflow: auto;
+    }
+
+    .tab {
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--ink-dim);
+      border: 1px solid transparent;
+      user-select: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .tab:hover {
+      color: var(--ink)
+    }
+
+    .tab.active {
+      color: #0D0D0D;
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, .15) inset;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--ring);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
+    }
+
+    /* responsive grids */
+    .row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px
+    }
+
+    @media (max-width:980px) {
+      .row {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .row-2 {
+        grid-template-columns: 1fr
+      }
+    }
+
+    @media (max-width:640px) {
+
+      .row,
+      .row-3 {
+        grid-template-columns: 1fr
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      color: var(--ink-dim);
+      margin-bottom: 6px
+    }
+
+    .muted {
+      color: var(--ink-muted);
+      font-size: 13px
+    }
+
+    .spacer {
+      height: 16px
+    }
+
+    .hidden {
+      display: none
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #192734;
+      border: 1px solid var(--ring);
+      font-size: 12px;
+      color: var(--ink-dim);
+    }
+
+    /* KPIs */
+    .kpi {
+      text-align: center;
+      background: #192734;
+      border: 1px solid var(--ring);
+      border-radius: 16px;
+      padding: 16px
+    }
+
+    .kpi .v {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent)
+    }
+
+    #timerDisplay,
+    .kpi .v,
+    table td {
+      font-variant-numeric: tabular-nums
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--ink-muted);
+      font-size: 12px
+    }
+
+    /* Timer */
+    .timegrid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px
+    }
+
+    .timegrid input {
+      width: 100%;
+      min-width: 0;
+      text-align: center;
+      direction: ltr
+    }
+
+    .timegrid input::-webkit-outer-spin-button,
+    .timegrid input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0
+    }
+
+    .timegrid input[type="number"] {
+      -moz-appearance: textfield
+    }
+
+    .timer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center
+    }
+
+    #timerDisplay {
+      text-align: center;
+      direction: ltr;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      padding: 10px 12px;
+      border: 1px solid var(--ring);
+      background: #192734;
+      border-radius: 12px;
+      width: 240px;
+    }
+
+    .timer .toggle {
+      --size: 56px;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--ring);
+      background: var(--accent);
+      color: #0D0D0D;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .timer .toggle:hover {
+      background: var(--accent-2)
+    }
+
+    .timer .toggle:active {
+      background: var(--accent-3)
+    }
+
+    .timer .toggle svg {
+      width: 26px;
+      height: 26px;
+      fill: #0D0D0D
+    }
 
 
-.books-grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px }
-@media (max-width:980px){ .books-grid{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
-@media (max-width:640px){ .books-grid{ grid-template-columns:1fr } }
-.book-mini{ background:#192734; border:1px solid var(--ring); border-radius:12px; padding:12px }
-.book-mini .bk{ font-weight:800; color:var(--accent) }
-.book-mini .nm{ color:var(--ink-dim); font-size:13px }
-.book-mini .mn{ font-variant-numeric:tabular-nums; color:var(--ink) }
+    /* timer as a full-width row centered */
+    .timer-row {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
 
-/* 
+    /* compact, centered timer display that scales on phones */
+    #timerDisplay {
+      width: clamp(220px, 60vw, 320px);
+      text-align: center;
+      direction: ltr;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      padding: 10px 12px;
+      border: 1px solid var(--ring);
+      background: #192734;
+      border-radius: 12px;
+    }
+
+    .timer-row .toggle {
+      --size: 56px;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--ring);
+      background: var(--accent);
+      color: #0D0D0D;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .timer-row .toggle:hover {
+      background: var(--accent-2)
+    }
+
+    .timer-row .toggle:active {
+      background: var(--accent-3)
+    }
+
+    .timer-row .toggle svg {
+      width: 26px;
+      height: 26px;
+      fill: #0D0D0D
+    }
+
+    @media (max-width:640px) {
+      .timer-row {
+        margin-top: 14px
+      }
+
+      #timerDisplay {
+        width: clamp(200px, 90vw, 320px);
+      }
+    }
+
+
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px
+    }
+
+    @media (max-width:980px) {
+      .books-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+    }
+
+    @media (max-width:640px) {
+      .books-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .book-mini {
+      background: #192734;
+      border: 1px solid var(--ring);
+      border-radius: 12px;
+      padding: 12px
+    }
+
+    .book-mini .bk {
+      font-weight: 800;
+      color: var(--accent)
+    }
+
+    .book-mini .nm {
+      color: var(--ink-dim);
+      font-size: 13px
+    }
+
+    .book-mini .mn {
+      font-variant-numeric: tabular-nums;
+      color: var(--ink)
+    }
+
+    /* 
 #currentWeekBooks{
   display:grid; gap:12px;
   grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
 } */
-.book-card{
-  background:#192734; border:1px solid var(--ring); border-radius:12px; padding:12px 14px;
-}
-.book-title{
-  font-weight:800; color:var(--ink); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.book-card .meta{ display:flex; justify-content:space-between; color:var(--ink-muted); font-size:13px }
-.book-card .minutes{ color:var(--accent); font-weight:700 }
+    .book-card {
+      background: #192734;
+      border: 1px solid var(--ring);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
 
-#currentWeekBooks {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-}
-.book-only {
-  background: #192734;
-  color: var(--ink);
-  border-radius: 10px;
-  padding: 10px 14px;
-  text-align: center;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+    .book-title {
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .book-card .meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--ink-muted);
+      font-size: 13px
+    }
+
+    .book-card .minutes {
+      color: var(--accent);
+      font-weight: 700
+    }
+
+    #currentWeekBooks {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .book-only {
+      background: #192734;
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-align: center;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .book-only {
+      position: relative
+    }
+
+    .book-badge {
+      position: absolute;
+      inset-block-start: 6px;
+      inset-inline-start: 6px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #F29F05;
+      color: #0D0D0D;
+      font-weight: 800;
+      font-size: 11px;
+      border: 1px solid rgba(0, 0, 0, .35);
+    }
 
 
 
-/* ======= BADGES ======= */
-.badges{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:6px 0 18px }
-@media (max-width:980px){ .badges{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
-@media (max-width:640px){ .badges{ grid-template-columns:1fr } }
-.badge{
-  display:flex; align-items:center; gap:12px;
-  padding:14px 16px; border-radius:14px;
-  background:#192734; border:1px solid var(--ring);
-  box-shadow:0 8px 20px rgba(0,0,0,.25);
-  overflow:hidden;
-}
-.badge .ic{
-  width:48px; height:48px; flex:0 0 48px; border-radius:12px;
-  display:grid; place-items:center;
-  background:linear-gradient(180deg,var(--accent),var(--accent-3));
-  color:#0D0D0D; font-size:22px; font-weight:800;
-  border:1px solid rgba(242,159,5,.55);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 6px 14px rgba(0,0,0,.25);
-}
-.badge .txt{ flex:1 1 auto; min-width:0 }
-.badge .txt .title{ font-weight:800 }
-.badge .txt .name{ font-weight:800; color:var(--accent) }
-.badge .strip-wrap{ margin-top:8px; width:100%; overflow:hidden }
 
-/* Calendar */
-.cal{ border:1px solid var(--ring); border-radius:12px; padding:12px; background:#192734 }
-.cal .cal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-weight:800 }
-.cal .grid{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px }
-.cal .dow{ text-align:center; font-size:12px; color:var(--ink-muted) }
-.cal .cell{ position:relative; min-height:52px; border:1px dashed rgba(255,255,255,.08); border-radius:10px; padding:6px; }
-.cal .cell .d{ position:absolute; top:6px; inset-inline-start:8px; font-weight:700; opacity:.9 }
-.cal .cell.hit{ border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.08) }
-.cal .dot{ position:absolute; bottom:8px; inset-inline-start:50%; transform:translateX(-50%); width:8px; height:8px; border-radius:99px; background:#22c55e }
+    /* ======= BADGES ======= */
+    .badges {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 6px 0 18px
+    }
 
-/* Tables */
-table{ width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0 8px }
-th,td{ text-align:start; padding:10px 12px; background:#192734; border:1px solid var(--ring); overflow:hidden; white-space:nowrap; text-overflow:ellipsis }
-th:first-child,td:first-child{ border-start-start-radius:10px; border-end-start-radius:10px }
-th:last-child,td:last-child{ border-start-end-radius:10px; border-end-end-radius:10px }
-#tblStreaks td{ overflow:visible }
+    @media (max-width:980px) {
+      .badges {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+    }
 
-/* Charts: prevent overflow */
-/* Charts */
-/* #chartMain{ display:block; width:100% !important; height:clamp(260px,56vh,680px) !important }
+    @media (max-width:640px) {
+      .badges {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #192734;
+      border: 1px solid var(--ring);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
+      overflow: hidden;
+    }
+
+    .badge .ic {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, var(--accent), var(--accent-3));
+      color: #0D0D0D;
+      font-size: 22px;
+      font-weight: 800;
+      border: 1px solid rgba(242, 159, 5, .55);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 6px 14px rgba(0, 0, 0, .25);
+    }
+
+    .badge .txt {
+      flex: 1 1 auto;
+      min-width: 0
+    }
+
+    .badge .txt .title {
+      font-weight: 800
+    }
+
+    .badge .txt .name {
+      font-weight: 800;
+      color: var(--accent)
+    }
+
+    .badge .strip-wrap {
+      margin-top: 8px;
+      width: 100%;
+      overflow: hidden
+    }
+
+    /* Calendar */
+    .cal {
+      border: 1px solid var(--ring);
+      border-radius: 12px;
+      padding: 12px;
+      background: #192734
+    }
+
+    .cal .cal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-weight: 800
+    }
+
+    .cal .grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px
+    }
+
+    .cal .dow {
+      text-align: center;
+      font-size: 12px;
+      color: var(--ink-muted)
+    }
+
+    .cal .cell {
+      position: relative;
+      min-height: 52px;
+      border: 1px dashed rgba(255, 255, 255, .08);
+      border-radius: 10px;
+      padding: 6px;
+    }
+
+    .cal .cell .d {
+      position: absolute;
+      top: 6px;
+      inset-inline-start: 8px;
+      font-weight: 700;
+      opacity: .9
+    }
+
+    .cal .cell.hit {
+      border-color: rgba(34, 197, 94, .35);
+      background: rgba(34, 197, 94, .08)
+    }
+
+    .cal .dot {
+      position: absolute;
+      bottom: 8px;
+      inset-inline-start: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #22c55e
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: separate;
+      border-spacing: 0 8px
+    }
+
+    th,
+    td {
+      text-align: start;
+      padding: 10px 12px;
+      background: #192734;
+      border: 1px solid var(--ring);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis
+    }
+
+    th:first-child,
+    td:first-child {
+      border-start-start-radius: 10px;
+      border-end-start-radius: 10px
+    }
+
+    th:last-child,
+    td:last-child {
+      border-start-end-radius: 10px;
+      border-end-end-radius: 10px
+    }
+
+    #tblStreaks td {
+      overflow: visible
+    }
+
+    /* Charts: prevent overflow */
+    /* Charts */
+    /* #chartMain{ display:block; width:100% !important; height:clamp(260px,56vh,680px) !important }
 #chartHistory{ display:block; width:100% !important; height:clamp(200px,38vh,520px) !important } */
 
-/* DOW chart: fixed, not stretch */
-#chartDOW{
-  display:block;
+    /* DOW chart: fixed, not stretch */
+    #chartDOW {
+      display: block;
+    }
+
+
+    /* Streak strip */
+    .streak-strip {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 6px;
+      gap: 2px;
+      height: 8px;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 4px;
+      background: transparent;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .streak-strip::-webkit-scrollbar {
+      display: none
+    }
+
+    .streak-strip span {
+      height: 100%;
+      width: 100%;
+      border-radius: 2px;
+      background: #2b3a4a
+    }
+
+    .streak-strip span.on {
+      background: var(--ok)
+    }
+
+    @media (max-width:480px) {
+      .streak-strip {
+        grid-auto-columns: 4px;
+        gap: 1.5px;
+        height: 6px
+      }
+    }
+
+    /* A11y + RTL */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 10px
+    }
+
+    body.rtl {
+      direction: rtl
+    }
+
+    body.rtl .row,
+    body.rtl .row-3 {
+      direction: rtl
+    }
+
+    img,
+    canvas {
+      max-width: 100%;
+      height: auto
+    }
+
+    /*warnings*/
+
+    /* .status { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700 }
+.status.good  { background:#083; color:#dffbe8 }
+.status.warn  { background:#7a4b00; color:#ffe1b3 }
+.status.dang  { background:#6d1515; color:#ffd0d0 } */
+
+    /* 
+.st{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid transparent}
+.st.ok{color:#22c55e;background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35)}
+.st.warn{color:#f59e0b;background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35)}
+.st.danger{color:#ef4444;background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35)} */
+    /* قيّد الأنماط بلوحة الانضباط فقط */
+    #panel-discipline .disc-status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid transparent
+    }
+
+    #panel-discipline .disc-status.disc-ok {
+      color: #22c55e;
+      background: rgba(34, 197, 94, .12);
+      border-color: rgba(34, 197, 94, .35)
+    }
+
+    #panel-discipline .disc-status.disc-warn {
+      color: #f59e0b;
+      background: rgba(245, 158, 11, .12);
+      border-color: rgba(245, 158, 11, .35)
+    }
+
+    #panel-discipline .disc-status.disc-danger {
+      color: #ef4444;
+      background: rgba(239, 68, 68, .12);
+      border-color: rgba(239, 68, 68, .35)
+    }
+
+    /* Records leaderboard tweaks */
+    #tblRecords td small {
+      color: var(--ink-muted)
+    }
+
+    .rank {
+      display: inline-block;
+      width: 36px;
+      text-align: center;
+      font-weight: 800;
+      background: #192734;
+      border: 1px solid var(--ring);
+      border-radius: 10px;
+      padding: 6px 0;
+    }
+
+    .rank.gold {
+      background: linear-gradient(180deg, #F2C94C, #F29F05);
+      color: #0D0D0D
+    }
+
+    .rank.silver {
+      background: linear-gradient(180deg, #D9D9D9, #BFBFBF);
+      color: #0D0D0D
+    }
+
+    .rank.bronze {
+      background: linear-gradient(180deg, #D2A679, #B87436);
+      color: #0D0D0D
+    }
+
+
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--accent);
+      padding: 4px 8px;
+    }
+
+    .icon-btn:hover {
+      opacity: .8
+    }
+
+
+    .modal {
+  position:fixed; inset:0; display:grid; place-items:center;
+  background:rgba(0,0,0,0.65); z-index:1000;
 }
-
-
-/* Streak strip */
-.streak-strip{
-  display:grid;
-  grid-auto-flow:column;
-  grid-auto-columns:6px;
-  gap:2px;
-  height:8px;
-  width:100%;
-  overflow:hidden;
-  border-radius:4px;
-  background:transparent;
-  scrollbar-width:none; -ms-overflow-style:none;
+.modal.hidden{ display:none; }
+.modal-box {
+  background:#111c27; border:1px solid var(--ring);
+  border-radius:16px; padding:24px; width:90%; max-width:700px;
+  position:relative;
 }
-.streak-strip::-webkit-scrollbar{ display:none }
-.streak-strip span{ height:100%; width:100%; border-radius:2px; background:#2b3a4a }
-.streak-strip span.on{ background:var(--ok) }
-@media (max-width:480px){
-  .streak-strip{ grid-auto-columns:4px; gap:1.5px; height:6px }
+.close-btn {
+  position:absolute; top:10px; left:10px;
+  background:none; border:none; font-size:22px; color:var(--accent);
+  cursor:pointer;
 }
-
-/* A11y + RTL */
-:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:10px }
-body.rtl{ direction:rtl } body.rtl .row,body.rtl .row-3{ direction:rtl }
-
-img,canvas{ max-width:100%; height:auto }
 
 
 
   </style>
-  
-  
-  
-  
+
+
+
+
 
   <script>
 
 
 
-//     Chart.defaults.color = '#e9e9e9';
-//     Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
-//     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
-//     Chart.defaults.plugins.tooltip.titleColor = '#fff';
-//     Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+    //     Chart.defaults.color = '#e9e9e9';
+    //     Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
+    //     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
+    //     Chart.defaults.plugins.tooltip.titleColor = '#fff';
+    //     Chart.defaults.plugins.tooltip.bodyColor = '#fff';
 
 
-//     Chart.defaults.font.family = "'Almarai', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif";
-// Chart.defaults.font.size = 12;          // fixed px
-// Chart.defaults.font.weight = '400';
-// Chart.defaults.responsive = true;
-// Chart.defaults.maintainAspectRatio = true;
+    //     Chart.defaults.font.family = "'Almarai', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif";
+    // Chart.defaults.font.size = 12;          // fixed px
+    // Chart.defaults.font.weight = '400';
+    // Chart.defaults.responsive = true;
+    // Chart.defaults.maintainAspectRatio = true;
 
 
-// ====== Chart.js theme (single block only) ======
-Chart.defaults.color = '#e9e9e9';
-Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
-Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
-Chart.defaults.plugins.tooltip.titleColor = '#fff';
-Chart.defaults.plugins.tooltip.bodyColor = '#fff';
-Chart.defaults.font.family = "'Almarai', system-ui, sans-serif";
-Chart.defaults.font.size = 13;
-Chart.defaults.responsive = true;
-Chart.defaults.maintainAspectRatio = true;
-Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+    // ====== Chart.js theme (single block only) ======
+    Chart.defaults.color = '#e9e9e9';
+    Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
+    Chart.defaults.plugins.tooltip.titleColor = '#fff';
+    Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+    Chart.defaults.font.family = "'Almarai', system-ui, sans-serif";
+    Chart.defaults.font.size = 13;
+    Chart.defaults.responsive = true;
+    Chart.defaults.maintainAspectRatio = true;
+    Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
 
   </script>
 </head>
+
 <body class="rtl">
   <header>
-    <div class="brand"><img class="logo" id="logo" alt="Logo" /><div id="appTitle">تحدي القراء</div></div>
+    <div class="brand"><img class="logo" id="logo" alt="Logo" />
+      <div id="appTitle">تحدي القراء</div>
+    </div>
+
+    <button id="btnSettings" title="الإعدادات" class="icon-btn">⚙️</button>
+
 
   </header>
 
   <div class="wrap">
     <div class="tabs" role="tablist" aria-label="Pages">
-      <div class="tab active" data-tab="log" role="tab" aria-selected="true" tabindex="0" id="tab-log">تسجيل القراءة</div>
-      <div class="tab" data-tab="stats" role="tab" aria-selected="false" tabindex="0" id="tab-stats">لوحة الإحصائيات</div>
+      <div class="tab active" data-tab="log" role="tab" aria-selected="true" tabindex="0" id="tab-log">تسجيل القراءة
+      </div>
+      <div class="tab" data-tab="stats" role="tab" aria-selected="false" tabindex="0" id="tab-stats">لوحة الإحصائيات
+      </div>
+      <div class="tab" data-tab="records" role="tab" aria-selected="false" tabindex="0" id="tab-records">الأرقام
+        القياسية</div>
       <div class="tab" data-tab="reader" role="tab" aria-selected="false" tabindex="0" id="tab-reader">سجل القارئ</div>
-      <div class="tab" data-tab="discipline" role="tab" aria-selected="false" tabindex="0" id="tab-discipline">المطرودون/الإنذارات</div>
+      <div class="tab" data-tab="discipline" role="tab" aria-selected="false" tabindex="0" id="tab-discipline">
+        المطرودون/الإنذارات</div>
     </div>
 
     <!-- Log Form -->
     <div id="panel-log" class="card" role="tabpanel" aria-labelledby="tab-log">
       <h2 id="logTitle" style="margin-top:0">إضافة جلسة قراءة</h2>
-    
+
       <div class="row">
         <div>
           <label for="name" id="lblReader">القارئ</label>
@@ -372,7 +963,7 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
           <datalist id="namesList"></datalist>
           <div class="muted" id="nameHint">لم تجد اسمك؟ تواصل مع المجلس الأعلى</div>
         </div>
-    
+
         <div>
           <label for="book">أقرأ حاليا</label>
           <input id="book" list="bookList" placeholder="اسم الكتاب" />
@@ -380,7 +971,7 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
           <label><input type="checkbox" id="bookFinished">أنهيت الكتاب</label>
         </div>
 
-    
+
         <div>
           <label id="lblDuration">المدة (ث:د:س)</label>
           <div class="timegrid">
@@ -390,28 +981,30 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
           </div>
           <div class="muted" id="durationHint">أدخل الساعات والدقائق والثواني</div>
         </div>
-    
+
         <div>
           <label for="date" id="lblDate">التاريخ</label>
           <div class="date-wrap"><input id="date" type="date" /><span class="cal-ic" aria-hidden="true"></span></div>
         </div>
-    
+
         <div style="display:flex; align-items:flex-end; gap:12px;">
           <button id="submitBtn">حفظ</button>
           <span class="muted" id="status" role="status" aria-live="polite"></span>
         </div>
-    
+
         <!-- TIMER ROW -->
         <div class="timer-row">
           <div id="timerDisplay">00:00:00</div>
           <button id="btnToggle" class="toggle" type="button" aria-label="تشغيل/إيقاف مؤقت" title="تشغيل/إيقاف">
-            <svg id="icoToggle" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="icoToggle" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7z" />
+            </svg>
           </button>
           <div class="hint">لمس مطوّل للتصفير</div>
         </div>
       </div>
     </div>
-    
+
 
     <!-- Stats Dashboard -->
     <div id="panel-stats" class="card hidden" role="tabpanel" aria-labelledby="tab-stats">
@@ -419,7 +1012,8 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
 
       <!-- Badges: جوائز الأسبوع دائمًا -->
       <div class="badge-row">
-        <div style="display:flex; justify-content:flex-end; margin-bottom:6px;"><span class="pill" id="awardsPill">جوائز الأسبوع</span></div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:6px;"><span class="pill" id="awardsPill">جوائز
+            الأسبوع</span></div>
         <div id="badges" class="badges"></div>
       </div>
 
@@ -427,8 +1021,8 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
         <h3>الكتب المقروءة هذا الأسبوع</h3>
         <div id="currentWeekBooks"></div>
       </div>
-      
-      
+
+
       <div class="spacer"></div>
       <!-- صندوق المدى أسفل الجوائز مباشرة (مفتوح افتراضياً) -->
       <details class="range-box" id="rangeBox" close>
@@ -438,7 +1032,8 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
           <div class="row">
             <div>
               <label for="statsDate" id="lblRefDate">تاريخ المرجع (افتراضي: أمس)</label>
-              <div class="date-wrap"><input id="statsDate" type="date" /><span class="cal-ic" aria-hidden="true"></span></div>
+              <div class="date-wrap"><input id="statsDate" type="date" /><span class="cal-ic" aria-hidden="true"></span>
+              </div>
             </div>
             <div>
               <label for="rangeSel" id="lblRange">المدى</label>
@@ -450,8 +1045,14 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
               </select>
             </div>
             <div>
-              <label for="topNSel" id="lblTopN" class="muted">أفضل N</label>
-              <select id="topNSel"><option>10</option><option selected>20</option><option>50</option><option>100</option><option>All</option></select>
+              <label for="topNSel" id="lblTopN" class="muted">أفضل..</label>
+              <select id="topNSel">
+                <option>10</option>
+                <option selected>20</option>
+                <option>50</option>
+                <option>100</option>
+                <option>All</option>
+              </select>
             </div>
             <div style="display:flex; align-items:flex-end; gap:12px;">
               <button id="refreshBtn">تحديث</button>
@@ -465,26 +1066,37 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
 
       <!-- KPIs -->
       <div class="row-3" id="kpiRow">
-        <div class="kpi"><div class="v" id="kpi-total">–</div><div class="muted" id="kpiTotalLabel">إجمالي الدقائق</div></div>
-        <div class="kpi"><div class="v" id="kpi-avg">–</div><div class="muted" id="kpiAvgLabel">متوسط لكل قارئ</div></div>
-        <div class="kpi"><div class="v" id="kpi-count">–</div><div class="muted" id="kpiCountLabel">عدد القرّاء النشطين</div></div>
+        <div class="kpi">
+          <div class="v" id="kpi-total">–</div>
+          <div class="muted" id="kpiTotalLabel">إجمالي الدقائق</div>
+        </div>
+        <div class="kpi">
+          <div class="v" id="kpi-avg">–</div>
+          <div class="muted" id="kpiAvgLabel">متوسط لكل قارئ</div>
+        </div>
+        <div class="kpi">
+          <div class="v" id="kpi-count">–</div>
+          <div class="muted" id="kpiCountLabel">عدد القرّاء النشطين</div>
+        </div>
       </div>
 
       <div style="text-align:end; margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
         <button id="btnDownloadCSV">تحميل CSV</button>
         <button id="btnDownloadPNG">تحميل صورة (PNG)</button>
       </div>
-      
-      
+
+
 
       <div class="spacer"></div>
 
       <div class="card" style="background:transparent; border:0; padding:0;">
         <div style="display:grid; grid-template-columns:1fr; gap:24px;">
-          <div><div class="pill" id="pillByReader">لوحة الشرف</div><canvas id="chartMain" height="140"></canvas></div>
+          <div>
+            <div class="pill" id="pillByReader">لوحة الشرف</div><canvas id="chartMain" height="140"></canvas>
+          </div>
 
 
-          <label>    </label>
+          <label> </label>
 
           <div>
             <div class="pill" id="weekCountLabel">حصيلة الأسابيع</div>
@@ -496,19 +1108,26 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
             </select>
             <canvas id="chartDOW" height="100"></canvas>
           </div>
-          
 
-        <label>    </label>
+
+          <label> </label>
 
           <div>
             <div class="pill" id="pillStreaks">سلاسل الأيام المتتالية (≥ دقيقة يومياً)</div>
             <table id="tblStreaks">
-              <thead><tr><th id="thReader">القارئ</th><th id="thCurrent">الحالية</th><th id="thLongest">الأطول</th><th id="thStrip">آخر 30 يوم</th></tr></thead>
+              <thead>
+                <tr>
+                  <th id="thReader">القارئ</th>
+                  <th id="thCurrent">الحالية</th>
+                  <th id="thLongest">الأطول</th>
+                  <th id="thStrip">آخر 30 يوم</th>
+                </tr>
+              </thead>
               <tbody></tbody>
             </table>
           </div>
 
-          
+
 
           <!-- تم حذف تصنيفات القراء -->
         </div>
@@ -540,7 +1159,9 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
       <div class="spacer"></div>
 
       <div id="readerCal" class="cal">
-        <div class="cal-head"><div id="calTitle">—</div></div>
+        <div class="cal-head">
+          <div id="calTitle">—</div>
+        </div>
         <div class="grid" id="calGrid"></div>
       </div>
 
@@ -571,22 +1192,134 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
 
     <!-- Discipline -->
     <div id="panel-discipline" class="card hidden" role="tabpanel" aria-labelledby="tab-discipline">
-      <h2 style="margin-top:0" id="discTitle">المطرودون والإنذارات</h2>
+      <h2 style="margin-top:0" id="discTitle">حالة الانضباط</h2>
+
       <div class="row">
-        <div><label id="lblDiscDate" for="discDate">تاريخ المرجع</label><div class="date-wrap"><input id="discDate" type="date" /><span class="cal-ic" aria-hidden="true"></span></div></div>
-        <div style="display:flex; align-items:flex-end; gap:12px;"><button id="discBtn">تحديث القائمة</button><span class="muted" id="discHint">الأسبوع يبدأ السبت وينتهي الجمعة</span></div>
+        <div>
+          <label id="lblDiscDate" for="discDate">تاريخ المرجع</label>
+          <div class="date-wrap">
+            <input id="discDate" type="date" /><span class="cal-ic" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div style="display:flex; align-items:flex-end; gap:12px;">
+          <button id="discBtn">تحديث القائمة</button>
+          <span class="muted" id="discHint">الأسبوع يبدأ السبت وينتهي الجمعة</span>
+        </div>
       </div>
+
       <div class="spacer"></div>
-      <div class="row-2">
-        <div><div class="pill" id="pillWarn">قائمة الإنذار (أقل من 30 دقيقة في الأسبوع السابق)</div>
-          <table id="tblWarn"><thead><tr><th>القارئ</th><th>دقائق الأسبوع السابق</th></tr></thead><tbody></tbody></table></div>
-        <div><div class="pill" id="pillRemoved">قائمة المطرودين (أقل من 60 دقيقة في آخر أسبوعين مكتملين)</div>
-          <table id="tblRemoved"><thead><tr><th>القارئ</th><th>مجموع آخر أسبوعين</th></tr></thead><tbody></tbody></table></div>
-      </div>
+
+      <!-- <div class="pill">القارئ • الدقائق المتبقية • الحالة</div> -->
+      <table id="tblDisc">
+        <thead>
+          <tr>
+            <th>القارئ</th>
+            <th>الدقائق المتبقية</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
+
+
+    <!-- الارقام القياسية -->
+    <!-- Records -->
+    <div id="panel-records" class="card hidden" role="tabpanel" aria-labelledby="tab-records">
+      <h2 style="margin-top:0">لوحة السجلات</h2>
+
+      <div class="row-2" style="align-items:end">
+        <div>
+          <label for="recMetric">المؤشر</label>
+          <select id="recMetric">
+            <option value="top-total" selected>الإجمالي</option>
+            <option value="top-day">أفضل يوم</option>
+            <option value="top-week">أفضل أسبوع</option>
+            <option value="top-month">أفضل شهر</option>
+            <option value="longest-streak">أطول سلسلة</option>
+            <!-- <option value="top-rolling7">أفضل 7 أيام متحركة</option> -->
+          </select>
+        </div>
+        <div style="display:flex; gap:12px; justify-content:flex-end">
+          <div>
+            <label for="recLimit">أفضل..</label>
+            <select id="recLimit">
+              <option selected>5</option>
+              <option>10</option>
+              <option>20</option>
+            </select>
+          </div>
+          <!-- <button id="recRefresh">تحديث</button> -->
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <!-- highlights -->
+      <div class="row-2">
+        <div class="kpi">
+          <div class="v" id="recTopName"></div>
+        </div>
+        <div class="kpi">
+          <div class="v" id="recTopValue">–</div>
+          <div class="muted" id="recTopLabel">القيمة</div>
+        </div>
+      </div>
+
+
+      <div class="spacer"></div>
+
+      <!-- unified leaderboard -->
+      <div class="pill" id="recTitle">لوحة المتصدرين</div>
+      <table id="tblRecords">
+        <thead>
+          <tr>
+            <th style="width:64px">#</th>
+            <th>القارئ</th>
+            <th id="colValue">القيمة</th>
+            <th id="colWhen">التاريخ/النطاق</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+
+
 
     <footer><span id="footNote">صُنع بحب لتحدي القراء</span></footer>
   </div>
+
+
+
+  <div id="adminModal" class="modal hidden">
+    <div class="modal-box">
+      <h3>لوحة الإدارة</h3>
+  
+      <div id="adminLogin">
+        <label>كلمة المرور</label>
+        <input id="admPass" type="password" placeholder="••••••" />
+        <button id="admLoginBtn">دخول</button>
+        <div class="muted" id="admMsg"></div>
+      </div>
+  
+      <div id="adminArea" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h4>المستخدمون المعرضون للإزالة</h4>
+          <button id="admLogout">خروج</button>
+        </div>
+        <table id="tblAdminRemoved">
+          <thead>
+            <tr><th>القارئ</th><th>الدقائق (آخر أسبوعين)</th><th>الحالة</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+  
+      <button id="admClose" class="close-btn">×</button>
+    </div>
+  </div>
+  
 
   <script>
     // ====== Chart.js theme ======
@@ -595,360 +1328,372 @@ Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
     // Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
     // Chart.defaults.plugins.tooltip.titleColor = '#fff';
     // Chart.defaults.plugins.tooltip.bodyColor = '#fff';
-  
+
     // ====== CONFIG ======
     const API_BASE = 'https://ethical-lorine-readerschallenge-88169b1f.koyeb.app/api';
-    const FALLBACK_NAMES = ['Reader 1','Reader 2','Reader 3'];
+    const FALLBACK_NAMES = ['Reader 1', 'Reader 2', 'Reader 3'];
     const LOGO_SRC = 'logo.svg';
-  
+
     // ====== DOM ======
     const tabs = document.querySelectorAll('.tab');
     const panels = {
       log: q('#panel-log'),
       stats: q('#panel-stats'),
       reader: q('#panel-reader'),
-      discipline: q('#panel-discipline')
+      discipline: q('#panel-discipline'),
+      records: q('#panel-records'),
+
     };
-  
+
     const logo = q('#logo');
     const dlNames = q('#namesList');
     const dlReaders = q('#readerList');
-  
+
     const elName = q('#name');
     const elDate = q('#date');
     const elStatus = q('#status');
     const btnSubmit = q('#submitBtn');
     const durH = q('#durH'), durM = q('#durM'), durS = q('#durS');
-  
+
     const timerDisplay = q('#timerDisplay');
     const btnToggle = q('#btnToggle');
     const icoToggle = q('#icoToggle');
-  
+
     const elStatsDate = q('#statsDate');
     const elRangeSel = q('#rangeSel');
     const elTopN = q('#topNSel');
     const elRefresh = q('#refreshBtn');
-  
+
     const kpiTotal = q('#kpi-total'), kpiAvg = q('#kpi-avg'), kpiCount = q('#kpi-count');
     const chartMainCanvas = q('#chartMain');
     const chartHistoryCanvas = q('#chartHistory');
     const chartDOWCanvas = q('#chartDOW');
-  
+
     const tblStreaksBody = q('#tblStreaks tbody');
     const badgesDiv = q('#badges');
-  
+
     const readerMonth = q('#readerMonth');
     const readerSel = q('#readerSel');
     const calTitle = q('#calTitle');
     const calGrid = q('#calGrid');
-  
+
     const discDate = q('#discDate');
     const discBtn = q('#discBtn');
     const tblWarnBody = q('#tblWarn tbody');
     const tblRemovedBody = q('#tblRemoved tbody');
 
-    const elBook   = q('#book');
-const dlBooks  = q('#bookList');
+    const elBook = q('#book');
+    const dlBooks = q('#bookList');
     const chkFinished = q('#bookFinished'); // and a <input type="checkbox" id="bookFinished">
 
 
     // run once after you grab chartMainCanvas
-// chartMainCanvas.removeAttribute('height');      // kill fixed attr height
-// chartMainCanvas.style.height = '100%';          // let it fill its holder
+    // chartMainCanvas.removeAttribute('height');      // kill fixed attr height
+    // chartMainCanvas.style.height = '100%';          // let it fill its holder
 
-// ====== Chart.js theme ======
-Chart.defaults.color = '#e9e9e9';
-Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
-Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
-Chart.defaults.plugins.tooltip.titleColor = '#fff';
-Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+    // ====== Chart.js theme ======
+    Chart.defaults.color = '#e9e9e9';
+    Chart.defaults.borderColor = 'rgba(233,233,233,0.15)';
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22,38,59,0.97)';
+    Chart.defaults.plugins.tooltip.titleColor = '#fff';
+    Chart.defaults.plugins.tooltip.bodyColor = '#fff';
 
-// ====== FONT SETTINGS ======
-// Chart.defaults.font.family = "'Almarai', 'Cairo', system-ui, sans-serif"; // pick your font
-Chart.defaults.font.size = 13;   // optional
-Chart.defaults.font.weight = '300'; // optional
-
-
-Chart.defaults.font.family = "'Almarai'";
-// Chart.defaults.font.size = 12;
-// Chart.defaults.font.weight = '400';
-Chart.defaults.responsive = true;
-Chart.defaults.maintainAspectRatio = true;
-Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+    // ====== FONT SETTINGS ======
+    // Chart.defaults.font.family = "'Almarai', 'Cairo', system-ui, sans-serif"; // pick your font
+    Chart.defaults.font.size = 13;   // optional
+    Chart.defaults.font.weight = '300'; // optional
 
 
-  
+    Chart.defaults.font.family = "'Almarai'";
+    // Chart.defaults.font.size = 12;
+    // Chart.defaults.font.weight = '400';
+    Chart.defaults.responsive = true;
+    Chart.defaults.maintainAspectRatio = true;
+    Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+
+
+
     // ====== Helpers ======
-    function q(s){ return document.querySelector(s) }
-    function todayISO(){
-      const d=new Date(); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    function q(s) { return document.querySelector(s) }
+    function todayISO() {
+      const d = new Date(); const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
       return `${y}-${m}-${day}`;
     }
-    function yesterdayISO(){ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10) }
-    function monthNow(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` }
-    function showStatus(msg, ok=true){ elStatus.textContent=msg; elStatus.style.color= ok?'#8ef5b2':'#ffb4b4' }
-    function fetchJSON(url,opts){ return fetch(url,opts).then(r=>r.json()) }
-    function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]) ) }
-    function num(v){ const n=Number(v); return Number.isFinite(n)?n:0 }
-  
-    function makeBar(ctx, labels, data, title, opts = {}){
-  if (ctx.__chart) ctx.__chart.destroy();
-  const c = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets: [{ label: title, data,
-      backgroundColor: 'rgba(255,177,0,0.85)',
-      hoverBackgroundColor: 'rgba(255,197,77,0.95)' }]},
-    options: Object.assign({
-      responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 2.2,                  // controls canvas size, not font
-      animation: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { display:false }, ticks: { font: { size: 12, family: Chart.defaults.font.family } } },
-        y: { beginAtZero:true, ticks: { precision:0, font: { size: 12, family: Chart.defaults.font.family } } }
-      },
-      devicePixelRatio: window.devicePixelRatio || 1
-    }, opts)
-  });
-  ctx.__chart = c; return c;
-}
+    function yesterdayISO() { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10) }
+    function monthNow() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` }
+    function showStatus(msg, ok = true) { elStatus.textContent = msg; elStatus.style.color = ok ? '#8ef5b2' : '#ffb4b4' }
+    function fetchJSON(url, opts) { return fetch(url, opts).then(r => r.json()) }
+    function esc(s) { return (s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])) }
+    function num(v) { const n = Number(v); return Number.isFinite(n) ? n : 0 }
 
-
-
-
-    function makeBarH(canvas, labels, data, title){
-  if (canvas.__chart) { canvas.__chart.destroy(); canvas.__chart = null; }
-
-  // set HEIGHT ON THE PARENT, not the canvas
-  const rowH = 26, pad = 80;
-  const h = Math.min(800, Math.max(240, labels.length * rowH + pad));
-  const holder = canvas.parentElement;
-  if (holder) holder.style.height = h + 'px';
-
-  const c = new Chart(canvas,{
-    type:'bar',
-    data:{ labels, datasets:[{
-      label:title,
-      data,
-      backgroundColor:'rgba(242,159,5,0.9)',
-      hoverBackgroundColor:'rgba(242,116,5,0.95)'
-    }]},
-    options:{
-      indexAxis:'y',
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{ legend:{ display:false } },
-      scales:{
-        x:{ beginAtZero:true, ticks:{ precision:0 }, grid:{ display:true } },
-        y:{ ticks:{ autoSkip:false, maxRotation:0, minRotation:0 }, grid:{ display:false } }
-      }
-    }
-  });
-  canvas.__chart = c;
-  return c;
-}
-
-
-
-
-    function makeLine(ctx, labels, data, title){
+    function makeBar(ctx, labels, data, title, opts = {}) {
       if (ctx.__chart) ctx.__chart.destroy();
-      const c=new Chart(ctx,{type:'line',
-        data:{labels,datasets:[{label:title,data,tension:.35,fill:false,borderWidth:2.5,borderColor:'#ffb100',pointRadius:2.5,pointHoverRadius:4}]},
-        options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0}}}}
-      }); ctx.__chart=c; return c;
+      const c = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels, datasets: [{
+            label: title, data,
+            backgroundColor: 'rgba(255,177,0,0.85)',
+            hoverBackgroundColor: 'rgba(255,197,77,0.95)'
+          }]
+        },
+        options: Object.assign({
+          responsive: true,
+          maintainAspectRatio: true,
+          aspectRatio: 2.2,                  // controls canvas size, not font
+          animation: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 12, family: Chart.defaults.font.family } } },
+            y: { beginAtZero: true, ticks: { precision: 0, font: { size: 12, family: Chart.defaults.font.family } } }
+          },
+          devicePixelRatio: window.devicePixelRatio || 1
+        }, opts)
+      });
+      ctx.__chart = c; return c;
     }
-    function renderStreakStrip(days=30, hitDaysSet=new Set()){
-      const frag=document.createDocumentFragment();
-      for(let i=days-1;i>=0;i--){
-        const dd=new Date(Date.now()-i*86400000);
-        const key=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`;
-        const span=document.createElement('span');
-        if(hitDaysSet.has(key)) span.className='on';
+
+
+
+
+    function makeBarH(canvas, labels, data, title) {
+      if (canvas.__chart) { canvas.__chart.destroy(); canvas.__chart = null; }
+
+      // set HEIGHT ON THE PARENT, not the canvas
+      const rowH = 26, pad = 80;
+      const h = Math.min(800, Math.max(240, labels.length * rowH + pad));
+      const holder = canvas.parentElement;
+      if (holder) holder.style.height = h + 'px';
+
+      const c = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels, datasets: [{
+            label: title,
+            data,
+            backgroundColor: 'rgba(242,159,5,0.9)',
+            hoverBackgroundColor: 'rgba(242,116,5,0.95)'
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true, ticks: { precision: 0 }, grid: { display: true } },
+            y: { ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 }, grid: { display: false } }
+          }
+        }
+      });
+      canvas.__chart = c;
+      return c;
+    }
+
+
+
+
+    function makeLine(ctx, labels, data, title) {
+      if (ctx.__chart) ctx.__chart.destroy();
+      const c = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets: [{ label: title, data, tension: .35, fill: false, borderWidth: 2.5, borderColor: '#ffb100', pointRadius: 2.5, pointHoverRadius: 4 }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } } } }
+      }); ctx.__chart = c; return c;
+    }
+    function renderStreakStrip(days = 30, hitDaysSet = new Set()) {
+      const frag = document.createDocumentFragment();
+      for (let i = days - 1; i >= 0; i--) {
+        const dd = new Date(Date.now() - i * 86400000);
+        const key = `${dd.getFullYear()}-${String(dd.getMonth() + 1).padStart(2, '0')}-${String(dd.getDate()).padStart(2, '0')}`;
+        const span = document.createElement('span');
+        if (hitDaysSet.has(key)) span.className = 'on';
         frag.appendChild(span);
       }
-      const wrap=document.createElement('div'); wrap.className='streak-strip'; wrap.appendChild(frag); return wrap.outerHTML;
+      const wrap = document.createElement('div'); wrap.className = 'streak-strip'; wrap.appendChild(frag); return wrap.outerHTML;
     }
-  
+
     // ====== Init ======
-    const state = { names:[], nameSet:new Set() };
+    const state = { names: [], nameSet: new Set() };
     logo.src = LOGO_SRC;
     const t0 = todayISO();
     elDate.value = t0;
     elStatsDate.value = yesterdayISO();
     discDate.value = t0;
     readerMonth.value = monthNow();
-  
-    tabs.forEach(tab=>{
-      const activate=()=>{ tabs.forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false')});
-        tab.classList.add('active'); tab.setAttribute('aria-selected','true');
-        const k=tab.dataset.tab; Object.keys(panels).forEach(p=>panels[p].classList.toggle('hidden',p!==k));
-        if(k==='stats') loadDashboard();
-        if(k==='reader'){ loadReaderNames(); renderReaderMonth(); }
-        if(k==='discipline') loadDiscipline();
+
+    tabs.forEach(tab => {
+      const activate = () => {
+        tabs.forEach(x => { x.classList.remove('active'); x.setAttribute('aria-selected', 'false') });
+        tab.classList.add('active'); tab.setAttribute('aria-selected', 'true');
+        const k = tab.dataset.tab; Object.keys(panels).forEach(p => panels[p].classList.toggle('hidden', p !== k));
+        if (k === 'stats') loadDashboard();
+        if (k === 'reader') { loadReaderNames(); renderReaderMonth(); }
+        if (k === 'discipline') loadDiscipline();
+        if (k === 'records') loadRecords();
+
       };
-      tab.addEventListener('click',activate);
-      tab.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' ') activate() });
+      tab.addEventListener('click', activate);
+      tab.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') activate() });
     });
 
 
     // ====== Names ======
-    function setNames(list){
-  const names = Array.isArray(list) && list.length ? list : FALLBACK_NAMES;
-  dlNames.innerHTML=''; dlReaders.innerHTML='';
-  for(const n of names){
-    const o1=document.createElement('option'); o1.value=n; dlNames.appendChild(o1);
-    const o2=document.createElement('option'); o2.value=n; dlReaders.appendChild(o2);
-  }
-  state.names = names.slice();
-  state.nameSet = new Set(names.map(x=>x.trim()));
-}
+    function setNames(list) {
+      const names = Array.isArray(list) && list.length ? list : FALLBACK_NAMES;
+      dlNames.innerHTML = ''; dlReaders.innerHTML = '';
+      for (const n of names) {
+        const o1 = document.createElement('option'); o1.value = n; dlNames.appendChild(o1);
+        const o2 = document.createElement('option'); o2.value = n; dlReaders.appendChild(o2);
+      }
+      state.names = names.slice();
+      state.nameSet = new Set(names.map(x => x.trim()));
+    }
 
-async function loadNames(){
-  try{
-    const r = await fetch(`${API_BASE}/names`);
-    if(!r.ok){ console.warn('GET /names failed', r.status); setNames(null); return; }
-    const j = await r.json();
-    if (j && Array.isArray(j.names)) setNames(j.names);
-    else { console.warn('Unexpected /names shape', j); setNames(null); }
-  }catch(e){
-    console.error('Error fetching /names', e);
-    setNames(null);
-  }
-}
+    async function loadNames() {
+      try {
+        const r = await fetch(`${API_BASE}/names`);
+        if (!r.ok) { console.warn('GET /names failed', r.status); setNames(null); return; }
+        const j = await r.json();
+        if (j && Array.isArray(j.names)) setNames(j.names);
+        else { console.warn('Unexpected /names shape', j); setNames(null); }
+      } catch (e) {
+        console.error('Error fetching /names', e);
+        setNames(null);
+      }
+    }
 
-async function loadBooksSuggestions(){
-  const qstr   = (elBook.value || '').trim();
-  const reader = (elName.value || '').trim();
+    async function loadBooksSuggestions() {
+      const qstr = (elBook.value || '').trim();
+      const reader = (elName.value || '').trim();
 
-  const params = new URLSearchParams();
-  if (qstr.length >= 2) params.set('q', qstr);
-  if (reader)           params.set('name', reader);
+      const params = new URLSearchParams();
+      if (qstr.length >= 2) params.set('q', qstr);
+      if (reader) params.set('name', reader);
 
-  const url = `${API_BASE}/books${params.toString() ? '?' + params.toString() : ''}`;
+      const url = `${API_BASE}/books${params.toString() ? '?' + params.toString() : ''}`;
 
-  try{
-    const res = await fetch(url);
-    const { books = [] } = await res.json();
-    dlBooks.innerHTML = books.map(b => `<option value="${b}"></option>`).join('');
-  }catch(e){
-    console.error('books fetch failed:', e);
-    dlBooks.innerHTML = '';
-  }
-}
+      try {
+        const res = await fetch(url);
+        const { books = [] } = await res.json();
+        dlBooks.innerHTML = books.map(b => `<option value="${b}"></option>`).join('');
+      } catch (e) {
+        console.error('books fetch failed:', e);
+        dlBooks.innerHTML = '';
+      }
+    }
 
-elBook?.addEventListener('input', loadBooksSuggestions);
-elBook?.addEventListener('focus', loadBooksSuggestions);
-elName?.addEventListener('change', loadBooksSuggestions);
-
-
+    elBook?.addEventListener('input', loadBooksSuggestions);
+    elBook?.addEventListener('focus', loadBooksSuggestions);
+    elName?.addEventListener('change', loadBooksSuggestions);
 
 
 
 
 
-    function loadReaderNames(){ if(dlReaders.childElementCount===0) loadNames() }
+
+
+    function loadReaderNames() { if (dlReaders.childElementCount === 0) loadNames() }
     loadNames();
-  
+
     // ====== Timer ======
-    const TIMER_KEY='readingTimer:v1';
-    const timer={ running:false, startAt:0, elapsed:0, rafId:null };
-    function saveTimer(){ try{ localStorage.setItem(TIMER_KEY, JSON.stringify({running:timer.running,startAt:timer.startAt,elapsed:timer.elapsed})) }catch(_){ } }
-    function msToHMS(ms){ ms=Math.max(0,Math.floor(ms)); const sTot=Math.floor(ms/1000); const h=Math.floor(sTot/3600), m=Math.floor((sTot%3600)/60), s=sTot%60; return {h,m,s,label:`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`} }
-    function fillInputsFromElapsed(){ if(!timer.running && timer.elapsed===0) return; const {h,m,s}=msToHMS(timer.elapsed); durH.value=h; durM.value=m; durS.value=s }
-    function setIcon(running){ icoToggle.innerHTML = running ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>' }
-    function updateTimerUI(){ const t=msToHMS(timer.elapsed); timerDisplay.textContent=t.label; fillInputsFromElapsed(); setIcon(timer.running) }
-    function tick(){ if(!timer.running) return; timer.elapsed=Date.now()-timer.startAt; updateTimerUI(); timer.rafId=requestAnimationFrame(tick) }
-    function startTick(){ cancelAnimationFrame(timer.rafId); timer.rafId=requestAnimationFrame(tick) }
-    function startTimer(){ if(timer.running) return; timer.running=true; timer.startAt=Date.now()-timer.elapsed; saveTimer(); updateTimerUI(); startTick() }
-    function pauseTimer(){ if(!timer.running) return; timer.running=false; cancelAnimationFrame(timer.rafId); timer.elapsed=Date.now()-timer.startAt; saveTimer(); updateTimerUI() }
-    function resetTimer(){ timer.running=false; cancelAnimationFrame(timer.rafId); timer.elapsed=0; durH.value=''; durM.value=''; durS.value=''; saveTimer(); updateTimerUI() }
-    function loadTimer(){ try{ const t=JSON.parse(localStorage.getItem(TIMER_KEY)||'{}'); if(typeof t.elapsed==='number') timer.elapsed=t.elapsed; if(t.running && t.startAt){ timer.running=true; timer.startAt=t.startAt; startTick() } else updateTimerUI() }catch(_){ updateTimerUI() } }
-    let pressTimer=null;
-    btnToggle.addEventListener('click', ()=>{ timer.running?pauseTimer():startTimer() });
-    btnToggle.addEventListener('pointerdown', ()=>{ clearTimeout(pressTimer); pressTimer=setTimeout(()=>resetTimer(),800) });
-    btnToggle.addEventListener('pointerup', ()=> clearTimeout(pressTimer));
-    btnToggle.addEventListener('pointerleave', ()=> clearTimeout(pressTimer));
-    document.addEventListener('keydown', e=>{
-      if(e.code==='Space' && document.activeElement.tagName!=='INPUT'){ e.preventDefault(); timer.running?pauseTimer():startTimer() }
-      if(e.code==='KeyR' && (e.metaKey||e.ctrlKey)) { e.preventDefault(); resetTimer() }
+    const TIMER_KEY = 'readingTimer:v1';
+    const timer = { running: false, startAt: 0, elapsed: 0, rafId: null };
+    function saveTimer() { try { localStorage.setItem(TIMER_KEY, JSON.stringify({ running: timer.running, startAt: timer.startAt, elapsed: timer.elapsed })) } catch (_) { } }
+    function msToHMS(ms) { ms = Math.max(0, Math.floor(ms)); const sTot = Math.floor(ms / 1000); const h = Math.floor(sTot / 3600), m = Math.floor((sTot % 3600) / 60), s = sTot % 60; return { h, m, s, label: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` } }
+    function fillInputsFromElapsed() { if (!timer.running && timer.elapsed === 0) return; const { h, m, s } = msToHMS(timer.elapsed); durH.value = h; durM.value = m; durS.value = s }
+    function setIcon(running) { icoToggle.innerHTML = running ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>' }
+    function updateTimerUI() { const t = msToHMS(timer.elapsed); timerDisplay.textContent = t.label; fillInputsFromElapsed(); setIcon(timer.running) }
+    function tick() { if (!timer.running) return; timer.elapsed = Date.now() - timer.startAt; updateTimerUI(); timer.rafId = requestAnimationFrame(tick) }
+    function startTick() { cancelAnimationFrame(timer.rafId); timer.rafId = requestAnimationFrame(tick) }
+    function startTimer() { if (timer.running) return; timer.running = true; timer.startAt = Date.now() - timer.elapsed; saveTimer(); updateTimerUI(); startTick() }
+    function pauseTimer() { if (!timer.running) return; timer.running = false; cancelAnimationFrame(timer.rafId); timer.elapsed = Date.now() - timer.startAt; saveTimer(); updateTimerUI() }
+    function resetTimer() { timer.running = false; cancelAnimationFrame(timer.rafId); timer.elapsed = 0; durH.value = ''; durM.value = ''; durS.value = ''; saveTimer(); updateTimerUI() }
+    function loadTimer() { try { const t = JSON.parse(localStorage.getItem(TIMER_KEY) || '{}'); if (typeof t.elapsed === 'number') timer.elapsed = t.elapsed; if (t.running && t.startAt) { timer.running = true; timer.startAt = t.startAt; startTick() } else updateTimerUI() } catch (_) { updateTimerUI() } }
+    let pressTimer = null;
+    btnToggle.addEventListener('click', () => { timer.running ? pauseTimer() : startTimer() });
+    btnToggle.addEventListener('pointerdown', () => { clearTimeout(pressTimer); pressTimer = setTimeout(() => resetTimer(), 800) });
+    btnToggle.addEventListener('pointerup', () => clearTimeout(pressTimer));
+    btnToggle.addEventListener('pointerleave', () => clearTimeout(pressTimer));
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); timer.running ? pauseTimer() : startTimer() }
+      if (e.code === 'KeyR' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); resetTimer() }
     });
     loadTimer();
 
 
-// ====== Submit (POST /api/logs) ======
-btnSubmit.addEventListener('click', async () => {
-  const raw = (elName.value || '').trim();
-  let name = raw;
-  if (!state.nameSet.has(name)) {
-    const cand = state.names.filter(n => n.toLowerCase() === raw.toLowerCase());
-    if (cand.length === 1) name = cand[0];
-  }
-  if (!state.nameSet.has(name)) { showStatus('الاسم غير موجود في القائمة. اختر من الاقتراحات.', false); return; }
+    // ====== Submit (POST /api/logs) ======
+    btnSubmit.addEventListener('click', async () => {
+      const raw = (elName.value || '').trim();
+      let name = raw;
+      if (!state.nameSet.has(name)) {
+        const cand = state.names.filter(n => n.toLowerCase() === raw.toLowerCase());
+        if (cand.length === 1) name = cand[0];
+      }
+      if (!state.nameSet.has(name)) { showStatus('الاسم غير موجود في القائمة. اختر من الاقتراحات.', false); return; }
 
-  const h = Number(durH.value) || 0, m = Number(durM.value) || 0, s = Number(durS.value) || 0;
-  const date = elDate.value;
-  const minutes = +(h * 60 + m + s / 60).toFixed(2);
-  if (minutes <= 0 || !isFinite(minutes) || !date || m < 0 || m > 59 || s < 0 || s > 59 || h < 0) {
-    showStatus('تحقَّق من المدخلات', false); return;
-  }
+      const h = Number(durH.value) || 0, m = Number(durM.value) || 0, s = Number(durS.value) || 0;
+      const date = elDate.value;
+      const minutes = +(h * 60 + m + s / 60).toFixed(2);
+      if (minutes <= 0 || !isFinite(minutes) || !date || m < 0 || m > 59 || s < 0 || s > 59 || h < 0) {
+        showStatus('تحقَّق من المدخلات', false); return;
+      }
 
-  const timestamp = new Date().toISOString();        // <-- required
-  const book = (elBook?.value || '').trim() || null; // safe if field missing
-  const finished = !!chkFinished?.checked;           // boolean
+      const timestamp = new Date().toISOString();        // <-- required
+      const book = (elBook?.value || '').trim() || null; // safe if field missing
+      const finished = !!chkFinished?.checked;           // boolean
 
-  btnSubmit.disabled = true; showStatus('جاري الحفظ…');
-  try {
-    const payload = { timestamp, name, minutes, date, book, finished };
-    const res = await fetch(`${API_BASE}/logs`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      btnSubmit.disabled = true; showStatus('جاري الحفظ…');
+      try {
+        const payload = { timestamp, name, minutes, date, book, finished };
+        const res = await fetch(`${API_BASE}/logs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const j = await res.json().catch(() => ({}));
+        if (res.ok) { showStatus(j.message || 'تم الحفظ'); durH.value = ''; durM.value = ''; durS.value = ''; resetTimer(); }
+        else { showStatus(j.error || 'حدث خطأ', false); }
+      } catch (e) {
+        console.error(e);
+        showStatus('حدث خطأ في الاتصال', false);
+      } finally {
+        btnSubmit.disabled = false;
+      }
     });
-    const j = await res.json().catch(()=>({}));
-    if (res.ok) { showStatus(j.message || 'تم الحفظ'); durH.value=''; durM.value=''; durS.value=''; resetTimer(); }
-    else { showStatus(j.error || 'حدث خطأ', false); }
-  } catch (e) {
-    console.error(e);
-    showStatus('حدث خطأ في الاتصال', false);
-  } finally {
-    btnSubmit.disabled = false;
-  }
-});
-  
+
     // ====== Dashboard ======
-    async function loadAwards(refDate){
-      try{
+    async function loadAwards(refDate) {
+      try {
         const a = await fetchJSON(`${API_BASE}/awards?date=${encodeURIComponent(refDate)}`);
-// replace your card() in loadAwards/renderBadgesWeekly
-const card=(icon,title,name,sub,extra='')=>`
+        // replace your card() in loadAwards/renderBadgesWeekly
+        const card = (icon, title, name, sub, extra = '') => `
   <div class="badge">
     <div class="ic">${icon}</div>
     <div class="txt">
       <div class="title">${title}</div>
-      <div class="name">${esc(name||'—')}</div>
-      <small>${sub||''}</small>
+      <div class="name">${esc(name || '—')}</div>
+      <small>${sub || ''}</small>
       ${extra ? `<div class="strip-wrap">${extra}</div>` : ''}
     </div>
   </div>`;
 
         // streak strip for best current streak
-        let stripHTML='';
-        if (a?.bestCurrentStreak?.name){
+        let stripHTML = '';
+        if (a?.bestCurrentStreak?.name) {
           const h = await fetchJSON(`${API_BASE}/history-window?name=${encodeURIComponent(a.bestCurrentStreak.name)}&days=30&date=${encodeURIComponent(refDate)}`);
-          const daysSet = new Set((h.points||[]).filter(p=>(Number(p.minutes)||0)>0).map(p=>p.date));
+          const daysSet = new Set((h.points || []).filter(p => (Number(p.minutes) || 0) > 0).map(p => p.date));
           stripHTML = renderStreakStrip(30, daysSet);
         }
         badgesDiv.innerHTML =
-          card('🏅','قارئ الأسبوع', a?.bestReader?.name || '—', `${Math.max(0, a?.bestReader?.minutes||0)} دقيقة`) +
-          card('📈','الأفضل تحسّنًا', a?.mostImproved?.name || '—', `+${Math.max(0, a?.mostImproved?.diff||0)} دقيقة`) +
-          card('🔥','أطول سلسلة نشطة', a?.bestCurrentStreak?.name || '—', `${Math.max(0, a?.bestCurrentStreak?.current||0)} يوم`, stripHTML);
-      }catch(_){
+          card('🏅', 'قارئ الأسبوع', a?.bestReader?.name || '—', `${Math.max(0, a?.bestReader?.minutes || 0)} دقيقة`) +
+          card('📈', 'الأفضل تحسّنًا', a?.mostImproved?.name || '—', `+${Math.max(0, a?.mostImproved?.diff || 0)} دقيقة`) +
+          card('🔥', 'أطول سلسلة نشطة', a?.bestCurrentStreak?.name || '—', `${Math.max(0, a?.bestCurrentStreak?.current || 0)} يوم`, stripHTML);
+      } catch (_) {
         badgesDiv.innerHTML = '';
       }
     }
-  
+
     // async function loadDOW(refDate){
     //   try{
     //     const d = await fetchJSON(`${API_BASE}/dow?date=${encodeURIComponent(refDate)}&weeks=12`);
@@ -963,280 +1708,292 @@ const card=(icon,title,name,sub,extra='')=>`
     //   }
     // }
 
-    function addDaysISO(iso, days){
-  const d = new Date(iso); d.setDate(d.getDate()+days);
-  return d.toISOString().slice(0,10);
-}
-function weekLabelShort(d){
-  const fmt = new Intl.DateTimeFormat('ar', { month:'short', day:'numeric' });
-  return 'أسبوع ' + fmt.format(d);
-}
-  
-// Week starts Saturday, ends Friday
-function startOfWeekSat(d){
-  const x = new Date(d);
-  x.setHours(12,0,0,0);                 // avoid TZ/DST edge cases
-  const dow = x.getDay();               // 0=Sun..6=Sat
-  const offset = (dow + 1) % 7;         // days since Saturday
-  x.setDate(x.getDate() - offset);
-  return x;                             // local start-of-week (Sat)
-}
-
-async function loadWeeklyTrend(refDate, weeks){
-  weeks = Number(weeks) || 8;
-
-  const labels = [];
-  const data = [];
-  const fmt = new Intl.DateTimeFormat('ar', { day: 'numeric', month: 'short' });
-
-  const anchor = startOfWeekSat(new Date(refDate));  // start of current week (Sat)
-
-  for(let i = weeks - 1; i >= 0; i--){
-    const start = new Date(anchor);
-    start.setDate(anchor.getDate() - i * 7);         // walk back by whole weeks
-    const iso = start.toISOString().slice(0,10);
-
-    let rows = [];
-    try{
-      rows = await fetchJSON(`${API_BASE}/stats?range=week&date=${encodeURIComponent(iso)}`);
-    }catch(_){ rows = []; }
-
-    const total = (rows || []).reduce((s,r)=> s + num(r.total_minutes), 0);
-    labels.push(fmt.format(start));                   // first day of week (Sat)
-    data.push(Math.round(total));
-  }
-
-  makeLine(chartDOWCanvas, labels, data, `مجموع دقائق الأسبوع (آخر ${weeks} أسابيع)`);
-}
-
-
-
-
-
-// helper: get active names for the selected range/date (minutes > 0)
-async function fetchActiveNames(refDate, range){
-  const url = range==='all'
-    ? `${API_BASE}/stats`
-    : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(refDate)}`;
-  try{
-    const rows = await fetchJSON(url);
-    return new Set((rows||[]).filter(r => Number(r.total_minutes) > 0).map(r => r.name));
-  }catch(_){
-    return new Set();
-  }
-}
-
-// replace old loadStreaks with this one
-async function loadStreaks(refDate, range){
-  tblStreaksBody.innerHTML='';
-  try{
-    // 1) who is active in the selected range?
-    const active = await fetchActiveNames(refDate, range);
-
-    // 2) fetch all streaks (anchored at refDate), then keep only active users
-    const s = await fetchJSON(`${API_BASE}/streaks?date=${encodeURIComponent(refDate)}&threshold=1`);
-    const allRows = s?.streaks || [];
-    const rows = allRows.filter(r => active.has(r.name));
-
-    if (rows.length === 0){
-      tblStreaksBody.innerHTML = `<tr><td class="muted" colspan="4">لا يوجد مستخدمون نشطون ضمن المدى الحالي</td></tr>`;
-      return;
+    function addDaysISO(iso, days) {
+      const d = new Date(iso); d.setDate(d.getDate() + days);
+      return d.toISOString().slice(0, 10);
+    }
+    function weekLabelShort(d) {
+      const fmt = new Intl.DateTimeFormat('ar', { month: 'short', day: 'numeric' });
+      return 'أسبوع ' + fmt.format(d);
     }
 
-    // 3) build strips only for the filtered rows
-    const strips = await Promise.all(rows.map(async r=>{
-      const h = await fetchJSON(`${API_BASE}/history-window?name=${encodeURIComponent(r.name)}&days=30&date=${encodeURIComponent(refDate)}`);
-      const daysSet = new Set((h.points||[]).filter(p => (Number(p.minutes)||0) > 0).map(p => p.date));
-      return renderStreakStrip(30, daysSet);
-    }));
+    // Week starts Saturday, ends Friday
+    function startOfWeekSat(d) {
+      const x = new Date(d);
+      x.setHours(12, 0, 0, 0);                 // avoid TZ/DST edge cases
+      const dow = x.getDay();               // 0=Sun..6=Sat
+      const offset = (dow + 1) % 7;         // days since Saturday
+      x.setDate(x.getDate() - offset);
+      return x;                             // local start-of-week (Sat)
+    }
 
-    tblStreaksBody.innerHTML = rows.map((r,i)=>
-      `<tr><td>${esc(r.name)}</td><td>${r.current}</td><td>${r.longest}</td><td>${strips[i]}</td></tr>`
-    ).join('');
-  }catch(_){
-    tblStreaksBody.innerHTML = `<tr><td class="muted" colspan="4">خطأ في الجلب</td></tr>`;
-  }
-}
+    async function loadWeeklyTrend(refDate, weeks) {
+      weeks = Number(weeks) || 8;
 
-async function renderCurrentWeekBooks(refDate){
-  const box = document.getElementById('currentWeekBooks');
-  if (!box) return;
-  const d = refDate || (elStatsDate?.value) || new Date().toISOString().slice(0,10);
-  box.innerHTML = '<div class="muted">يتم التحميل…</div>';
-  try{
-    const r = await fetch(`${API_BASE}/current-week-books?date=${encodeURIComponent(d)}`);
-    const j = await r.json();
-    const books = j.books || [];
-    box.innerHTML = books.length
-      ? books.map(b => `<div class="book-only">${esc(b)}</div>`).join('')
-      : '<div class="muted">لا توجد كتب لهذا الأسبوع</div>';
-  }catch(e){
-    console.error(e);
-    box.innerHTML = '<div class="muted">خطأ في الجلب</div>';
-  }
-}
+      const labels = [];
+      const data = [];
+      const fmt = new Intl.DateTimeFormat('ar', { day: 'numeric', month: 'short' });
 
+      const anchor = startOfWeekSat(new Date(refDate));  // start of current week (Sat)
 
+      for (let i = weeks - 1; i >= 0; i--) {
+        const start = new Date(anchor);
+        start.setDate(anchor.getDate() - i * 7);         // walk back by whole weeks
+        const iso = start.toISOString().slice(0, 10);
 
+        let rows = [];
+        try {
+          rows = await fetchJSON(`${API_BASE}/stats?range=week&date=${encodeURIComponent(iso)}`);
+        } catch (_) { rows = []; }
 
+        const total = (rows || []).reduce((s, r) => s + num(r.total_minutes), 0);
+        labels.push(fmt.format(start));                   // first day of week (Sat)
+        data.push(Math.round(total));
+      }
 
-
-
-
-
-async function loadDashboard(){
-  const d = elStatsDate.value || yesterdayISO();
-  const range = elRangeSel.value;
-  const weekCount = q('#weekCountSel')?.value || 8;
-  // await Promise.all([
-  //   loadAwards(d),
-  //   loadCurrentWeekBooks(d),       // <— here
-  //   loadWeeklyTrend(d, weekCount),
-  //   loadStreaks(d, range),
-  //   loadStats(d, range)
-  // ]);
-
-  await Promise.all([
-  loadAwards(d),
-  loadWeeklyTrend(d, weekCount),
-  renderCurrentWeekBooks(d),   // <—
-  loadStreaks(d, range),
-  loadStats(d, range)
-]);
-
-}
-
-
-
-  
-async function loadStats(refDate, range){
-  const url = range==='all'
-    ? `${API_BASE}/stats`
-    : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(refDate)}`;
-
-  let rows=[]; try{ rows = await fetchJSON(url);}catch(_){ rows=[]; }
-
-  const sorted = (Array.isArray(rows)?rows:[])
-    .slice()
-    .sort((a,b)=>num(b.total_minutes)-num(a.total_minutes));
-
-  // KPIs
-  const total = Math.round(sorted.reduce((s,r)=>s+num(r.total_minutes),0));
-  const n = sorted.length;
-  kpiTotal.textContent = total;
-  kpiCount.textContent = n;
-  kpiAvg.textContent = n ? Math.round(total/n) : 0;
-
-  // Top-N
-  const topNVal = elTopN.value;
-  const view = topNVal !== 'All' ? sorted.slice(0, Number(topNVal)) : sorted;
-
-  const labels = view.map(r=>r.name);
-  const data   = view.map(r=>Math.round(num(r.total_minutes)));
-
-  makeBarH(chartMainCanvas, labels, data, 'إجمالي الدقائق');
-}
-
-
-// async function loadBooksSuggestions(){
-//   const reader = (elName.value || '').trim();
-//   const params = reader ? `?name=${encodeURIComponent(reader)}` : '';
-//   try{
-//     const j = await fetchJSON(`${API_BASE}/books${params}`);
-//     const books = (j && Array.isArray(j.books)) ? j.books : [];
-//     dlBooks.innerHTML = '';
-//     books.forEach(b => {
-//       if(!b) return;
-//       const opt = document.createElement('option');
-//       opt.value = b;
-//       dlBooks.appendChild(opt);
-//     });
-//   }catch(_){
-//     dlBooks.innerHTML = '';
-//   }
-// }
+      makeLine(chartDOWCanvas, labels, data, `مجموع دقائق الأسبوع (آخر ${weeks} أسابيع)`);
+    }
 
 
 
 
 
+    // helper: get active names for the selected range/date (minutes > 0)
+    async function fetchActiveNames(refDate, range) {
+      const url = range === 'all'
+        ? `${API_BASE}/stats`
+        : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(refDate)}`;
+      try {
+        const rows = await fetchJSON(url);
+        return new Set((rows || []).filter(r => Number(r.total_minutes) > 0).map(r => r.name));
+      } catch (_) {
+        return new Set();
+      }
+    }
 
-  
+    // replace old loadStreaks with this one
+    async function loadStreaks(refDate, range) {
+      tblStreaksBody.innerHTML = '';
+      try {
+        // 1) who is active in the selected range?
+        const active = await fetchActiveNames(refDate, range);
 
-    
+        // 2) fetch all streaks (anchored at refDate), then keep only active users
+        const s = await fetchJSON(`${API_BASE}/streaks?date=${encodeURIComponent(refDate)}&threshold=1`);
+        const allRows = s?.streaks || [];
+        const rows = allRows.filter(r => active.has(r.name));
+
+        if (rows.length === 0) {
+          tblStreaksBody.innerHTML = `<tr><td class="muted" colspan="4">لا يوجد مستخدمون نشطون ضمن المدى الحالي</td></tr>`;
+          return;
+        }
+
+        // 3) build strips only for the filtered rows
+        const strips = await Promise.all(rows.map(async r => {
+          const h = await fetchJSON(`${API_BASE}/history-window?name=${encodeURIComponent(r.name)}&days=30&date=${encodeURIComponent(refDate)}`);
+          const daysSet = new Set((h.points || []).filter(p => (Number(p.minutes) || 0) > 0).map(p => p.date));
+          return renderStreakStrip(30, daysSet);
+        }));
+
+        tblStreaksBody.innerHTML = rows.map((r, i) =>
+          `<tr><td>${esc(r.name)}</td><td>${r.current}</td><td>${r.longest}</td><td>${strips[i]}</td></tr>`
+        ).join('');
+      } catch (_) {
+        tblStreaksBody.innerHTML = `<tr><td class="muted" colspan="4">خطأ في الجلب</td></tr>`;
+      }
+    }
+
+    async function renderCurrentWeekBooks(refDate) {
+      const box = document.getElementById('currentWeekBooks');
+      if (!box) return;
+      const d = refDate || (elStatsDate?.value) || new Date().toISOString().slice(0, 10);
+      box.innerHTML = '<div class="muted">يتم التحميل…</div>';
+      try {
+        const r = await fetch(`${API_BASE}/current-week-books?date=${encodeURIComponent(d)}`);
+        const j = await r.json();
+
+        // يدعم شكلين:
+        // 1) [{book, readers, count}]
+        // 2) [ "عنوان كتاب" ]  (قديم)
+        const items = Array.isArray(j.books) ? j.books : [];
+        if (!items.length) { box.innerHTML = '<div class="muted">لا توجد كتب لهذا الأسبوع</div>'; return; }
+
+        const html = items.map(it => {
+          const book = typeof it === 'string' ? it : it.book;
+          const cnt = typeof it === 'string' ? 1 : (Number(it.count) || 0);
+          const badge = cnt > 1 ? `<span class="book-badge" title="${cnt} قارئ">${cnt}</span>` : '';
+          return `<div class="book-only">${badge}${esc(book)}</div>`;
+        }).join('');
+
+        box.innerHTML = html;
+      } catch (e) {
+        console.error(e);
+        box.innerHTML = '<div class="muted">خطأ في الجلب</div>';
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+    async function loadDashboard() {
+      const d = elStatsDate.value || yesterdayISO();
+      const range = elRangeSel.value;
+      const weekCount = q('#weekCountSel')?.value || 8;
+      // await Promise.all([
+      //   loadAwards(d),
+      //   loadCurrentWeekBooks(d),       // <— here
+      //   loadWeeklyTrend(d, weekCount),
+      //   loadStreaks(d, range),
+      //   loadStats(d, range)
+      // ]);
+
+      await Promise.all([
+        loadAwards(d),
+        loadWeeklyTrend(d, weekCount),
+        renderCurrentWeekBooks(d),   // <—
+        loadStreaks(d, range),
+        loadStats(d, range)
+      ]);
+
+    }
+
+
+
+
+    async function loadStats(refDate, range) {
+      const url = range === 'all'
+        ? `${API_BASE}/stats`
+        : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(refDate)}`;
+
+      let rows = []; try { rows = await fetchJSON(url); } catch (_) { rows = []; }
+
+      const sorted = (Array.isArray(rows) ? rows : [])
+        .slice()
+        .sort((a, b) => num(b.total_minutes) - num(a.total_minutes));
+
+      // KPIs
+      const total = Math.round(sorted.reduce((s, r) => s + num(r.total_minutes), 0));
+      const n = sorted.length;
+      kpiTotal.textContent = total;
+      kpiCount.textContent = n;
+      kpiAvg.textContent = n ? Math.round(total / n) : 0;
+
+      // Top-N
+      const topNVal = elTopN.value;
+      const view = topNVal !== 'All' ? sorted.slice(0, Number(topNVal)) : sorted;
+
+      const labels = view.map(r => r.name);
+      const data = view.map(r => Math.round(num(r.total_minutes)));
+
+      makeBarH(chartMainCanvas, labels, data, 'إجمالي الدقائق');
+    }
+
+
+    // async function loadBooksSuggestions(){
+    //   const reader = (elName.value || '').trim();
+    //   const params = reader ? `?name=${encodeURIComponent(reader)}` : '';
+    //   try{
+    //     const j = await fetchJSON(`${API_BASE}/books${params}`);
+    //     const books = (j && Array.isArray(j.books)) ? j.books : [];
+    //     dlBooks.innerHTML = '';
+    //     books.forEach(b => {
+    //       if(!b) return;
+    //       const opt = document.createElement('option');
+    //       opt.value = b;
+    //       dlBooks.appendChild(opt);
+    //     });
+    //   }catch(_){
+    //     dlBooks.innerHTML = '';
+    //   }
+    // }
+
+
+
+
+
+
+
+
+
     elRefresh.addEventListener('click', loadDashboard);
     elTopN.addEventListener('change', loadDashboard);
     elRangeSel.addEventListener('change', loadDashboard);
-    q('#tab-stats').addEventListener('click', ()=>{ if(!chartMainCanvas.__chart) loadDashboard() });
-     q('#weekCountSel')?.addEventListener('change', loadDashboard);
-  
+    q('#tab-stats').addEventListener('click', () => { if (!chartMainCanvas.__chart) loadDashboard() });
+    q('#weekCountSel')?.addEventListener('change', loadDashboard);
+
     // ====== Reader (GET /api/history) ======
-    function normalizeName(raw){
-      const r=(raw||'').trim();
-      if(state.nameSet.has(r)) return r;
-      const cand=state.names.filter(n=>n.toLowerCase()===r.toLowerCase());
-      return cand.length===1?cand[0]:null;
+    function normalizeName(raw) {
+      const r = (raw || '').trim();
+      if (state.nameSet.has(r)) return r;
+      const cand = state.names.filter(n => n.toLowerCase() === r.toLowerCase());
+      return cand.length === 1 ? cand[0] : null;
     }
-    function monthFirstLast(valYYYYMM){
-      const [y,m]=valYYYYMM.split('-').map(Number);
-      const first=new Date(y,m-1,1);
-      const last=new Date(y,m,0);
-      return {first,last,days:last.getDate()};
+    function monthFirstLast(valYYYYMM) {
+      const [y, m] = valYYYYMM.split('-').map(Number);
+      const first = new Date(y, m - 1, 1);
+      const last = new Date(y, m, 0);
+      return { first, last, days: last.getDate() };
     }
-    function arMonthName(date){
-      const fmt=new Intl.DateTimeFormat('ar', {month:'long', year:'numeric'});
+    function arMonthName(date) {
+      const fmt = new Intl.DateTimeFormat('ar', { month: 'long', year: 'numeric' });
       return fmt.format(date);
     }
-    function buildCalendarSkeleton(first){
-      const dow=['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
-      const header = dow.map(d=>`<div class="dow">${d}</div>`).join('');
-      const blanks=(first.getDay()+1)%7;
+    function buildCalendarSkeleton(first) {
+      const dow = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+      const header = dow.map(d => `<div class="dow">${d}</div>`).join('');
+      const blanks = (first.getDay() + 1) % 7;
       return { header, blanks };
     }
-    function renderCalendarGrid(monthVal, dayMinutesMap){
-      const {first,days}=monthFirstLast(monthVal);
+    function renderCalendarGrid(monthVal, dayMinutesMap) {
+      const { first, days } = monthFirstLast(monthVal);
       calTitle.textContent = arMonthName(first);
-      const {header,blanks}=buildCalendarSkeleton(first);
-      calGrid.innerHTML=''; calGrid.insertAdjacentHTML('beforeend', header);
-      for(let i=0;i<blanks;i++) calGrid.insertAdjacentHTML('beforeend','<div class="cell"></div>');
-      const cells=[];
-      for(let d=1; d<=days; d++){
-        const key=`${first.getFullYear()}-${String(first.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const minutes = Math.round(dayMinutesMap.get(key)||0);
-        const has = minutes>0;
-        const cell = `<div class="cell ${has?'hit':''}"><div class="d">${d}</div>${has?'<span class="dot"></span>':''}${has?`<div class="muted" style="position:absolute;bottom:8px;inset-inline-end:8px;font-size:11px;">${minutes}</div>`:''}</div>`;
+      const { header, blanks } = buildCalendarSkeleton(first);
+      calGrid.innerHTML = ''; calGrid.insertAdjacentHTML('beforeend', header);
+      for (let i = 0; i < blanks; i++) calGrid.insertAdjacentHTML('beforeend', '<div class="cell"></div>');
+      const cells = [];
+      for (let d = 1; d <= days; d++) {
+        const key = `${first.getFullYear()}-${String(first.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const minutes = Math.round(dayMinutesMap.get(key) || 0);
+        const has = minutes > 0;
+        const cell = `<div class="cell ${has ? 'hit' : ''}"><div class="d">${d}</div>${has ? '<span class="dot"></span>' : ''}${has ? `<div class="muted" style="position:absolute;bottom:8px;inset-inline-end:8px;font-size:11px;">${minutes}</div>` : ''}</div>`;
         cells.push(cell);
       }
       calGrid.insertAdjacentHTML('beforeend', cells.join(''));
     }
-  
-    async function renderReaderMonth(){
-      const name=normalizeName(readerSel.value);
-      if(!name){ calTitle.textContent='اختر قارئًا'; calGrid.innerHTML=''; if(chartHistoryCanvas.__chart) chartHistoryCanvas.__chart.destroy(); return; }
-  
+
+    async function renderReaderMonth() {
+      const name = normalizeName(readerSel.value);
+      if (!name) { calTitle.textContent = 'اختر قارئًا'; calGrid.innerHTML = ''; if (chartHistoryCanvas.__chart) chartHistoryCanvas.__chart.destroy(); return; }
+
       const monthVal = readerMonth.value || monthNow();
-      const [yy,mm] = monthVal.split('-');
-  
-      let rows=[];
-      try{
+      const [yy, mm] = monthVal.split('-');
+
+      let rows = [];
+      try {
         rows = await fetchJSON(`${API_BASE}/history?name=${encodeURIComponent(name)}&month=${encodeURIComponent(mm)}&year=${encodeURIComponent(yy)}`);
-      }catch(_){ rows=[]; }
-  
+      } catch (_) { rows = []; }
+
       const dayMap = new Map();
-      for(const r of rows||[]){
-        const d = (r.date || '').slice(0,10);
-        const m = Number(r.minutes)||0;
-        dayMap.set(d, (dayMap.get(d)||0)+m);
+      for (const r of rows || []) {
+        const d = (r.date || '').slice(0, 10);
+        const m = Number(r.minutes) || 0;
+        dayMap.set(d, (dayMap.get(d) || 0) + m);
       }
-  
+
       renderCalendarGrid(monthVal, dayMap);
-  
-      const {first,days} = monthFirstLast(monthVal);
-      const labels=[], data=[];
-      for(let i=1;i<=days;i++){
-        const key=`${first.getFullYear()}-${String(first.getMonth()+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+
+      const { first, days } = monthFirstLast(monthVal);
+      const labels = [], data = [];
+      for (let i = 1; i <= days; i++) {
+        const key = `${first.getFullYear()}-${String(first.getMonth() + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
         labels.push(key);
-        data.push(Math.round(dayMap.get(key)||0));
+        data.push(Math.round(dayMap.get(key) || 0));
       }
       makeLine(chartHistoryCanvas, labels, data, 'Minutes');
 
@@ -1246,138 +2003,358 @@ async function loadStats(refDate, range){
 
     const tblReaderBooksBody = document.querySelector('#tblReaderBooks tbody');
 
-async function loadReaderBooks(name){
-  if(!name){ tblReaderBooksBody.innerHTML = ''; return; }
+    async function loadReaderBooks(name) {
+      if (!name) { tblReaderBooksBody.innerHTML = ''; return; }
 
-  const monthVal = readerMonth.value;
-  let url = `${API_BASE}/reader-books?name=${encodeURIComponent(name)}`;
-  if (monthVal){
-    const [yy, mm] = monthVal.split('-');
-    url += `&month=${encodeURIComponent(mm)}&year=${encodeURIComponent(yy)}`;
-  }
+      const monthVal = readerMonth.value;
+      let url = `${API_BASE}/reader-books?name=${encodeURIComponent(name)}`;
+      if (monthVal) {
+        const [yy, mm] = monthVal.split('-');
+        url += `&month=${encodeURIComponent(mm)}&year=${encodeURIComponent(yy)}`;
+      }
 
-  try{
-    const j = await fetchJSON(url);
-    const rows = j?.books || [];
-    tblReaderBooksBody.innerHTML = rows.length
-      ? rows.map(r => `
+      try {
+        const j = await fetchJSON(url);
+        const rows = j?.books || [];
+        tblReaderBooksBody.innerHTML = rows.length
+          ? rows.map(r => `
           <tr>
             <td>${esc(r.book || '—')}</td>
             <td>${Math.round(Number(r.total_minutes) || 0)}</td>
-            <td>${r.start_date ? r.start_date.slice(0,10) : '—'}</td>
-            <td>${r.end_date ? r.end_date.slice(0,10) : '—'}</td>
+            <td>${r.start_date ? r.start_date.slice(0, 10) : '—'}</td>
+            <td>${r.end_date ? r.end_date.slice(0, 10) : '—'}</td>
           </tr>
         `).join('')
-      : `<tr><td class="muted" colspan="4">لا توجد بيانات</td></tr>`;
-  }catch(_){
-    tblReaderBooksBody.innerHTML = `<tr><td class="muted" colspan="4">خطأ</td></tr>`;
-  }
-}
-
-
-
-
-
-  
-    q('#readerBtn').addEventListener('click', renderReaderMonth);
-    readerMonth.addEventListener('change', renderReaderMonth);
-    q('#tab-reader').addEventListener('click', ()=>{ if(!chartHistoryCanvas.__chart) renderReaderMonth(); });
-
-   
-  
-    // ====== Discipline (GET /api/discipline) ======
-    async function loadDiscipline(){
-      const d = discDate.value || todayISO();
-      try{
-        const res = await fetchJSON(`${API_BASE}/discipline?date=${encodeURIComponent(d)}`);
-        const warn = res?.warning || [];
-        const removed = res?.removed || [];
-        tblWarnBody.innerHTML = warn.length ? warn.map(r=>`<tr><td>${esc(r.name)}</td><td>${Math.round(Number(r.minutes)||0)}</td></tr>`).join('') : `<tr><td class="muted" colspan="2">لا يوجد</td></tr>`;
-        tblRemovedBody.innerHTML = removed.length ? removed.map(r=>`<tr><td>${esc(r.name)}</td><td>${Math.round(Number(r.minutes)||0)}</td></tr>`).join('') : `<tr><td class="muted" colspan="2">لا يوجد</td></tr>`;
-      }catch(_){
-        tblWarnBody.innerHTML = `<tr><td class="muted" colspan="2">خطأ في الجلب</td></tr>`;
-        tblRemovedBody.innerHTML = `<tr><td class="muted" colspan="2">خطأ في الجلب</td></tr>`;
+          : `<tr><td class="muted" colspan="4">لا توجد بيانات</td></tr>`;
+      } catch (_) {
+        tblReaderBooksBody.innerHTML = `<tr><td class="muted" colspan="4">خطأ</td></tr>`;
       }
     }
+
+
+
+
+
+
+    q('#readerBtn').addEventListener('click', renderReaderMonth);
+    readerMonth.addEventListener('change', renderReaderMonth);
+    q('#tab-reader').addEventListener('click', () => { if (!chartHistoryCanvas.__chart) renderReaderMonth(); });
+
+
+
+    // ====== Discipline (GET /api/discipline) ======
+    const tblDiscBody = document.querySelector('#tblDisc tbody');
+
+
+    function badgeClass(s) {
+      if (s === 'معرض للطرد') return 'disc-status disc-danger';
+      if (s === 'تنبيه') return 'disc-status disc-warn';
+      return 'disc-status disc-ok';
+    }
+
+
+    async function loadDiscipline() {
+      const d = discDate.value || todayISO();
+      try {
+        const { warning = [], removed = [] } =
+          await fetchJSON(`${API_BASE}/discipline?date=${encodeURIComponent(d)}`);
+
+        // minutes last week / last two weeks
+        const wMap = new Map(warning.map(x => [x.name, Number(x.minutes) || 0]));
+        const rMap = new Map(removed.map(x => [x.name, Number(x.minutes) || 0]));
+
+        const names = new Set([...wMap.keys(), ...rMap.keys()]);
+        const rows = [...names].map(name => {
+          const w = wMap.has(name) ? wMap.get(name) : null;   // الأسبوع السابق
+          const r = rMap.has(name) ? rMap.get(name) : null;   // آخر أسبوعين
+
+          // أولوية الحالة: معرض للطرد <60 خلال أسبوعين، ثم تنبيه <30 للأسبوع السابق، ثم جيد
+          let status = 'جيد', remaining = 0;
+          if (r !== null && r < 60) { status = 'معرض للطرد'; remaining = Math.max(0, 60 - r); }
+          else if (w !== null && w < 30) { status = 'تنبيه'; remaining = Math.max(0, 30 - w); }
+
+          return { name, remaining, status };
+        }).sort((a, b) =>
+          // ترتيب: الأخطر أولاً ثم الأكثر احتياجاً
+          (a.status === b.status ? 0 :
+            (a.status === 'معرض للطرد' ? -1 :
+              b.status === 'معرض للطرد' ? 1 :
+                a.status === 'تنبيه' ? -1 : 1)) ||
+          a.remaining - b.remaining ||
+          a.name.localeCompare(b.name, 'ar')
+        );
+
+        tblDiscBody.innerHTML = rows.length
+          ? rows.map(r => `
+          <tr>
+            <td>${esc(r.name)}</td>
+            <td>${r.remaining}</td>
+            <td><span class="${badgeClass(r.status)}">${r.status}</span></td>
+          </tr>`).join('')
+          : `<tr><td class="muted" colspan="3">لا توجد بيانات</td></tr>`;
+      } catch (e) {
+        tblDiscBody.innerHTML = `<tr><td class="muted" colspan="3">خطأ في الجلب</td></tr>`;
+      }
+    }
+
     discBtn.addEventListener('click', loadDiscipline);
 
-// ===== PNG Export with background =====
-function downloadCanvasPNG(canvas, filename, bgColor='#233240'){
-  if(!canvas) { alert('لا يوجد رسم بياني'); return; }
-  const chart = canvas.__chart;
-  if(chart?.update) chart.update(0);
 
-  const w = canvas.width, h = canvas.height;
-  const out = document.createElement('canvas');
-  out.width = w; out.height = h;
-  const ctx = out.getContext('2d');
-  ctx.fillStyle = bgColor;
-  ctx.fillRect(0, 0, w, h);
-  ctx.drawImage(canvas, 0, 0);
 
-  out.toBlob((blob)=>{
-    if(!blob){ alert('فشل إنشاء الصورة'); return; }
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(a.href);
-    a.remove();
-  }, 'image/png');
+    // ===== PNG Export with background =====
+    function downloadCanvasPNG(canvas, filename, bgColor = '#233240') {
+      if (!canvas) { alert('لا يوجد رسم بياني'); return; }
+      const chart = canvas.__chart;
+      if (chart?.update) chart.update(0);
+
+      const w = canvas.width, h = canvas.height;
+      const out = document.createElement('canvas');
+      out.width = w; out.height = h;
+      const ctx = out.getContext('2d');
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(canvas, 0, 0);
+
+      out.toBlob((blob) => {
+        if (!blob) { alert('فشل إنشاء الصورة'); return; }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      }, 'image/png');
+    }
+
+    function downloadChartPNG() {
+      const d = elStatsDate.value || yesterdayISO();
+      const range = elRangeSel.value;
+      const bg = getComputedStyle(document.body).backgroundColor || '#233240';
+      downloadCanvasPNG(chartMainCanvas, `stats_${range}_${d}.png`, bg);
+    }
+
+    // ===== CSV Export =====
+    function toCSV(rows) {
+      if (!rows?.length) return '';
+      const header = Object.keys(rows[0]).join(',');
+      const lines = rows.map(r => Object.values(r).map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+      return [header, ...lines].join('\n');
+    }
+
+    async function downloadStatsCSV() {
+      const d = elStatsDate.value || yesterdayISO();
+      const range = elRangeSel.value;
+      const url = range === 'all'
+        ? `${API_BASE}/stats`
+        : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(d)}`;
+
+      try {
+        const rows = await fetchJSON(url);
+        if (!rows?.length) { alert('لا توجد بيانات حالياً'); return; }
+        const blob = new Blob([toCSV(rows)], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `stats_${range}_${d}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      } catch (e) {
+        console.error(e); alert('حدث خطأ أثناء التحميل');
+      }
+    }
+
+    // ===== Correct bindings (match your HTML) =====
+    q('#btnDownloadPNG')?.addEventListener('click', downloadChartPNG);
+    q('#btnDownloadCSV')?.addEventListener('click', downloadStatsCSV);
+
+
+
+    // records
+
+    const METRICS = {
+      'top-total': {
+        url: (n) => `${API_BASE}/records/top-total?limit=${n}`,
+        title: 'إجمالي كل الوقت',
+        valueLabel: 'الدقائق',
+        row: r => ({ name: r.name, value: r.minutes, when: '' })
+      },
+      'top-day': {
+        url: (n) => `${API_BASE}/records/top-day?limit=${n}`,
+        title: 'أفضل يوم',
+        valueLabel: 'الدقائق',
+        row: r => ({ name: r.name, value: r.minutes, when: r.day?.slice(0, 10) || '' })
+      },
+      'top-week': {
+        url: (n) => `${API_BASE}/records/top-week?limit=${n}`,
+        title: 'أفضل أسبوع (السبت–الجمعة)',
+        valueLabel: 'الدقائق',
+        row: r => ({ name: r.name, value: r.minutes, when: `بدء ${r.week_start?.slice(0, 10) || ''}` })
+      },
+      'top-month': {
+        url: (n) => `${API_BASE}/records/top-month?limit=${n}`,
+        title: 'أفضل شهر',
+        valueLabel: 'الدقائق',
+        row: r => ({ name: r.name, value: r.minutes, when: r.month_start?.slice(0, 10) || '' })
+      },
+      'longest-streak': {
+        url: (n) => `${API_BASE}/records/longest-streak?limit=${n}`,
+        title: 'أطول سلسلة',
+        valueLabel: 'الأيام',
+        row: r => ({ name: r.name, value: r.days, when: r.start_d && r.end_d ? `${r.start_d.slice(0, 10)} → ${r.end_d.slice(0, 10)}` : '' })
+      },
+      // 'top-rolling7': {
+      //   url: (n)=> `${API_BASE}/records/top-rolling7?limit=${n}`,
+      //   title: 'أفضل 7 أيام متحركة',
+      //   valueLabel: 'الدقائق',
+      //   row: r => ({ name:r.name, value: r.minutes, when: r.window_end?.slice(0,10)||'' })
+      // }
+    };
+
+    function rankBadge(i) {
+      const n = i + 1;
+      const cls = n === 1 ? 'gold' : n === 2 ? 'silver' : n === 3 ? 'bronze' : '';
+      return `<span class="rank ${cls}">${n}</span>`;
+    }
+    function setText(el, txt) { if (el) el.textContent = txt; }
+
+    async function fetchJSONSafe(url) {
+      try {
+        const r = await fetch(url, { cache: 'no-store' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return await r.json();
+      } catch (e) { console.error('records fetch failed:', url, e); return { items: [], error: true }; }
+    }
+
+    async function loadRecords() {
+      const metricKey = q('#recMetric').value;
+      const N = Number(q('#recLimit').value || 10);
+      const meta = METRICS[metricKey];
+
+      // title and column labels
+      setText(q('#recTitle'), meta.title);
+      setText(q('#colValue'), meta.valueLabel);
+      setText(q('#colWhen'), 'التاريخ/النطاق');
+
+      // loading row
+      const body = q('#tblRecords tbody');
+      body.innerHTML = `<tr><td colspan="4" class="muted">يتم التحميل…</td></tr>`;
+
+      const data = await fetchJSONSafe(meta.url(N));
+      const items = data.items || [];
+
+      // highlights
+      setText(q('#recCount'), items.length || 0);
+      if (items.length) {
+        const top = meta.row(items[0]);
+        setText(q('#recTopName'), top.name || '—');
+        setText(q('#recTopValue'), String(top.value ?? '—'));
+        setText(q('#recTopLabel'), meta.valueLabel);
+      } else {
+        setText(q('#recTopName'), '—'); setText(q('#recTopValue'), '—'); setText(q('#recTopLabel'), 'القيمة');
+      }
+
+      if (!items.length) {
+        body.innerHTML = `<tr><td colspan="4" class="muted">لا توجد بيانات</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = items.map((raw, i) => {
+        const r = meta.row(raw);
+        return `
+      <tr>
+        <td>${rankBadge(i)}</td>
+        <td>${esc(r.name)}</td>
+        <td>${r.value}</td>
+        <td>${esc(r.when || '')}</td>
+      </tr>`;
+      }).join('');
+    }
+
+    // events
+    q('#recRefresh')?.addEventListener('click', loadRecords);
+    q('#recLimit')?.addEventListener('change', loadRecords);
+    q('#recMetric')?.addEventListener('change', loadRecords);
+    q('#tab-records')?.addEventListener('click', () => {
+      if (q('#tblRecords tbody')?.children?.length === 0) loadRecords();
+    });
+    // auto-load if panel visible
+    if (!q('#panel-records')?.classList.contains('hidden')) loadRecords();
+
+
+
+    // admin
+
+    const modal = q('#adminModal');
+const adminLoginBox = q('#adminLogin');
+const adminArea = q('#adminArea');
+const admMsg = q('#admMsg');
+const tblAdmBody = q('#tblAdminRemoved tbody');
+
+function showModal(on){ modal.classList.toggle('hidden', !on); }
+function showAdminArea(on){
+  adminLoginBox.classList.toggle('hidden', on);
+  adminArea.classList.toggle('hidden', !on);
 }
+q('#btnSettings')?.addEventListener('click', ()=> showModal(true));
+q('#admClose')?.addEventListener('click', ()=> showModal(false));
 
-function downloadChartPNG(){
-  const d = elStatsDate.value || yesterdayISO();
-  const range = elRangeSel.value;
-  const bg = getComputedStyle(document.body).backgroundColor || '#233240';
-  downloadCanvasPNG(chartMainCanvas, `stats_${range}_${d}.png`, bg);
-}
-
-// ===== CSV Export =====
-function toCSV(rows){
-  if(!rows?.length) return '';
-  const header = Object.keys(rows[0]).join(',');
-  const lines = rows.map(r => Object.values(r).map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
-  return [header, ...lines].join('\n');
-}
-
-async function downloadStatsCSV(){
-  const d = elStatsDate.value || yesterdayISO();
-  const range = elRangeSel.value;
-  const url = range==='all'
-    ? `${API_BASE}/stats`
-    : `${API_BASE}/stats?range=${encodeURIComponent(range)}&date=${encodeURIComponent(d)}`;
-
+async function adminLogin(){
+  const pw = q('#admPass').value.trim();
+  admMsg.textContent='';
   try{
-    const rows = await fetchJSON(url);
-    if(!rows?.length){ alert('لا توجد بيانات حالياً'); return; }
-    const blob = new Blob([toCSV(rows)], { type:'text/csv;charset=utf-8;' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `stats_${range}_${d}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(a.href);
-    a.remove();
-  }catch(e){
-    console.error(e); alert('حدث خطأ أثناء التحميل');
+    const r = await fetch(`${API_BASE}/admin/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      credentials:'include', body:JSON.stringify({password:pw})
+    });
+    if(!r.ok) throw new Error('bad');
+    showAdminArea(true); await loadAdminRemoved();
+  }catch{ admMsg.textContent='كلمة مرور غير صحيحة'; }
+}
+async function adminLogout(){
+  await fetch(`${API_BASE}/admin/logout`,{method:'POST',credentials:'include'});
+  showAdminArea(false);
+}
+
+async function loadAdminRemoved(){
+  tblAdmBody.innerHTML='<tr><td colspan="3" class="muted">يتم التحميل…</td></tr>';
+  try{
+    const r = await fetch(`${API_BASE}/admin/removed?date=${encodeURIComponent(todayISO())}`,{credentials:'include'});
+    if(!r.ok) throw new Error();
+    const {items=[]}=await r.json();
+    if(!items.length){ tblAdmBody.innerHTML='<tr><td colspan="3" class="muted">لا توجد أسماء</td></tr>'; return; }
+    tblAdmBody.innerHTML=items.map(x=>`
+      <tr>
+        <td>${esc(x.name)}</td>
+        <td>${x.minutes}</td>
+        <td><label style="display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" data-name="${esc(x.name)}" ${x.hidden?'checked':''}/> إخفاء
+        </label></td>
+      </tr>`).join('');
+  }catch{
+    tblAdmBody.innerHTML='<tr><td colspan="3" class="muted">غير مصرح</td></tr>';
   }
 }
-
-// ===== Correct bindings (match your HTML) =====
-q('#btnDownloadPNG')?.addEventListener('click', downloadChartPNG);
-q('#btnDownloadCSV')?.addEventListener('click', downloadStatsCSV);
-
-
-
+q('#admLoginBtn')?.addEventListener('click', adminLogin);
+q('#admLogout')?.addEventListener('click', adminLogout);
+q('#tblAdminRemoved')?.addEventListener('change', async e=>{
+  const cb=e.target;
+  if(cb.type==='checkbox'){
+    await fetch(`${API_BASE}/admin/hide`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      credentials:'include',
+      body:JSON.stringify({name:cb.dataset.name,hide:cb.checked})
+    }).catch(()=>cb.checked=!cb.checked);
+  }
+});
 
 
 
   </script>
-  
-  
+
+
+
 </body>
+
 </html>
-
-
